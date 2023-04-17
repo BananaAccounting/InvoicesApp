@@ -2451,21 +2451,30 @@ Item {
                                         } else if (discount.isPercentage) {
                                             if (!invoice.json.billing_info.discount)
                                                 invoice.json.billing_info.discount = {}
-                                            invoice.json.billing_info.discount.percent = discount.value
+                                            delete invoice.json.billing_info.discount.percent
+                                            delete invoice.json.billing_info.discount.percent_vat_inclusive
+                                            delete invoice.json.billing_info.discount.percent_vat_exclusive
                                             delete invoice.json.billing_info.discount.amount
                                             delete invoice.json.billing_info.discount.amount_vat_inclusive
                                             delete invoice.json.billing_info.discount.amount_vat_exclusive
+                                            if (!isVatModeVatInclusive) {
+                                               invoice.json.billing_info.discount.percent_vat_exclusive = discount.value
+                                            } else {
+                                               invoice.json.billing_info.discount.percent_vat_inclusive = discount.value
+                                            }
                                         } else {
                                             if (!invoice.json.billing_info.discount)
                                                 invoice.json.billing_info.discount = {}
                                             delete invoice.json.billing_info.discount.percent
+                                            delete invoice.json.billing_info.discount.percent_vat_inclusive
+                                            delete invoice.json.billing_info.discount.percent_vat_exclusive
                                             delete invoice.json.billing_info.discount.amount
+                                            delete invoice.json.billing_info.discount.amount_vat_inclusive
+                                            delete invoice.json.billing_info.discount.amount_vat_exclusive
                                             if (!isVatModeVatInclusive) {
                                                 invoice.json.billing_info.discount.amount_vat_exclusive = discount.value
-                                                delete invoice.json.billing_info.discount.amount_vat_inclusive
                                             } else {
                                                 invoice.json.billing_info.discount.amount_vat_inclusive = discount.value
-                                                delete invoice.json.billing_info.discount.amount_vat_exclusive
                                             }
                                         }
                                         calculateInvoice()
@@ -2476,6 +2485,14 @@ Item {
                                     if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.discount) {
                                         if (invoice.json.billing_info.discount.percent) {
                                             let value = invoice.json.billing_info.discount.percent
+                                            let dec = getDecimalsCount(value);
+                                            return Banana.Converter.toLocaleNumberFormat(value, dec, true) + "%"
+                                        } else if (invoice.json.billing_info.discount.percent_vat_inclusive) {
+                                            let value = invoice.json.billing_info.discount.percent_vat_inclusive
+                                            let dec = getDecimalsCount(value);
+                                            return Banana.Converter.toLocaleNumberFormat(value, dec, true) + "%"
+                                        } else if (invoice.json.billing_info.discount.percent_vat_exclusive) {
+                                            let value = invoice.json.billing_info.discount.percent_vat_exclusive
                                             let dec = getDecimalsCount(value);
                                             return Banana.Converter.toLocaleNumberFormat(value, dec, true) + "%"
                                         } else if (invoice.json.billing_info.discount.amount_vat_inclusive) {
