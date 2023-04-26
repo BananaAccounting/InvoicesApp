@@ -73,9 +73,10 @@ Item {
                     font.bold: true
                 }
 
-                StyledLabel{
+                StyledLabel {
                     wrapMode: Text.WordWrap
-                    width: scrollView.availableWidth
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 200
                     text: qsTr("Changes to the following settings are applied to the current document and to future documents. If you only wish to change the current document use the Invoice tab.")
                 }
 
