@@ -2324,12 +2324,15 @@ Item {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
                             if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
                                 var itemCopy = invoice.json.items[itemRow]
+                                if (!itemCopy)
+                                    itemCopy = emptyInvoiceItem()
                                 invoice.json.items[itemRow] = invoice.json.items[itemRow-1]
                                 invoice.json.items[itemRow - 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
                                 invoiceItemsTable.currentRow--
                                 invoiceItemsTable.focus = true
+
                                 //                                    invoiceItemsTable.currentRow = itemRow
                                 //                                    invoiceItemsTable.selection.clear()
                                 //                                    invoiceItemsTable.selection.select(itemRow)
