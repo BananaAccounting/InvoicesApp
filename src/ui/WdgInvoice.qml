@@ -562,13 +562,16 @@ Item {
                             onEditingFinished: {
                                 if (modified) {
                                     // Check date
-                                    let date = Banana.Converter.toInternalDateFormat(text)
-                                    let localDate = Banana.Converter.toLocaleDateFormat(date)
-                                    if (!localDate) {
-                                        errorMessageDialog.text = qsTr("Invalid date: " + text)
-                                        errorMessageDialog.visible = true
-                                        update()
-                                        return
+                                    let date = text
+                                    if (date) {
+                                        date = Banana.Converter.toInternalDateFormat(text)
+                                        let localDate = Banana.Converter.toLocaleDateFormat(date)
+                                        if (!localDate) {
+                                            errorMessageDialog.text = qsTr("Invalid date: " + text)
+                                            errorMessageDialog.visible = true
+                                            update()
+                                            return
+                                        }
                                     }
                                     // Set date
                                     invoice.json.payment_info.due_date = date
