@@ -564,7 +564,7 @@ Item {
                                     // Check date
                                     let date = Banana.Converter.toInternalDateFormat(text)
                                     let localDate = Banana.Converter.toLocaleDateFormat(date)
-                                    if (!localDate || localDate.length === 0) {
+                                    if (!localDate) {
                                         errorMessageDialog.text = qsTr("Invalid date: " + text)
                                         errorMessageDialog.visible = true
                                         update()
@@ -2321,12 +2321,15 @@ Item {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
                             if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
                                 var itemCopy = invoice.json.items[itemRow]
+                                if (!itemCopy)
+                                    itemCopy = emptyInvoiceItem()
                                 invoice.json.items[itemRow] = invoice.json.items[itemRow-1]
                                 invoice.json.items[itemRow - 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
                                 invoiceItemsTable.currentRow--
                                 invoiceItemsTable.focus = true
+
                                 //                                    invoiceItemsTable.currentRow = itemRow
                                 //                                    invoiceItemsTable.selection.clear()
                                 //                                    invoiceItemsTable.selection.select(itemRow)
