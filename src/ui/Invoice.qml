@@ -20,6 +20,7 @@ QtObject {
     // Constants
     readonly property int type_invoice: 0
     readonly property int type_estimate: 1
+    property int count: 0
 
     // Properties
     property var json: null

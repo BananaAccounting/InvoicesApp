@@ -67,8 +67,11 @@ Item {
         if (invoice.isModified && !invoice.isReadOnly) {
             invoice.save()
         }
-        invoice.setType(invoice.type_invoice)
         invoice.json = Invoice.invoiceDuplicateObj(invoice.json, invoice.tabPos)
+        if (invoice.json.document_info.doc_type === "10")
+            invoice.setType(invoice.type_invoice)
+        else
+            invoice.setType(invoice.type_estimate)
         invoice.tabPos.rowNr = -1
         if (invoice.tabPos.tableName === "Archive" || invoice.tabPos.tableName === "Templates" ||
                 invoice.tabPos.tableName === "Extract") {
