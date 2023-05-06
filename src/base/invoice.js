@@ -258,7 +258,7 @@ function invoiceSetDate(invoiceObj, date) {
     if (invoiceDate && invoiceDueDate) {
         due_date_days = dateDiff(invoiceDate, invoiceDueDate)
     }
-    if (due_date_days <= 0) {
+    if (due_date_days <= 0 || invoiceObj.document_info.doc_type === "10") {
         due_date_days = invoiceIsEstimate(invoiceObj) ?
                     Number(settingsNewDocs.estimate_validity_days) :
                     Number(settingsNewDocs.payment_term_days);
