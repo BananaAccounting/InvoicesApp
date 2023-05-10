@@ -68,6 +68,7 @@ Item {
             invoice.save()
         }
         invoice.json = Invoice.invoiceDuplicateObj(invoice.json, invoice.tabPos)
+        // Check if doc_type is invoice or estimate
         if (invoice.json.document_info.doc_type === "10")
             invoice.setType(invoice.type_invoice)
         else
