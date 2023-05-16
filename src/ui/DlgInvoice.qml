@@ -63,6 +63,12 @@ Item {
 
     Component.onCompleted: {
         appSettings.loadSettings()
+        // Check for changing dialog title
+        if (Banana.document.cursor.tableName === "Invoices")
+            setIsEstimate(false)
+        else
+            setIsEstimate(true)
+
         if (!appSettings.data.creator ||
                 (appSettings.data.creator.pubdate < Banana.script.getParamValue('pubdate'))) {
             // Show notification message "updated extention was installed"

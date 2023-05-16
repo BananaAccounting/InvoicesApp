@@ -67,8 +67,12 @@ Item {
         if (invoice.isModified && !invoice.isReadOnly) {
             invoice.save()
         }
-        invoice.setType(invoice.type_invoice)
         invoice.json = Invoice.invoiceDuplicateObj(invoice.json, invoice.tabPos)
+        // Check if doc_type is invoice or estimate
+        if (invoice.json.document_info.doc_type === "10")
+            invoice.setType(invoice.type_invoice)
+        else
+            invoice.setType(invoice.type_estimate)
         invoice.tabPos.rowNr = -1
         if (invoice.tabPos.tableName === "Archive" || invoice.tabPos.tableName === "Templates" ||
                 invoice.tabPos.tableName === "Extract") {
@@ -562,13 +566,16 @@ Item {
                             onEditingFinished: {
                                 if (modified) {
                                     // Check date
-                                    let date = Banana.Converter.toInternalDateFormat(text)
-                                    let localDate = Banana.Converter.toLocaleDateFormat(date)
-                                    if (!localDate || localDate.length === 0) {
-                                        errorMessageDialog.text = qsTr("Invalid date: " + text)
-                                        errorMessageDialog.visible = true
-                                        update()
-                                        return
+                                    let date = text
+                                    if (date) {
+                                        date = Banana.Converter.toInternalDateFormat(text)
+                                        let localDate = Banana.Converter.toLocaleDateFormat(date)
+                                        if (!localDate) {
+                                            errorMessageDialog.text = qsTr("Invalid date: " + text)
+                                            errorMessageDialog.visible = true
+                                            update()
+                                            return
+                                        }
                                     }
                                     // Set date
                                     invoice.json.payment_info.due_date = date
@@ -2321,12 +2328,15 @@ Item {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
                             if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
                                 var itemCopy = invoice.json.items[itemRow]
+                                if (!itemCopy)
+                                    itemCopy = emptyInvoiceItem()
                                 invoice.json.items[itemRow] = invoice.json.items[itemRow-1]
                                 invoice.json.items[itemRow - 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
-                                invoiceItemsTable.currentRow--
+//                                invoiceItemsTable.currentRow--
                                 invoiceItemsTable.focus = true
+
                                 //                                    invoiceItemsTable.currentRow = itemRow
                                 //                                    invoiceItemsTable.selection.clear()
                                 //                                    invoiceItemsTable.selection.select(itemRow)
@@ -2337,7 +2347,7 @@ Item {
 
                     StyledButton { // Move down button
                         text: qsTr("Move Down")
-                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow + 1 < invoiceItemsTable.rowCount
+                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow + 1 < invoiceItemsTable.rows
                         onClicked: {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
                             if (itemRow >= 0 && itemRow < invoiceItemsModel.rowCount - 1) {
@@ -2346,7 +2356,7 @@ Item {
                                 invoice.json.items[itemRow + 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
-                                invoiceItemsTable.currentRow++
+//                                invoiceItemsTable.currentRow++
                                 invoiceItemsTable.focus = true
                             }
                         }
