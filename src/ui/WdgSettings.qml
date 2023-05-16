@@ -57,6 +57,7 @@ Item {
         id: scrollView
         clip: true
 
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
         anchors.fill: parent
         anchors.margins: Stylesheet.defaultMargin
         //anchors.topMargin: styleSectionSeparatorHeight / 2
