@@ -2330,7 +2330,7 @@ Item {
                                 invoice.json.items[itemRow - 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
-                                invoiceItemsTable.currentRow--
+//                                invoiceItemsTable.currentRow--
                                 invoiceItemsTable.focus = true
 
                                 //                                    invoiceItemsTable.currentRow = itemRow
@@ -2343,7 +2343,7 @@ Item {
 
                     StyledButton { // Move down button
                         text: qsTr("Move Down")
-                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow + 1 < invoiceItemsTable.rowCount
+                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow + 1 < invoiceItemsTable.rows
                         onClicked: {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
                             if (itemRow >= 0 && itemRow < invoiceItemsModel.rowCount - 1) {
@@ -2352,7 +2352,7 @@ Item {
                                 invoice.json.items[itemRow + 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
-                                invoiceItemsTable.currentRow++
+//                                invoiceItemsTable.currentRow++
                                 invoiceItemsTable.focus = true
                             }
                         }
