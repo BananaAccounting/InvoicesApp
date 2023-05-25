@@ -2840,7 +2840,7 @@ Item {
 
     function getRoundingDecimals() {
         if (invoice.json && invoice.json.document_info.decimals_amounts !== null) {
-            if (invoice.json.document_info.decimals_amount >= 0) {
+            if (invoice.json.document_info.decimals_amounts >= 0) {
                 return invoice.json.document_info.decimals_amounts
             }
         }
