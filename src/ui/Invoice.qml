@@ -162,8 +162,15 @@ QtObject {
                             json.items[i].unit_price.amount_vat_exclusive = json.items[i].unit_price.amount_vat_inclusive;
                         } else if (json.items[i].unit_price.calculated_amount_vat_inclusive) {
                             json.items[i].unit_price.amount_vat_exclusive = json.items[i].unit_price.calculated_amount_vat_inclusive;
+                        } else if (json.items[i].unit_price._vat_code) {
+                            json.items[i].unit_price.vat_code = json.items[i].unit_price._vat_code
+                        } else if (json.items[i].unit_price._vat_rate) {
+                            json.items[i].unit_price.vat_rate = json.items[i].unit_price._vat_rate
                         }
+                        console.debug("vat_mode: " + json.document_info.vat_mode)
                         json.items[i].unit_price.amount_vat_inclusive = null;
+                        json.items[i].unit_price._vat_code = null
+                        json.items[i].unit_price._vat_rate = null
                     }
                 } else { // json.document_info.vat_mode === "vat_excl"
                     for (var i = 0; i < json.items.length; ++i) {
@@ -171,8 +178,15 @@ QtObject {
                             // Nothing to do
                         } else if (json.items[i].unit_price.calculated_amount_vat_exclusive) {
                             json.items[i].unit_price.amount_vat_exclusive = json.items[i].unit_price.calculated_amount_vat_exclusive;
+                        } else if (json.items[i].unit_price._vat_code) {
+                            json.items[i].unit_price.vat_code = json.items[i].unit_price._vat_code
+                        } else if (json.items[i].unit_price._vat_rate) {
+                            json.items[i].unit_price.vat_rate = json.items[i].unit_price._vat_rate
                         }
+                        console.log("vat_mode: " + json.document_info.vat_mode)
                         json.items[i].unit_price.amount_vat_inclusive = null;
+                        json.items[i].unit_price._vat_code = null
+                        json.items[i].unit_price._vat_rate = null
                      }
                 }
             } else { // vatMode === "vat_none" | "vat_incl"
@@ -184,8 +198,15 @@ QtObject {
                             json.items[i].unit_price.amount_vat_inclusive = json.items[i].unit_price.amount_vat_exclusive;
                         } else if (json.items[i].unit_price.calculated_amount_vat_exclusive) {
                             json.items[i].unit_price.amount_vat_inclusive = json.items[i].unit_price.calculated_amount_vat_exclusive;
+                        } else if (json.items[i].unit_price._vat_code) {
+                            json.items[i].unit_price.vat_code = json.items[i].unit_price._vat_code
+                        } else if (json.items[i].unit_price._vat_rate) {
+                            json.items[i].unit_price.vat_rate = json.items[i].unit_price._vat_rate
                         }
+                        console.log("vat_mode: " + json.document_info.vat_mode)
                         json.items[i].unit_price.amount_vat_exclusive = null;
+                        json.items[i].unit_price._vat_code = null
+                        json.items[i].unit_price._vat_rate = null
                     }
                 } else { // json.document_info.vat_mode === "vat_none" | "vat_incl"
                      for (var i = 0; i < json.items.length; ++i) {
@@ -193,8 +214,15 @@ QtObject {
                             // Nothing to do
                         } else if (json.items[i].unit_price.calculated_amount_vat_inclusive) {
                             json.items[i].unit_price.amount_vat_inclusive = json.items[i].unit_price.calculated_amount_vat_inclusive;
+                        } else if (json.items[i].unit_price.vat_code) {
+                            json.items[i].unit_price._vat_code = json.items[i].unit_price.vat_code
+                        } else if (json.items[i].unit_price.vat_rate) {
+                            json.items[i].unit_price._vat_rate = json.items[i].unit_price.vat_rate
                         }
+                        console.log("vat_mode: " + json.document_info.vat_mode)
                         json.items[i].unit_price.amount_vat_exclusive = null;
+                        json.items[i].unit_price.vat_code = null
+                        json.items[i].unit_price.vat_rate = null
                      }
                 }
             }
