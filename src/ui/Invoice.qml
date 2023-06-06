@@ -163,9 +163,12 @@ QtObject {
                             json.items[i].unit_price.amount_vat_exclusive = json.items[i].unit_price.amount_vat_inclusive;
                         } else if (json.items[i].unit_price.calculated_amount_vat_inclusive) {
                             json.items[i].unit_price.amount_vat_exclusive = json.items[i].unit_price.calculated_amount_vat_inclusive;
-                        } else if (json.items[i].unit_price._vat_code) {
+                        }
+
+                        if (json.items[i].unit_price._vat_code) {
                             json.items[i].unit_price.vat_code = json.items[i].unit_price._vat_code
-                        } else if (json.items[i].unit_price._vat_rate) {
+                        }
+                        if (json.items[i].unit_price._vat_rate) {
                             json.items[i].unit_price.vat_rate = json.items[i].unit_price._vat_rate
                         }
 
@@ -197,7 +200,8 @@ QtObject {
                         if (vatMode === "vat_none") {
                             if (json.items[i].unit_price.vat_code) {
                                 json.items[i].unit_price._vat_code = json.items[i].unit_price.vat_code
-                            } else if (json.items[i].unit_price.vat_rate) {
+                            }
+                            if (json.items[i].unit_price.vat_rate) {
                                 json.items[i].unit_price._vat_rate = json.items[i].unit_price.vat_rate
                             }
                             json.items[i].unit_price.vat_code = null
@@ -205,7 +209,8 @@ QtObject {
                         } else {
                             if (json.items[i].unit_price._vat_code) {
                                 json.items[i].unit_price.vat_code = json.items[i].unit_price._vat_code
-                            } else if (json.items[i].unit_price._vat_rate) {
+                            }
+                            if (json.items[i].unit_price._vat_rate) {
                                 json.items[i].unit_price.vat_rate = json.items[i].unit_price._vat_rate
                             }
                             json.items[i].unit_price._vat_code = null
@@ -224,7 +229,8 @@ QtObject {
                         if (vatMode === "vat_none") {
                             if (json.items[i].unit_price.vat_code) {
                                 json.items[i].unit_price._vat_code = json.items[i].unit_price.vat_code
-                            } else if (json.items[i].unit_price.vat_rate) {
+                            }
+                            if (json.items[i].unit_price.vat_rate) {
                                 json.items[i].unit_price._vat_rate = json.items[i].unit_price.vat_rate
                             }
                             json.items[i].unit_price.vat_code = null
@@ -232,7 +238,8 @@ QtObject {
                         } else {
                             if (json.items[i].unit_price._vat_code) {
                                 json.items[i].unit_price.vat_code = json.items[i].unit_price._vat_code
-                            } else if (json.items[i].unit_price._vat_rate) {
+                            }
+                            if (json.items[i].unit_price._vat_rate) {
                                 json.items[i].unit_price.vat_rate = json.items[i].unit_price._vat_rate
                             }
                             json.items[i].unit_price._vat_code = null
