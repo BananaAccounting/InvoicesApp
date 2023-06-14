@@ -1394,6 +1394,13 @@ Item {
                     Layout.fillWidth: parent.width
                     Layout.topMargin: Stylesheet.defaultMargin
 
+                    Component.onCompleted: {
+                        if (resizableColumns) {
+                            resizableColumns = false; // otherwise QTBUG-111013 happens
+                            // NB.: resizableColumns was introduced in Qt 6.5
+                        }
+                    }
+
                     delegate: DelegateChooser {
                         DelegateChoice {
                             Item {
