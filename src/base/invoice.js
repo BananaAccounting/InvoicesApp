@@ -383,6 +383,7 @@ function invoiceChangedFieldsGet(invoiceObj, row) {
             changedRowFields["InvoiceDiscountPercentage"] = "";
         changedRowFields["InvoiceTotalAmount"] = invoiceObj.billing_info.total_to_pay;
         changedRowFields["InvoiceTotalVat"] = invoiceObj.billing_info.total_vat_amount;
+        changedRowFields["Currency"] = invoiceObj.document_info.currency;
         changedRowFields["EmailWork"] = invoiceObj.customer_info.email;
         changedRowFields["PhoneWork"] = invoiceObj.customer_info.phone;
         changedRowFields["InvoiceDateExpiration"] = invoiceObj.payment_info.due_date

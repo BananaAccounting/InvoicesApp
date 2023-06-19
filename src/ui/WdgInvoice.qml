@@ -1078,6 +1078,7 @@ Item {
                                     invoice.json.customer_info = Contacts.contactAddressGet(contactId)
                                     invoice.json.customer_info.number = contactId
                                     setDocumentLocale(Contacts.contactLocaleGet(contactId))
+                                    setDocumentCurrency(Contacts.contactCurrencyGet(contactId))
                                     updateViewAddress()
                                 } else {
                                     invoice.json.customer_info.number = ""
@@ -2870,6 +2871,20 @@ Item {
             }
             invoice.json.document_info.locale = lang;
             invoiceUpdateCustomFields();
+            setDocumentModified()
+        }
+    }
+
+    function setDocumentCurrency(currency) {
+        if (currency) {
+            let curCurrency = invoice.json.document_info.currency
+            if (curCurrency !== currency) {
+                // Update currency
+                invoice.json.document_info.currency = currency
+            }
+            setDocumentModified()
+        } else {
+            invoice.json.document_info.currency = "CHF"
             setDocumentModified()
         }
     }

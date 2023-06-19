@@ -236,6 +236,8 @@ function contactCurrencyGet(customer_id) {
             let currency = contactRow.value("Currency")
             if (currency) {
                 return currency
+            } else {
+                return "CHF"
             }
         }
     }

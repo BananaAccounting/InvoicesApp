@@ -299,12 +299,11 @@ var JsAction = class JsAction {
                 invoiceObj = invoiceObjGet(tabPos);
                 if (!invoiceObj)
                     invoiceObj = invoiceCreateNew(tabPos);
-                invoiceObj.document_info.currency = row.value("Currency");
+                invoiceObj.document_info.currency = row.value("Currency") ? row.value("Currency") : "CHF";
 
                 // Create docChange
                 changedRowFields = {};
                 changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
-                console.debug(invoiceObj)
                 docChange = new DocumentChange();
                 docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
                 docChange.setDocumentForCurrentRow();
