@@ -228,3 +228,16 @@ function contactsSupplementSearchText(rowNr) {
     return '';
 }
 
+function contactCurrencyGet(customer_id) {
+    var tableContacts = contactsTableGet()
+    if (tableContacts) {
+        var contactRow = tableContacts.findRowByValue("RowId", customer_id)
+        if (contactRow) {
+            let currency = contactRow.value("Currency")
+            if (currency) {
+                return currency
+            }
+        }
+    }
+}
+

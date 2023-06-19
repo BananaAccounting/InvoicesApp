@@ -158,6 +158,7 @@ var JsAction = class JsAction {
                 var customer_id = table.value(tabPos.rowNr, "ContactsId");
                 invoiceObj.customer_info = contactAddressGet(customer_id);
                 invoiceObj.document_info.locale = contactLocaleGet(customer_id);
+                invoiceObj.document_info.currency = contactCurrencyGet(customer_id)
 
                 // Create docChange
                 changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
@@ -287,12 +288,27 @@ var JsAction = class JsAction {
 
                 // Create docChange
                 invoiceObj = JSON.parse(Banana.document.calculateInvoice(JSON.stringify(invoiceObj)));
-                changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
+                changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
                 docChange = new DocumentChange();
                 docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
                 docChange.setDocumentForCurrentRow();
                 return docChange.getDocChange();
 
+            } else if (tabPos.columnName === "Currency") {
+                // Update invoice
+                invoiceObj = invoiceObjGet(tabPos);
+                if (!invoiceObj)
+                    invoiceObj = invoiceCreateNew(tabPos);
+                invoiceObj.document_info.currency = row.value("Currency");
+
+                // Create docChange
+                changedRowFields = {};
+                changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
+                console.debug(invoiceObj)
+                docChange = new DocumentChange();
+                docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
+                docChange.setDocumentForCurrentRow();
+                return docChange.getDocChange();
             }
         }
 
