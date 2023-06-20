@@ -1078,6 +1078,7 @@ Item {
                                     invoice.json.customer_info = Contacts.contactAddressGet(contactId)
                                     invoice.json.customer_info.number = contactId
                                     setDocumentLocale(Contacts.contactLocaleGet(contactId))
+                                    setDocumentDueDate(Contacts.contactPaymentTermInDaysGet(contactId))
                                     updateViewAddress()
                                 } else {
                                     invoice.json.customer_info.number = ""
@@ -2872,6 +2873,23 @@ Item {
             invoiceUpdateCustomFields();
             setDocumentModified()
         }
+    }
+
+    function setDocumentDueDate(paymentTermInDays) {
+        if (paymentTermInDays) {
+            let curPaymentTermInDays = dateDiff(invoice.json.document_info.date, invoice.json.payment_info.due_date)
+            if (curPaymentTermInDays !== Number(paymentTermInDays)) {
+                // Update due date
+                console.debug(invoice.json.document_info.date)
+                invoice.json.payment_info.due_date = dateAdd(invoice.json.document_info.date, paymentTermInDays)
+                console.debug(invoice.json.payment_info.due_date)
+                setDocumentModified()
+            }
+        } else {
+            invoice.json.payment_info.due_date = dateAdd(invoice.json.document_info.date, "30")
+            setDocumentModified()
+        }
+
     }
 
     function setDocumentModified() {

@@ -228,3 +228,15 @@ function contactsSupplementSearchText(rowNr) {
     return '';
 }
 
+function contactPaymentTermInDaysGet(customer_id) {
+    var tableContacts = contactsTableGet()
+    if (tableContacts) {
+        var contactRow = tableContacts.findRowByValue("RowId", customer_id)
+        if (contactRow) {
+            let paymentTermInDays = contactRow.value("PaymentTermInDays")
+
+            return paymentTermInDays ? paymentTermInDays : "30"
+
+        }
+    }
+}
