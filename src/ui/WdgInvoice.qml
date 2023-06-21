@@ -3042,7 +3042,7 @@ Item {
             'es' : {"englishName":  'Spanish', "nativeName": 'Español'},
             'fr' : {"englishName":  'French', "nativeName": 'Français'},
             'it' : {"englishName":  'Italian', "nativeName": 'Italiano'},
-            'nl' : {"englishName":  'Portuguese', "nativeName": 'Portuguese'},
+            'nl' : {"englishName":  'Dutch', "nativeName": 'Nederlands'},
             'pt' : {"englishName":  'Portuguese', "nativeName": 'Portuguese'},
             'ru' : {"englishName":  'Russian', "nativeName": 'Русский'},
             'zh' : {"englishName":  'Chinese', "nativeName": '简体中文'}
