@@ -66,7 +66,16 @@ var JsAction = class JsAction {
         var changedRowFields = null;
         var docChange = null;
 
-        if (tabPos.tableName === "Invoices" || tabPos.tableName === "Estimates") {
+        Banana.console.log("Change table Services, column " + tabPos.columnName)
+        if (tabPos.tableName === "Services") {
+            Banana.console.log("Change table Services, column " + tabPos.columnName)
+            //TODO: Update row with the corresponding values
+            if (tabPos.columnName === "CustomersId") {
+                // Update Customer description
+            }
+            //...
+        }
+        else if (tabPos.tableName === "Invoices" || tabPos.tableName === "Estimates") {
             if (tabPos.columnName === "RowId") {
                 changedRowFields = {};
                 var rowId = row.value("RowId");
