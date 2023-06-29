@@ -120,6 +120,7 @@ Item {
         id: invoiceItemsModel
 
         TableModelColumn { display: "row"}
+        TableModelColumn { display: "type"}
         TableModelColumn { display: "number"}
         TableModelColumn { display: "date"}
         TableModelColumn { display: "description"}
@@ -133,6 +134,7 @@ Item {
         rows: [
             {
                 "row": "",
+                "type": "",
                 "number": "",
                 "date": "",
                 "description": "",
@@ -153,6 +155,14 @@ Item {
                 'title': qsTr("#"),
                 'visible': true,
                 'width': 30
+            },
+            {
+                'id': 'invoice_item_column_type',
+                'align': Text.AlignLeft,
+                'role':  'type',
+                'title': qsTr("Type"),
+                'visible': true,
+                'width': 100
             },
             {
                 'id': 'invoice_item_column_number',
@@ -232,6 +242,11 @@ Item {
 
     VatModesModel {
         id: vatModesModel
+    }
+
+    InvoiceItemTypesModel {
+
+        id: invoiceItemTypesModel
     }
 
     ListModel {
@@ -1643,9 +1658,49 @@ Item {
                             }
                         }
 
-
                         DelegateChoice {
                             column: 1
+                            StyledKeyDescrComboBox {
+                                id: invoice_item_types
+                                Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
+                                visible: isInvoiceFieldVisible("show_invoice_item_column_type")
+                                enabled: !invoice.isReadOnly
+
+                                editable: false
+                                model: invoiceItemTypesModel
+                                textRole: "descr"
+                                filterEnabled: true
+                                currentIndex: -1
+                                listItemTextIncludesKey: false
+
+                                Connections {
+                                    target: invoice
+//                                    function onInvoiceChanged() {
+//                                        if (invoice.json && invoice.json.document_info.vat_mode) {
+//                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
+//                                        }
+//                                    }
+                                }
+
+                                onCurrentKeySet: function(key, isExistingKey) {
+                                    if (invoiceItemsTable.isNewRow(row)) {
+                                        invoiceItemsTable.appendNewRow()
+                                    }
+//                                    invoice.setVatMode(key)
+                                    calculateInvoice()
+                                }
+
+                                onFocusChanged: {
+                                    if (focus) {
+                                        let index = invoiceItemsModel.index(row, column)
+                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                    }
+                                }
+                            }
+                        }
+
+                        DelegateChoice {
+                            column: 2
                             StyledKeyDescrComboBox {
                                 popupMinWidth: 300 * Stylesheet.pixelScaleRatio
                                 editable: true
@@ -1711,7 +1766,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 2
+                            column: 3
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1767,7 +1822,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 3
+                            column: 4
                             StyledTextArea {
                                 required property bool current
                                 selected: current
@@ -1831,7 +1886,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 4
+                            column: 5
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1866,7 +1921,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 5
+                            column: 6
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1901,7 +1956,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 6
+                            column: 7
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1960,7 +2015,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 7
+                            column: 8
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2003,7 +2058,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 8
+                            column: 9
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2022,7 +2077,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 9
+                            column: 10
                             StyledKeyDescrComboBox {
                                 id: invoice_item_vat
                                 popupMinWidth: 300  * Stylesheet.pixelScaleRatio
@@ -2279,7 +2334,7 @@ Item {
                     }
 
                     function updateColDescrWidth() {
-                        let colDescriptionIndex = 3
+                        let colDescriptionIndex = 4
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
                         let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
