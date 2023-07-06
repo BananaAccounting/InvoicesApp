@@ -1552,9 +1552,21 @@ Item {
                                 event.accepted = true
                                 if (event.modifiers & Qt.ShiftModifier) {
                                     invoiceItemsTable.selectPreviousItem()
+                                } else if (event.modifiers & Qt.ControlModifier) {
+                                    var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
+                                    if (rowIndex < 0 || (rowIndex + 1 < rowIndex.count)) {
+                                        invoice.json.items.push(emptyInvoiceItem())
+                                    } else {
+                                        invoice.json.items.splice(rowIndex + 1, 0, emptyInvoiceItem())
+                                    }
+                                    invoice.setIsModified(true)
+                                    updateViewItems()
+                                    invoiceItemsTable.signalUpdateTableHeight++
+                                    event.accepted = true
                                 } else {
                                     invoiceItemsTable.selectNextItem()
                                 }
+
                             } else {
                                 event.accepted = true
                             }
