@@ -66,7 +66,6 @@ var JsAction = class JsAction {
         var changedRowFields = null;
         var docChange = null;
 
-        Banana.console.log("Change table Services, column " + tabPos.columnName)
         if (tabPos.tableName === "Services") {
             Banana.console.log("Change table Services, column " + tabPos.columnName)
             //TODO: Update row with the corresponding values
