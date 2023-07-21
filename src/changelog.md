@@ -1,20 +1,47 @@
 # Changelog
 
-## 2022-04-17
+## 2023-07-21
+
+* [RELEASE STABLE] Released as Stable
+* [RELEASE DEV] Released as Dev
+
+Changes availables only with BananaPlus version 10.1.7 or newer.
+
+* [Fix] Fix discount percentage is not showed in the printed invoice
+
+## 2023-07-18
+
+* [RELEASE STABLE] Released as Stable
+* [RELEASE DEV] Released as Dev
+
+Changes availables only with BananaPlus version 10.1.7 or newer.
+
+* [Fix] Fix vat is calculated even when vat mode set to no vat
+* [Fix] Fix after setting decimals to 4 digits totals remain with 2 digits
+* [Fix] Fix in settings tab the option's switchs are not visibles when the dialog is resized
+* [Fix] Fix in invoice dialog the move item down button is not active
+* [Fix] Fix moving up / down an item create an invalid item object
+* [Fix] Fix creating an invoice from an estimate doesn't update the due date (payment term)
+* [Fix] Fix the due date can't be left empty
+* [Fix] Fix in settings tab the vertical scrollbar has to be always visible
+* [Fix] Fix wrong dialog title for estimates
+* [Fix] Fix wrong translation for Dutch language in invoice dialog
+
+## 2023-04-17
 
 * [RELEASE STABLE] Released as Stable
 * [RELEASE DEV] Released as Dev
 
 * [Fix] Fix with BananaPlus RC (Qt 6.5) it is not possible to enter in edit in text fields over the table header.
 
-## 2022-04-05
+## 2023-04-05
 
 * [RELEASE STABLE] Released as Stable
 * [RELEASE DEV] Released as Dev
 
 * [Fix] Fix the invoice discount entered as percentage is set vat inclusive even if the invoice is vat exclusive.
 
-## 2022-04-03
+## 2023-04-03
 
 * [RELEASE STABLE] Released as Stable
 * [RELEASE DEV] Released as Dev
