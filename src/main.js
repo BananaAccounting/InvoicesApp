@@ -71,6 +71,29 @@ var JsAction = class JsAction {
             //TODO: Update row with the corresponding values
             if (tabPos.columnName === "CustomersId") {
                 // Update Customer description
+
+            } else if (tabPos.columnName === "Price" || tabPos.columnName === "Quantity") {
+                // Calculate total
+                let price = row.value("Price");
+                let qty = row.value("Quantity");
+                let total = "";
+                if (price !== "" && qty !== "") {
+                    if (qty.indexOf(":") > 0) {
+                        // The quantity is inserted as time hh::mm
+                        qty = timeToDecimal(qty);
+                    }
+                    total = Banana.SDecimal.multiply(price, qty);
+                    total = Banana.SDecimal.round(total, {'decimals': 2});
+                }
+                // Create docChange
+                docChange = new DocumentChange();
+                let changedRowFields = {
+                    "Total": total
+                };
+                docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
+                docChange.setDocumentForCurrentRow();
+                return docChange.getDocChange();
+
             }
             //...
         }
@@ -573,3 +596,15 @@ Date.prototype.diff=function(d) {
     return diffDays;
 };
 
+/**
+ * Returns a time 'hh:mm' as a decimal value.
+ * Example: the value '2:30' is returned as "2.50"
+ */
+function timeToDecimal(time) {
+    if (time && time.indexOf(":") > 0) {
+        var hours = time.split(':')[0];
+        var minutes = Banana.SDecimal.divide(time.split(':')[1], 60);
+        return Banana.SDecimal.add(hours, minutes);
+    }
+    return time;
+}
