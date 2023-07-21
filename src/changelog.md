@@ -1,5 +1,14 @@
 # Changelog
 
+## 2023-07-21
+
+* [RELEASE STABLE] Released as Stable
+* [RELEASE DEV] Released as Dev
+
+Changes availables only with BananaPlus version 10.1.7 or newer.
+
+* [Fix] Fix discount percentage is not showed in the printed invoice
+
 ## 2023-07-18
 
 * [RELEASE STABLE] Released as Stable
