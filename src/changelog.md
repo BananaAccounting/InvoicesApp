@@ -1,6 +1,6 @@
 # Changelog
 
-## 2023-07-18
+## 2023-07-21
 
 * [RELEASE STABLE] Released as Stable
 * [RELEASE DEV] Released as Dev
