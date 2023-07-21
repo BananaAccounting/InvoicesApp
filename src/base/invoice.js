@@ -512,6 +512,20 @@ function invoicePrepareForPrinting(invoiceObj) {
         item.item = item.number
     }
 
+    // Insert discount percentage
+    // JsonInvoice.calculate need to fix rounding differences to know it the percentage is calculated on the
+    // inclusive or exclusive vat amount. But the layout look at the percent property to show the percentage
+    // on the invoice, cz fo that copy the percent_vat_inclusive or percent_vat_exclusive to the percent property.
+    // Maybe wouldbe in the JsonInvoice add a property to say if the invoice is without vat, with vat inclusive,
+    // or vat exclusive.
+    if (invoiceObj.billing_info.discount) {
+        if (invoiceObj.billing_info.discount.percent_vat_inclusive) {
+            invoiceObj.billing_info.discount.percent = invoiceObj.billing_info.discount.percent_vat_inclusive;
+        } else if (invoiceObj.billing_info.discount.percent_vat_exclusive) {
+            invoiceObj.billing_info.discount.percent = invoiceObj.billing_info.discount.percent_vat_exclusive;
+        }
+    }
+
     // Update custom fields descriptions
     if (invoiceObj.document_info.custom_fields) {
         let settings = getSettings();
