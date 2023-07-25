@@ -477,7 +477,7 @@ Item {
                             visible: isInvoiceFieldVisible("show_invoice_vat_mode")
                             enabled: !invoice.isReadOnly
 
-                            editable: true
+                            editable: false
                             model: vatModesModel
                             textRole: "descr"
                             listItemTextIncludesKey: false
