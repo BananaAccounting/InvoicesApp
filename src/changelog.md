@@ -8,6 +8,7 @@
 Changes availables only with BananaPlus version 10.1.9 or newer.
 
 * [Enhancement] Let print two or more invoices together
+* [Enhancement] Add new items with Ctrl + Enter
 
 ## 2023-07-21
 
