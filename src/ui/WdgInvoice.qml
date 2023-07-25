@@ -105,7 +105,7 @@ Item {
 
         invoiceUpdateCustomFields()
 
-        Invoice.invoicePrint(invoice.json);
+        Invoice.invoicePrint(invoice.json,invoice.tabPos.tableName);
     }
 
     Component.onCompleted: {
