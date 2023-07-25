@@ -1,5 +1,14 @@
 # Changelog
 
+## 2023-07-25
+
+* [RELEASE STABLE] Released as Stable
+* [RELEASE DEV] Released as Dev
+
+Changes availables only with BananaPlus version 10.1.9 or newer.
+
+* [Enhancement] Let print two or more invoices together
+
 ## 2023-07-21
 
 * [RELEASE STABLE] Released as Stable
