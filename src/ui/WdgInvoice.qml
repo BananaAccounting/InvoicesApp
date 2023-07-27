@@ -120,7 +120,7 @@ Item {
         id: invoiceItemsModel
 
         TableModelColumn { display: "row"}
-        TableModelColumn { display: "type"}
+        TableModelColumn { display: "item_type"}
         TableModelColumn { display: "number"}
         TableModelColumn { display: "date"}
         TableModelColumn { display: "description"}
@@ -134,7 +134,7 @@ Item {
         rows: [
             {
                 "row": "",
-                "type": "",
+                "item_type": "",
                 "number": "",
                 "date": "",
                 "description": "",
@@ -159,7 +159,7 @@ Item {
             {
                 'id': 'invoice_item_column_type',
                 'align': Text.AlignLeft,
-                'role':  'type',
+                'role':  'item_type',
                 'title': qsTr("Type"),
                 'visible': true,
                 'width': 100
@@ -1672,6 +1672,11 @@ Item {
                                 filterEnabled: true
                                 currentIndex: -1
                                 listItemTextIncludesKey: false
+//                                displayText: {
+//                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
+//                                    undoKey = display
+//                                    display
+//                                }
 
                                 Connections {
                                     target: invoice
@@ -1686,8 +1691,9 @@ Item {
                                     if (invoiceItemsTable.isNewRow(row)) {
                                         invoiceItemsTable.appendNewRow()
                                     }
+                                    setDocumentModified()
 //                                    invoice.setVatMode(key)
-                                    calculateInvoice()
+//                                    calculateInvoice()
                                 }
 
                                 onFocusChanged: {
@@ -1709,7 +1715,7 @@ Item {
                                 textRole: "key"
                                 filterEnabled: true
 
-                                currentIndex: -1
+//                                currentIndex: -1
                                 displayText: {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                     undoKey = display

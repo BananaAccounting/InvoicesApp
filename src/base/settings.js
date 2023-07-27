@@ -228,6 +228,7 @@ function getDefaultSettings() {
                             'show_invoice_item_column_discount': false,
 
                             'width_invoice_item_column_row_number': -1,
+                            'width_invoice_item_column_type': -1,
                             'width_invoice_item_column_number': -1,
                             'width_invoice_item_column_date': -1,
                             'width_invoice_item_column_quantity': -1,
@@ -304,6 +305,7 @@ function getDefaultSettings() {
                             'show_invoice_item_column_discount': false,
 
                             'width_invoice_item_column_row_number': -1,
+                            'width_invoice_item_column_type': -1,
                             'width_invoice_item_column_number': -1,
                             'width_invoice_item_column_date': -1,
                             'width_invoice_item_column_quantity': -1,
@@ -380,6 +382,7 @@ function getDefaultSettings() {
                             'show_invoice_item_column_discount': true,
 
                             'width_invoice_item_column_row_number': -1,
+                            'width_invoice_item_column_type': -1,
                             'width_invoice_item_column_number': -1,
                             'width_invoice_item_column_date': -1,
                             'width_invoice_item_column_quantity': -1,
