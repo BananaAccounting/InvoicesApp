@@ -1672,14 +1672,14 @@ Item {
                                 filterEnabled: true
                                 currentIndex: -1
                                 listItemTextIncludesKey: false
-//                                displayText: {
-//                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
-//                                    undoKey = display
-//                                    display
-//                                }
+                                displayText: {
+                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
+                                    undoKey = display
+                                    display
+                                }
 
                                 Connections {
-                                    target: invoice
+//                                    target: invoice
 //                                    function onInvoiceChanged() {
 //                                        if (invoice.json && invoice.json.document_info.vat_mode) {
 //                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
@@ -1691,7 +1691,12 @@ Item {
                                     if (invoiceItemsTable.isNewRow(row)) {
                                         invoiceItemsTable.appendNewRow()
                                     }
-                                    setDocumentModified()
+                                    if (isExistingKey) {
+                                        invoice.json.items[row].item_type = textAt(highlightedIndex)
+                                        console.log(highlightedIndex)
+                                        setDocumentModified()
+                                    }
+
 //                                    invoice.setVatMode(key)
 //                                    calculateInvoice()
                                 }
