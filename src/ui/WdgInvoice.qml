@@ -1865,6 +1865,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column description
                             column: 4
                             StyledTextArea {
                                 required property bool current
@@ -1929,6 +1930,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column quantity
                             column: 5
                             StyledTextField {
                                 required property bool current
@@ -1965,6 +1967,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column mesure unit
                             column: 6
                             StyledTextField {
                                 required property bool current
@@ -2001,6 +2004,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column quantity
                             column: 7
                             StyledTextField {
                                 required property bool current
@@ -2061,6 +2065,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column discount
                             column: 8
                             StyledTextField {
                                 required property bool current
@@ -2106,6 +2111,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column total
                             column: 9
                             StyledTextField {
                                 required property bool current
@@ -2125,6 +2131,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column vat
                             column: 10
                             StyledKeyDescrComboBox {
                                 id: invoice_item_vat
@@ -2237,6 +2244,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column default (not used)
                             StyledTextField {
                                 required property bool selected
                                 required property bool current
@@ -2316,7 +2324,7 @@ Item {
                     }
 
                     function isTotalRow(row) {
-                        if (row >= 0 && row < invoice.json.items.length) {
+                        if (row >= 0 && invoice && invoice.json && invoice.json.items && row < invoice.json.items.length) {
                             let item_type = invoice.json.items[row].item_type
                             if (item_type === "total" || item_type === "total1" || item_type === "total2") {
                                 return true
