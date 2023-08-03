@@ -1933,6 +1933,7 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display ? Banana.Converter.toLocaleNumberFormat(model.display) : ""
                                 readOnly: invoice.isReadOnly
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -1968,6 +1969,7 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
                                 readOnly: invoice.isReadOnly
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -2003,6 +2005,7 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: toLocaleItemNumberFormat(model.display)
                                 readOnly: invoice.isReadOnly
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -2063,6 +2066,8 @@ Item {
                                 text: toLocaleItemDiscountFormat(model.display)
                                 placeholderText: hovered ? qsTr("30% or 30.00") : ""
                                 readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_discount")
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
+
                                 onEditingFinished: {
                                     if (modified) {
                                         if (invoiceItemsTable.isNewRow(row)) {
@@ -2128,7 +2133,7 @@ Item {
                                 model: taxRatesModel
                                 textRole: "key"
                                 editable: true // set to true to make tab navitation working
-                                enabled: !invoice.isReadOnly
+                                enabled: !invoice.isReadOnly && !invoiceItemsTable.isTotalRow(row)
 
                                 onCurrentKeySet: function(key, isExistingKey) {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
@@ -2302,6 +2307,16 @@ Item {
                     function isNewRow(row) {
                         if (row >= invoice.json.items.length) {
                             return true
+                        }
+                        return false
+                    }
+
+                    function isTotalRow(row) {
+                        if (row >= 0 && row < invoice.json.items.length) {
+                            let item_type = invoice.json.items[row].item_type
+                            if (item_type === "total" || item_type === "total1" || item_type === "total2") {
+                                return true
+                            }
                         }
                         return false
                     }
