@@ -105,7 +105,7 @@ Item {
 
         invoiceUpdateCustomFields()
 
-        Invoice.invoicePrint(invoice.json);
+        Invoice.invoicePrint(invoice.json,invoice.tabPos.tableName);
     }
 
     Component.onCompleted: {
@@ -1567,9 +1567,21 @@ Item {
                                 event.accepted = true
                                 if (event.modifiers & Qt.ShiftModifier) {
                                     invoiceItemsTable.selectPreviousItem()
+                                } else if (event.modifiers & Qt.ControlModifier) {
+                                    var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
+                                    if (rowIndex < 0 || (rowIndex + 1 < rowIndex.count)) {
+                                        invoice.json.items.push(emptyInvoiceItem())
+                                    } else {
+                                        invoice.json.items.splice(rowIndex + 1, 0, emptyInvoiceItem())
+                                    }
+                                    invoice.setIsModified(true)
+                                    updateViewItems()
+                                    invoiceItemsTable.signalUpdateTableHeight++
+                                    event.accepted = true
                                 } else {
                                     invoiceItemsTable.selectNextItem()
                                 }
+
                             } else {
                                 event.accepted = true
                             }
@@ -3108,7 +3120,7 @@ Item {
             'es' : {"englishName":  'Spanish', "nativeName": 'Español'},
             'fr' : {"englishName":  'French', "nativeName": 'Français'},
             'it' : {"englishName":  'Italian', "nativeName": 'Italiano'},
-            'nl' : {"englishName":  'Portuguese', "nativeName": 'Portuguese'},
+            'nl' : {"englishName":  'Dutch', "nativeName": 'Nederlands'},
             'pt' : {"englishName":  'Portuguese', "nativeName": 'Portuguese'},
             'ru' : {"englishName":  'Russian', "nativeName": 'Русский'},
             'zh' : {"englishName":  'Chinese', "nativeName": '简体中文'}
