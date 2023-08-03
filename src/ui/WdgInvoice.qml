@@ -1678,7 +1678,7 @@ Item {
                                 id: invoice_item_types
                                 Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                                 visible: isInvoiceFieldVisible("show_invoice_item_column_type")
-                                enabled: !invoice.isReadOnly && appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_type")
+                                enabled: !invoice.isReadOnly
 
                                 editable: false
                                 model: invoiceItemTypesModel
@@ -1736,6 +1736,14 @@ Item {
                                     }
                                     return "";
                                 }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_type")
+                                    onClicked: {
+                                        dlgLicense.visible = true
+                                    }
+                               }
 
                             }
                         }
