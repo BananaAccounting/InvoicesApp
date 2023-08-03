@@ -575,6 +575,7 @@ function getSettingsRequiringAdvancedPlan() {
             'show_invoice_address_business_unit_2',
             'show_invoice_address_business_unit_3',
             'show_invoice_address_business_unit_4',
+            'show_invoice_item_column_type',
             'show_invoice_item_column_date',
             'show_invoice_item_column_discount'
         ]

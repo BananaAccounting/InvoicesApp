@@ -1809,7 +1809,7 @@ Item {
                     }
 
                     StyledLabel{
-                        text: qsTr("Type")
+                        text: addLicenseRequirementText(qsTr("Type"), "show_invoice_item_column_type")
                         Layout.fillWidth: true
                     }
 

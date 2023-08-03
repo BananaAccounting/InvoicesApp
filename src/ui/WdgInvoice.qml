@@ -1657,6 +1657,7 @@ Item {
                     delegate: DelegateChooser {
 
                         DelegateChoice {
+                            // Column row number
                             column: 0
                             StyledTextField {
                                 required property bool current
@@ -1671,12 +1672,13 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column item type
                             column: 1
                             StyledKeyDescrComboBox {
                                 id: invoice_item_types
                                 Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                                 visible: isInvoiceFieldVisible("show_invoice_item_column_type")
-                                enabled: !invoice.isReadOnly
+                                enabled: !invoice.isReadOnly && appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_type")
 
                                 editable: false
                                 model: invoiceItemTypesModel
@@ -1739,6 +1741,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column article number
                             column: 2
                             StyledKeyDescrComboBox {
                                 popupMinWidth: 300 * Stylesheet.pixelScaleRatio
@@ -1805,6 +1808,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column date
                             column: 3
                             StyledTextField {
                                 required property bool current
