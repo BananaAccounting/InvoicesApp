@@ -15,10 +15,10 @@
 import QtQuick
 
 ListModel {
-    ListElement {key: "item_item"; descr: qsTr("Item")}
-    ListElement {key: "item_total"; descr: qsTr("Total")}
-    ListElement {key: "item_total_1"; descr: qsTr("Total 1")}
-    ListElement {key: "item_total_2"; descr: qsTr("Total 1")}
-    ListElement {key: "item_header"; descr: qsTr("Header")}
-    ListElement {key: "item_note"; descr: qsTr("Note")}
+    ListElement {key: ""; descr: qsTr("")} // Item
+    ListElement {key: "total"; descr: qsTr("Total")}
+    ListElement {key: "total1"; descr: qsTr("Total 1")}
+    ListElement {key: "total2"; descr: qsTr("Total 2")}
+    ListElement {key: "header"; descr: qsTr("Header")}
+    ListElement {key: "note"; descr: qsTr("Note")}
 }

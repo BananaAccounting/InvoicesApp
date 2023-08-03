@@ -1684,10 +1684,11 @@ Item {
                                 filterEnabled: true
                                 currentIndex: -1
                                 listItemTextIncludesKey: false
+
                                 displayText: {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                     undoKey = display
-                                    display
+                                    getDisplayText()
                                 }
 
                                 Connections {
@@ -1704,13 +1705,16 @@ Item {
                                         invoiceItemsTable.appendNewRow()
                                     }
                                     if (isExistingKey) {
-                                        invoice.json.items[row].item_type = textAt(highlightedIndex)
-                                        console.log(highlightedIndex)
+                                        invoice.json.items[row].item_type = key
+                                        if (!invoice.json.items[row].description) {
+                                            if (key === "total" || key === "total1" || key === "total2") {
+                                                let index = findKey(key)
+                                                invoice.json.items[row].description = invoiceItemTypesModel.get(index).descr
+                                            }
+                                        }
                                         setDocumentModified()
+                                        calculateInvoice()
                                     }
-
-//                                    invoice.setVatMode(key)
-//                                    calculateInvoice()
                                 }
 
                                 onFocusChanged: {
@@ -1719,6 +1723,18 @@ Item {
                                         invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
                                     }
                                 }
+
+                                function getDisplayText() {
+                                    if (row >= 0 && invoice.json && row < invoice.json.items.length) {
+                                        let itemType = invoice.json.items[row].item_type
+                                        let index = findKey(itemType)
+                                        if (index > 0) {
+                                            return invoiceItemTypesModel.get(index).descr
+                                        }
+                                    }
+                                    return "";
+                                }
+
                             }
                         }
 
