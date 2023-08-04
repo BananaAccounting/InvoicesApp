@@ -1,5 +1,12 @@
 # Changelog
 
+## 2023-08-04
+
+* [RELEASE DEV]
+
+* [Enhancement] Add subtotal items
+* [Fix] Fix button move up and button move down
+
 ## 2023-07-25
 
 * [RELEASE STABLE] Released as Stable
