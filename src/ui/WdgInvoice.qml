@@ -1677,6 +1677,14 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
                                 verticalAlignment: Qt.AlignVCenter
+
+                                onFocusChanged: {
+                                    if (focus) {
+                                        let index = invoiceItemsModel.index(row, column)
+                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                    }
+                                }
+
                             }
                         }
 
