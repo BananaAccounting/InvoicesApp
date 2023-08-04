@@ -107,7 +107,12 @@ QtObject {
         if (fieldId in viewAppearance) {
             return viewAppearance[fieldId];
         } else {
-            console.log("appearance flag '" + fieldId + "' in view '" + viewId + "' not found")
+            let defaultAppearance = Settings.getDefaultSettings().interface.invoice.views[viewId].appearance
+            if (fieldId in defaultAppearance) {
+                return defaultAppearance[fieldId];
+            } else {
+                console.log("appearance flag '" + fieldId + "' in view '" + viewId + "' not found")
+            }
         }
 
         return true; // if missing default is visible

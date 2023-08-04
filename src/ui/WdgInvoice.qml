@@ -1641,7 +1641,16 @@ Item {
                                 if (!visible) {
                                     return 0
                                 }
+                            } else {
+                                let defaultViewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
+                                if (settingIdColumnVisible in defaultViewAppearance) {
+                                    let visible = defaultViewAppearance[settingIdColumnVisible]
+                                    if (!visible) {
+                                        return 0
+                                    }
+                                }
                             }
+
                             if (settingIdColumnWidth in viewAppearance) {
                                 let width = viewAppearance[settingIdColumnWidth]
                                 if (width > 10) {
@@ -1677,7 +1686,6 @@ Item {
                             StyledKeyDescrComboBox {
                                 id: invoice_item_types
                                 Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                                visible: isInvoiceFieldVisible("show_invoice_item_column_type")
                                 enabled: !invoice.isReadOnly
 
                                 editable: false
@@ -3644,7 +3652,18 @@ Item {
                     return false
                 }
             } else {
-                console.log("appearance flag '" + fieldId + "' in view '" + currentView + "' not found")
+                viewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
+                if (fieldId in viewAppearance) {
+                    if (viewAppearance[fieldId]) {
+                        return true
+                    } else if (isNotEmpty && viewAppearance.show_invoice_fields_if_not_empty) {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else {
+                    viewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
+                }
             }
         }
         return true;
