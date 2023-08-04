@@ -15,7 +15,7 @@
 import QtQuick
 
 ListModel {
-    ListElement {key: ""; descr: qsTr("")} // Item
+    ListElement {key: ""; descr: ""} // Item
     ListElement {key: "total"; descr: qsTr("Total")}
     ListElement {key: "total1"; descr: qsTr("Total 1")}
     ListElement {key: "total2"; descr: qsTr("Total 2")}
