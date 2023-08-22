@@ -25,12 +25,12 @@ function invoiceCreateNew(tabPos, id) {
     let isEstimate = tabPos.tableName === "Estimates" ? true : false;
     let docNumber = id ? id : invoiceGetNextNumber(isEstimate);
 
-    var currentDate = new Date().toISOString().substring(0,10);
+    var currentDate = new Date().toISOString().substring(0, 10);
 
     var invoice = {
         'document_info': {
             'number': docNumber,
-            'locale': Banana.document.locale.substring(0,2),
+            'locale': Banana.document.locale.substring(0, 2),
             'currency': settingsNewDocs.currency,
             'date': currentDate,
             'description': invoiceGetTitle(isEstimate, docNumber),
@@ -52,10 +52,10 @@ function invoiceCreateNew(tabPos, id) {
 
             ]
         },
-        'billing_info' : {
+        'billing_info': {
             'total_vat_rates': ''
         },
-        'payment_info' : {
+        'payment_info': {
             'due_date': ''
         },
         'customer_info': {
@@ -88,12 +88,12 @@ function invoiceCreateNew(tabPos, id) {
                 "total_amount_vat_inclusive": "",
                 "total_vat_amount": "",
                 "unit_price": {
-                   "amount_vat_exclusive": null,
-                   "amount_vat_inclusive": null,
-                   "vat_code": "",
-                   "vat_rate": ""
+                    "amount_vat_exclusive": null,
+                    "amount_vat_inclusive": null,
+                    "vat_code": "",
+                    "vat_rate": ""
                 }
-             }
+            }
         ],
         'note': []
     };
@@ -122,7 +122,7 @@ function invoiceCreateFromEstimateObj(estimateObj) {
 
     estimateObj.document_info.number = invoiceGetNextNumber(false);
     estimateObj.document_info.doc_type = "10";
-    invoiceSetDate(estimateObj, new Date().toISOString().substring(0,10));
+    invoiceSetDate(estimateObj, new Date().toISOString().substring(0, 10));
     invoiceUpdateCreatorInfo(estimateObj);
     invoiceUpdateSupplierInfo(estimateObj);
     return estimateObj;
@@ -132,8 +132,8 @@ function invoiceGetNextNumber(isEstimate) {
     let table = Banana.document.table(isEstimate ? "Estimates" : "Invoices");
     if (table) {
         console.log(Banana.application.apiVersion);
-        if  (Banana.application.apiVersion &&
-                (Banana.compareVersion(Banana.application.apiVersion, "1.2.2") >= 0)) {
+        if (Banana.application.apiVersion &&
+            (Banana.compareVersion(Banana.application.apiVersion, "1.2.2") >= 0)) {
             return table.progressiveNumber('RowId', true);
         } else {
             let nextNumber = 0;
@@ -169,13 +169,13 @@ function invoiceGetTitle(isEstimate, nr, lang) {
     }
     if (!descrNewInvoice) {
         if (Banana.document) {
-            let trLang = Banana.document.locale.substring(0,2);
+            let trLang = Banana.document.locale.substring(0, 2);
             if (translationExists(settings, trId, trLang)) {
                 descrNewInvoice = getTranslatedText(settings, trId, trLang)
             }
         }
         if (!descrNewInvoice) {
-            let trLang = Banana.document.locale.substring(0,2);
+            let trLang = Banana.document.locale.substring(0, 2);
             if (translationExists(settings, trId, trLang)) {
                 descrNewInvoice = getTranslatedText(settings, trId, trLang)
             }
@@ -210,27 +210,27 @@ function invoiceUpdateSupplierInfo(invoiceObj) {
 function invoiceDuplicate(tabPos) {
     var documentObj = invoiceObjGet(tabPos);
     if (!documentObj)
-         return null;
+        return null;
 
     return invoiceDuplicateObj(documentObj, tabPos);
 }
 
 function invoiceDuplicateObj(invoiceObj, tabPos) {
     if (!invoiceObj)
-         return null;
+        return null;
 
     let tableName = tabPos.tableName;
     if (tabPos.tableName === "Archive" || tabPos.tableName === "Templates" ||
-                    tabPos.tableName === "Extract") {
+        tabPos.tableName === "Extract") {
         tableName = tabPos.parentTableName;
     }
     var settingsNewDocs = getSettings().new_documents;
     let isEstimate = invoiceIsEstimate(invoiceObj);
     invoiceObj.document_info.number = invoiceGetNextNumber(isEstimate);
-    invoiceObj.document_info.date = new Date().toISOString().substring(0,10);
+    invoiceObj.document_info.date = new Date().toISOString().substring(0, 10);
     var due_date_days = isEstimate ?
-                Number(settingsNewDocs.estimate_validity_days) :
-                Number(settingsNewDocs.payment_term_days);
+        Number(settingsNewDocs.estimate_validity_days) :
+        Number(settingsNewDocs.payment_term_days);
     invoiceObj.payment_info.due_date = dateAdd(invoiceObj.document_info.date, due_date_days);
 
     invoiceUpdateCreatorInfo(invoiceObj);
@@ -241,7 +241,7 @@ function invoiceDuplicateObj(invoiceObj, tabPos) {
 
 function invoiceIsEstimate(invoiceObj) {
     if (invoiceObj && invoiceObj.document_info.doc_type === "17")
-         return true;
+        return true;
     return false;
 }
 
@@ -261,8 +261,8 @@ function invoiceSetDate(invoiceObj, date) {
     // Added check to add invoice validity days
     if (due_date_days <= 0 || invoiceObj.document_info.doc_type === "10") {
         due_date_days = invoiceIsEstimate(invoiceObj) ?
-                    Number(settingsNewDocs.estimate_validity_days) :
-                    Number(settingsNewDocs.payment_term_days);
+            Number(settingsNewDocs.estimate_validity_days) :
+            Number(settingsNewDocs.payment_term_days);
     }
     invoiceObj.document_info.date = date;
     invoiceObj.payment_info.due_date = dateAdd(invoiceObj.document_info.date, due_date_days)
@@ -275,7 +275,7 @@ function invoiceObjGet(tabPos) {
             var invoiceFieldObj = JSON.parse(row.value("InvoiceData"));
             return JSON.parse(invoiceFieldObj.invoice_json);
         }
-        catch(e) {
+        catch (e) {
             return null;
         }
     }
@@ -303,7 +303,7 @@ function invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj) {
         if (row) {
             try {
                 invoiceFieldObj = JSON.parse(row.value("InvoiceData"));
-            } catch(e) {
+            } catch (e) {
 
             }
         }
@@ -392,16 +392,16 @@ function invoiceChangedFieldsGet(invoiceObj, row) {
         }
 
         // Remove unchanged values
-        for(var propertyName in changedRowFields) {
+        for (var propertyName in changedRowFields) {
             var rowValue = row ? row.value(propertyName) : "";
             if (rowValue === changedRowFields[propertyName]) {
                 delete changedRowFields[propertyName];
-            } else if (propertyName === "InvoiceDate" ) {
+            } else if (propertyName === "InvoiceDate") {
                 if (changedRowFields["InvoiceDate"]) {
                     // Bug in DocumentChange.apply, dates have to be in the format yyyymmdd
                     changedRowFields["InvoiceDate"] = changedRowFields["InvoiceDate"].replace(/-/g, "");
                 }
-            } else if (propertyName === "InvoiceDateExpiration" ) {
+            } else if (propertyName === "InvoiceDateExpiration") {
                 if (changedRowFields["InvoiceDateExpiration"]) {
                     // Bug in DocumentChange.apply, dates have to be in the format yyyymmdd
                     changedRowFields["InvoiceDateExpiration"] = changedRowFields["InvoiceDateExpiration"].replace(/-/g, "");
@@ -433,7 +433,7 @@ function invoiceInfoSummaryGet(invoiceObj, infoObj) {
 
     for (var i = 0; i < invoiceObj.items.length; ++i) {
         var item = invoiceObj.items[i];
-        infoMsg =  {};
+        infoMsg = {};
         if (i === 0)
             infoMsg.text = qsTr("Products:")
         else
@@ -461,11 +461,11 @@ function invoiceCustomFieldGet(invoiceObj, fieldId) {
     return "";
 }
 
-function invoicePrint(invoiceObj) {
+function invoicePrint(invoiceObj, tableName) {
     if (invoiceObj) {
         let printedJsonObj = JSON.parse(JSON.stringify(invoiceObj));
         invoicePrepareForPrinting(printedJsonObj);
-        Banana.document.printInvoice(JSON.stringify(printedJsonObj));
+        Banana.document.printInvoice(JSON.stringify(printedJsonObj), tableName ? tableName : "");
     }
 }
 
@@ -510,6 +510,20 @@ function invoicePrepareForPrinting(invoiceObj) {
 
         // Item number
         item.item = item.number
+    }
+
+    // Insert discount percentage
+    // JsonInvoice.calculate need to fix rounding differences to know it the percentage is calculated on the
+    // inclusive or exclusive vat amount. But the layout look at the percent property to show the percentage
+    // on the invoice, cz fo that copy the percent_vat_inclusive or percent_vat_exclusive to the percent property.
+    // Maybe wouldbe in the JsonInvoice add a property to say if the invoice is without vat, with vat inclusive,
+    // or vat exclusive.
+    if (invoiceObj.billing_info.discount) {
+        if (invoiceObj.billing_info.discount.percent_vat_inclusive) {
+            invoiceObj.billing_info.discount.percent = invoiceObj.billing_info.discount.percent_vat_inclusive;
+        } else if (invoiceObj.billing_info.discount.percent_vat_exclusive) {
+            invoiceObj.billing_info.discount.percent = invoiceObj.billing_info.discount.percent_vat_exclusive;
+        }
     }
 
     // Update custom fields descriptions

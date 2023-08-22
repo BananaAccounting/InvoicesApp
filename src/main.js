@@ -14,7 +14,7 @@
 
 // @id = ch.banana.application.invoice.default
 // @api = 1.0
-// @pubdate = 2023-04-17
+// @pubdate = 2023-07-25
 // @publisher = Banana.ch SA
 // @description = Estimates and Invoices extension
 // @doctype = *
@@ -31,9 +31,9 @@ var JsAction = class JsAction {
     constructor() {
         this.version = '1.0';
 
-        this.getUiFileName = function() {
+        this.getUiFileName = function () {
             if (Banana.application.qtVersion &&
-                    Banana.compareVersion(Banana.application.qtVersion, "6.0.0") > 0) {
+                Banana.compareVersion(Banana.application.qtVersion, "6.0.0") > 0) {
                 return 'ui/DlgInvoice.qml';
             } else {
                 return 'ui/qt5/DlgInvoice.qml';
@@ -76,8 +76,8 @@ var JsAction = class JsAction {
 
                     // If InvoiceData is empty and another invoice with the same number exists
                     // copy the InvoiceData too.
-                    var rowIdIs = function(rowObj,rowNr,table) {
-                       return rowObj.value('RowId') === rowId && rowObj.rowNr !== tabPos.rowNr;
+                    var rowIdIs = function (rowObj, rowNr, table) {
+                        return rowObj.value('RowId') === rowId && rowObj.rowNr !== tabPos.rowNr;
                     }
                     var rows = table.findRows(rowIdIs);
                     if (rows.length > 0) {
@@ -90,7 +90,7 @@ var JsAction = class JsAction {
                             changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
                             changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
                         }
-                        catch(e) {
+                        catch (e) {
                             // Continue
                         }
 
@@ -359,8 +359,9 @@ var JsAction = class JsAction {
 
         } else if (commandId === "print") {
             var invoiceObj = invoiceObjGet(fromTabPos);
-            if (invoiceObj) {
-                invoicePrint(invoiceObj);
+            var tableName = fromTabPos.tableName;
+            if (invoiceObj && tableName) {
+                invoicePrint(invoiceObj, tableName);
             }
             return null;
 
@@ -556,11 +557,11 @@ var JsAction = class JsAction {
 
 }
 
-Date.prototype.addDays=function(d) {
-    return new Date(this.valueOf()+24*60*60*1000*d);
+Date.prototype.addDays = function (d) {
+    return new Date(this.valueOf() + 24 * 60 * 60 * 1000 * d);
 };
 
-Date.prototype.diff=function(d) {
+Date.prototype.diff = function (d) {
     const diffTime = Math.abs(d - this);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
