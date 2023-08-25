@@ -2891,6 +2891,7 @@ Item {
     }
 
     function setDocumentDueDate(paymentTermInDays) {
+        let defaultPaymentTerm = appSettings.data.new_documents.payment_term_days;
         if (paymentTermInDays) {
             let curPaymentTermInDays = dateDiff(invoice.json.document_info.date, invoice.json.payment_info.due_date)
             if (curPaymentTermInDays !== Number(paymentTermInDays)) {
@@ -2899,7 +2900,7 @@ Item {
                 setDocumentModified()
             }
         } else {
-            invoice.json.payment_info.due_date = dateAdd(invoice.json.document_info.date, "30")
+            invoice.json.payment_info.due_date = dateAdd(invoice.json.document_info.date, defaultPaymentTerm)
             setDocumentModified()
         }
 
