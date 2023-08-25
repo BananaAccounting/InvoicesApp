@@ -2890,6 +2890,7 @@ Item {
     }
 
     function setDocumentCurrency(currency) {
+        let defaultCurrency = appSettings.data.new_documents.currency
         if (currency) {
             let curCurrency = invoice.json.document_info.currency
             if (curCurrency !== currency) {
@@ -2898,7 +2899,7 @@ Item {
             }
             setDocumentModified()
         } else {
-            invoice.json.document_info.currency = "CHF"
+            invoice.json.document_info.currency = defaultCurrency
             setDocumentModified()
         }
     }

@@ -25,6 +25,7 @@
 // @includejs = base/invoices.js
 // @includejs = base/contacts.js
 // @includejs = base/documentchange.js
+// @includejs = base/settings.js
 
 var JsAction = class JsAction {
 
@@ -295,11 +296,12 @@ var JsAction = class JsAction {
                 return docChange.getDocChange();
 
             } else if (tabPos.columnName === "Currency") {
+                let defaultCurrency = getSettings().new_documents.currency
                 // Update invoice
                 invoiceObj = invoiceObjGet(tabPos);
                 if (!invoiceObj)
                     invoiceObj = invoiceCreateNew(tabPos);
-                invoiceObj.document_info.currency = row.value("Currency") ? row.value("Currency") : "CHF";
+                invoiceObj.document_info.currency = row.value("Currency") ? row.value("Currency") : defaultCurrency;
 
                 // Create docChange
                 changedRowFields = {};

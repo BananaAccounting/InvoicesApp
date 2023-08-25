@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// @includejs = settings.js
+
 function contactAddressGet(id) {
 
     var customer_info = {
@@ -229,6 +231,7 @@ function contactsSupplementSearchText(rowNr) {
 }
 
 function contactCurrencyGet(customer_id) {
+    let defaultCurrency = getSettings().new_documents.currency
     var tableContacts = contactsTableGet()
     if (tableContacts) {
         var contactRow = tableContacts.findRowByValue("RowId", customer_id)
@@ -237,7 +240,7 @@ function contactCurrencyGet(customer_id) {
             if (currency) {
                 return currency
             } else {
-                return "CHF"
+                return defaultCurrency
             }
         }
     }
