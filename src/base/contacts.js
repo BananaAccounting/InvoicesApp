@@ -231,7 +231,6 @@ function contactsSupplementSearchText(rowNr) {
 }
 
 function contactCurrencyGet(customer_id) {
-    let defaultCurrency = getSettings().new_documents.currency
     var tableContacts = contactsTableGet()
     if (tableContacts) {
         var contactRow = tableContacts.findRowByValue("RowId", customer_id)
@@ -239,10 +238,23 @@ function contactCurrencyGet(customer_id) {
             let currency = contactRow.value("Currency")
             if (currency) {
                 return currency
-            } else {
-                return defaultCurrency
             }
         }
     }
+    let defaultCurrency = getSettings().new_documents.currency
+    return defaultCurrency
 }
 
+function contactPaymentTermInDaysGet(customer_id) {
+    var tableContacts = contactsTableGet()
+    if (tableContacts) {
+        var contactRow = tableContacts.findRowByValue("RowId", customer_id)
+        if (contactRow) {
+            let paymentTermInDays = contactRow.value("PaymentTermInDays")
+            if (paymentTermInDays)
+                paymentTermInDays
+        }
+    }
+    let defaultPaymentTerm = getSettings().new_documents.payment_term_days
+    return defaultPaymentTerm
+}
