@@ -25,6 +25,7 @@
 // @includejs = base/invoices.js
 // @includejs = base/contacts.js
 // @includejs = base/documentchange.js
+// @includejs = base/settings.js
 
 var JsAction = class JsAction {
 
@@ -158,6 +159,7 @@ var JsAction = class JsAction {
                 var customer_id = table.value(tabPos.rowNr, "ContactsId");
                 invoiceObj.customer_info = contactAddressGet(customer_id);
                 invoiceObj.document_info.locale = contactLocaleGet(customer_id);
+                invoiceObj.document_info.currency = contactCurrencyGet(customer_id)
                 invoiceObj.payment_info.due_date = dateAdd(invoiceObj.document_info.date, contactPaymentTermInDaysGet(customer_id))
 
                 // Create docChange
@@ -288,12 +290,27 @@ var JsAction = class JsAction {
 
                 // Create docChange
                 invoiceObj = JSON.parse(Banana.document.calculateInvoice(JSON.stringify(invoiceObj)));
-                changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
+                changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
                 docChange = new DocumentChange();
                 docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
                 docChange.setDocumentForCurrentRow();
                 return docChange.getDocChange();
 
+            } else if (tabPos.columnName === "Currency") {
+                let defaultCurrency = getSettings().new_documents.currency
+                // Update invoice
+                invoiceObj = invoiceObjGet(tabPos);
+                if (!invoiceObj)
+                    invoiceObj = invoiceCreateNew(tabPos);
+                invoiceObj.document_info.currency = row.value("Currency") ? row.value("Currency") : defaultCurrency;
+
+                // Create docChange
+                changedRowFields = {};
+                changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
+                docChange = new DocumentChange();
+                docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
+                docChange.setDocumentForCurrentRow();
+                return docChange.getDocChange();
             }
         }
 

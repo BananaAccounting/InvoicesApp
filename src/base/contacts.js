@@ -230,16 +230,31 @@ function contactsSupplementSearchText(rowNr) {
     return '';
 }
 
+function contactCurrencyGet(customer_id) {
+    var tableContacts = contactsTableGet()
+    if (tableContacts) {
+        var contactRow = tableContacts.findRowByValue("RowId", customer_id)
+        if (contactRow) {
+            let currency = contactRow.value("Currency")
+            if (currency) {
+                return currency
+            }
+        }
+    }
+    let defaultCurrency = getSettings().new_documents.currency
+    return defaultCurrency
+}
+
 function contactPaymentTermInDaysGet(customer_id) {
-    let defaultPaymentTerm = getSettings().new_documents.payment_term_days
     var tableContacts = contactsTableGet()
     if (tableContacts) {
         var contactRow = tableContacts.findRowByValue("RowId", customer_id)
         if (contactRow) {
             let paymentTermInDays = contactRow.value("PaymentTermInDays")
-
-            return paymentTermInDays ? paymentTermInDays : defaultPaymentTerm
-
+            if (paymentTermInDays)
+                paymentTermInDays
         }
     }
+    let defaultPaymentTerm = getSettings().new_documents.payment_term_days
+    return defaultPaymentTerm
 }
