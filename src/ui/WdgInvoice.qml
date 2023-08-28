@@ -120,6 +120,7 @@ Item {
         id: invoiceItemsModel
 
         TableModelColumn { display: "row"}
+        TableModelColumn { display: "item_type"}
         TableModelColumn { display: "number"}
         TableModelColumn { display: "date"}
         TableModelColumn { display: "description"}
@@ -133,6 +134,7 @@ Item {
         rows: [
             {
                 "row": "",
+                "item_type": "",
                 "number": "",
                 "date": "",
                 "description": "",
@@ -153,6 +155,14 @@ Item {
                 'title': qsTr("#"),
                 'visible': true,
                 'width': 30
+            },
+            {
+                'id': 'invoice_item_column_type',
+                'align': Text.AlignLeft,
+                'role':  'item_type',
+                'title': qsTr("Type"),
+                'visible': true,
+                'width': 100
             },
             {
                 'id': 'invoice_item_column_number',
@@ -232,6 +242,11 @@ Item {
 
     VatModesModel {
         id: vatModesModel
+    }
+
+    InvoiceItemTypesModel {
+
+        id: invoiceItemTypesModel
     }
 
     ListModel {
@@ -1629,7 +1644,16 @@ Item {
                                 if (!visible) {
                                     return 0
                                 }
+                            } else {
+                                let defaultViewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
+                                if (settingIdColumnVisible in defaultViewAppearance) {
+                                    let visible = defaultViewAppearance[settingIdColumnVisible]
+                                    if (!visible) {
+                                        return 0
+                                    }
+                                }
                             }
+
                             if (settingIdColumnWidth in viewAppearance) {
                                 let width = viewAppearance[settingIdColumnWidth]
                                 if (width > 10) {
@@ -1645,6 +1669,7 @@ Item {
                     delegate: DelegateChooser {
 
                         DelegateChoice {
+                            // Column row number
                             column: 0
                             StyledTextField {
                                 required property bool current
@@ -1655,12 +1680,96 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
                                 verticalAlignment: Qt.AlignVCenter
+
+                                onFocusChanged: {
+                                    if (focus) {
+                                        let index = invoiceItemsModel.index(row, column)
+                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                    }
+                                }
+
                             }
                         }
 
+                        DelegateChoice {
+                            // Column item type
+                            column: 1
+                            StyledKeyDescrComboBox {
+                                id: invoice_item_types
+                                Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
+                                enabled: !invoice.isReadOnly
+
+                                editable: false
+                                model: invoiceItemTypesModel
+                                textRole: "descr"
+                                filterEnabled: true
+                                currentIndex: -1
+                                listItemTextIncludesKey: false
+
+                                displayText: {
+                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
+                                    undoKey = display
+                                    getDisplayText()
+                                }
+
+                                Connections {
+//                                    target: invoice
+//                                    function onInvoiceChanged() {
+//                                        if (invoice.json && invoice.json.document_info.vat_mode) {
+//                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
+//                                        }
+//                                    }
+                                }
+
+                                onCurrentKeySet: function(key, isExistingKey) {
+                                    if (invoiceItemsTable.isNewRow(row)) {
+                                        invoiceItemsTable.appendNewRow()
+                                    }
+                                    if (isExistingKey) {
+                                        invoice.json.items[row].item_type = key
+                                        if (!invoice.json.items[row].description) {
+                                            if (key === "total" || key === "total1" || key === "total2") {
+                                                let index = findKey(key)
+                                                invoice.json.items[row].description = invoiceItemTypesModel.get(index).descr
+                                            }
+                                        }
+                                        setDocumentModified()
+                                        calculateInvoice()
+                                    }
+                                }
+
+                                onFocusChanged: {
+                                    if (focus) {
+                                        let index = invoiceItemsModel.index(row, column)
+                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                    }
+                                }
+
+                                function getDisplayText() {
+                                    if (row >= 0 && invoice.json && row < invoice.json.items.length) {
+                                        let itemType = invoice.json.items[row].item_type
+                                        let index = findKey(itemType)
+                                        if (index > 0) {
+                                            return invoiceItemTypesModel.get(index).descr
+                                        }
+                                    }
+                                    return "";
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    enabled: !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_type")
+                                    onClicked: {
+                                        dlgLicense.visible = true
+                                    }
+                               }
+
+                            }
+                        }
 
                         DelegateChoice {
-                            column: 1
+                            // Column article number
+                            column: 2
                             StyledKeyDescrComboBox {
                                 popupMinWidth: 300 * Stylesheet.pixelScaleRatio
                                 editable: true
@@ -1669,7 +1778,7 @@ Item {
                                 textRole: "key"
                                 filterEnabled: true
 
-                                currentIndex: -1
+//                                currentIndex: -1
                                 displayText: {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                     undoKey = display
@@ -1726,7 +1835,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 2
+                            // Column date
+                            column: 3
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1782,7 +1892,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 3
+                            // Column description
+                            column: 4
                             StyledTextArea {
                                 required property bool current
                                 selected: current
@@ -1846,7 +1957,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 4
+                            // Column quantity
+                            column: 5
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1854,6 +1966,7 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display ? Banana.Converter.toLocaleNumberFormat(model.display) : ""
                                 readOnly: invoice.isReadOnly
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -1881,7 +1994,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 5
+                            // Column mesure unit
+                            column: 6
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1889,6 +2003,7 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
                                 readOnly: invoice.isReadOnly
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -1916,7 +2031,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 6
+                            // Column quantity
+                            column: 7
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1924,6 +2040,7 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: toLocaleItemNumberFormat(model.display)
                                 readOnly: invoice.isReadOnly
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -1975,7 +2092,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 7
+                            // Column discount
+                            column: 8
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1984,6 +2102,8 @@ Item {
                                 text: toLocaleItemDiscountFormat(model.display)
                                 placeholderText: hovered ? qsTr("30% or 30.00") : ""
                                 readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_discount")
+                                enabled: !invoiceItemsTable.isTotalRow(model.row)
+
                                 onEditingFinished: {
                                     if (modified) {
                                         if (invoiceItemsTable.isNewRow(row)) {
@@ -2018,7 +2138,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 8
+                            // Column total
+                            column: 9
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2037,7 +2158,8 @@ Item {
                         }
 
                         DelegateChoice {
-                            column: 9
+                            // Column vat
+                            column: 10
                             StyledKeyDescrComboBox {
                                 id: invoice_item_vat
                                 popupMinWidth: 300  * Stylesheet.pixelScaleRatio
@@ -2049,7 +2171,7 @@ Item {
                                 model: taxRatesModel
                                 textRole: "key"
                                 editable: true // set to true to make tab navitation working
-                                enabled: !invoice.isReadOnly
+                                enabled: !invoice.isReadOnly && !invoiceItemsTable.isTotalRow(row)
 
                                 onCurrentKeySet: function(key, isExistingKey) {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
@@ -2149,6 +2271,7 @@ Item {
                         }
 
                         DelegateChoice {
+                            // Column default (not used)
                             StyledTextField {
                                 required property bool selected
                                 required property bool current
@@ -2227,6 +2350,16 @@ Item {
                         return false
                     }
 
+                    function isTotalRow(row) {
+                        if (row >= 0 && invoice && invoice.json && invoice.json.items && row < invoice.json.items.length) {
+                            let item_type = invoice.json.items[row].item_type
+                            if (item_type === "total" || item_type === "total1" || item_type === "total2") {
+                                return true
+                            }
+                        }
+                        return false
+                    }
+
                     function selectNextItem() {
                         let nextItem = null
                         let nextRow = invoiceItemsTable.currentRow
@@ -2294,7 +2427,7 @@ Item {
                     }
 
                     function updateColDescrWidth() {
-                        let colDescriptionIndex = 3
+                        let colDescriptionIndex = 4
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
                         let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
@@ -3560,7 +3693,18 @@ Item {
                     return false
                 }
             } else {
-                console.log("appearance flag '" + fieldId + "' in view '" + currentView + "' not found")
+                viewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
+                if (fieldId in viewAppearance) {
+                    if (viewAppearance[fieldId]) {
+                        return true
+                    } else if (isNotEmpty && viewAppearance.show_invoice_fields_if_not_empty) {
+                        return true
+                    } else {
+                        return false
+                    }
+                } else {
+                    viewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
+                }
             }
         }
         return true;

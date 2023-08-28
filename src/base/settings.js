@@ -220,6 +220,7 @@ function getDefaultSettings() {
                             'show_invoice_address_vat_and_fiscal_number': false, // deprecated
 
                             'show_invoice_item_column_row_number': true,
+                            'show_invoice_item_column_type': false,
                             'show_invoice_item_column_number': true,
                             'show_invoice_item_column_date': false,
                             'show_invoice_item_column_quantity': true,
@@ -227,6 +228,7 @@ function getDefaultSettings() {
                             'show_invoice_item_column_discount': false,
 
                             'width_invoice_item_column_row_number': -1,
+                            'width_invoice_item_column_type': -1,
                             'width_invoice_item_column_number': -1,
                             'width_invoice_item_column_date': -1,
                             'width_invoice_item_column_quantity': -1,
@@ -295,6 +297,7 @@ function getDefaultSettings() {
                             'show_invoice_address_vat_and_fiscal_number': false, // deprecated
 
                             'show_invoice_item_column_row_number': true,
+                            'show_invoice_item_column_type': false,
                             'show_invoice_item_column_number': true,
                             'show_invoice_item_column_date': false,
                             'show_invoice_item_column_quantity': false,
@@ -302,6 +305,7 @@ function getDefaultSettings() {
                             'show_invoice_item_column_discount': false,
 
                             'width_invoice_item_column_row_number': -1,
+                            'width_invoice_item_column_type': -1,
                             'width_invoice_item_column_number': -1,
                             'width_invoice_item_column_date': -1,
                             'width_invoice_item_column_quantity': -1,
@@ -370,6 +374,7 @@ function getDefaultSettings() {
                             'show_invoice_address_vat_and_fiscal_number': false, // deprecated
 
                             'show_invoice_item_column_row_number': true,
+                            'show_invoice_item_column_type': true,
                             'show_invoice_item_column_number': true,
                             'show_invoice_item_column_date': true,
                             'show_invoice_item_column_quantity': true,
@@ -377,6 +382,7 @@ function getDefaultSettings() {
                             'show_invoice_item_column_discount': true,
 
                             'width_invoice_item_column_row_number': -1,
+                            'width_invoice_item_column_type': -1,
                             'width_invoice_item_column_number': -1,
                             'width_invoice_item_column_date': -1,
                             'width_invoice_item_column_quantity': -1,
@@ -569,6 +575,7 @@ function getSettingsRequiringAdvancedPlan() {
             'show_invoice_address_business_unit_2',
             'show_invoice_address_business_unit_3',
             'show_invoice_address_business_unit_4',
+            'show_invoice_item_column_type',
             'show_invoice_item_column_date',
             'show_invoice_item_column_discount'
         ]

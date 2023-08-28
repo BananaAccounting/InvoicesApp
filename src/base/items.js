@@ -39,6 +39,7 @@ function itemGet(id, vatExclusive) {
                 product.description = productRow.value('Description');
                 product.mesure_unit = productRow.value('Unit');
                 product.number = productRow.value('RowId');
+                product.item_type = productRow.value('Type')
                 let price = productRow.value('UnitPrice');
                 if (price) {
                     // Set price and quantity only if the price is set
