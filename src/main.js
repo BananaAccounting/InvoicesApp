@@ -158,6 +158,7 @@ var JsAction = class JsAction {
                 var customer_id = table.value(tabPos.rowNr, "ContactsId");
                 invoiceObj.customer_info = contactAddressGet(customer_id);
                 invoiceObj.document_info.locale = contactLocaleGet(customer_id);
+                invoiceObj.payment_info.due_date = dateAdd(invoiceObj.document_info.date, contactPaymentTermInDaysGet(customer_id))
 
                 // Create docChange
                 changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
