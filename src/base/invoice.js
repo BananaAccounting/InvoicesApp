@@ -420,6 +420,8 @@ function invoiceChangedFieldsGetEmpty() {
     changedRowFields["RowId"] = "";
 
     changedRowFields["InvoiceDate"] = "";
+    changedRowFields["InvoiceData"] = "";
+    changedRowFields["Currency"] = "";
     changedRowFields["Description"] = "";
     changedRowFields["ContactsId"] = "";
     changedRowFields["InvoiceAddress"] = "";
