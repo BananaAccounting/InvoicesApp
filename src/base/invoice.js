@@ -414,6 +414,32 @@ function invoiceChangedFieldsGet(invoiceObj, row) {
     return changedRowFields;
 }
 
+function invoiceChangedFieldsGetEmpty() {
+    var changedRowFields = {};
+
+    changedRowFields["RowId"] = "";
+
+    changedRowFields["InvoiceDate"] = "";
+    changedRowFields["InvoiceData"] = "";
+    changedRowFields["Currency"] = "";
+    changedRowFields["Description"] = "";
+    changedRowFields["ContactsId"] = "";
+    changedRowFields["InvoiceAddress"] = "";
+    changedRowFields["InvoiceDiscountAmount"] = ""
+
+    changedRowFields["InvoiceDiscountPercentage"] = "";
+
+    changedRowFields["InvoiceTotalAmount"] = "";
+    changedRowFields["InvoiceTotalVat"] = "";
+    changedRowFields["EmailWork"] = "";
+    changedRowFields["PhoneWork"] = "";
+    changedRowFields["InvoiceDateExpiration"] = ""
+
+    changedRowFields["Notes"] = "";
+
+    return changedRowFields;
+}
+
 function invoiceInfoSummaryGet(invoiceObj, infoObj) {
     if (!invoiceObj || !infoObj)
         return;

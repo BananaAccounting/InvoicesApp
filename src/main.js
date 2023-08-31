@@ -66,7 +66,6 @@ var JsAction = class JsAction {
         var invoiceObj = null;
         var changedRowFields = null;
         var docChange = null;
-
         if (tabPos.tableName === "Invoices" || tabPos.tableName === "Estimates") {
             if (tabPos.columnName === "RowId") {
                 changedRowFields = {};
@@ -290,11 +289,19 @@ var JsAction = class JsAction {
 
                 // Create docChange
                 invoiceObj = JSON.parse(Banana.document.calculateInvoice(JSON.stringify(invoiceObj)));
-                changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
+                changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
                 docChange = new DocumentChange();
-                docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
-                docChange.setDocumentForCurrentRow();
-                return docChange.getDocChange();
+                if (row.value("RowId") === "") {
+                    // Cannot return null because the readOnly field does not reset the VatAmount
+                    changedRowFields = invoiceChangedFieldsGetEmpty();
+                    docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
+                    docChange.setDocumentForCurrentRow();
+                    return docChange.getDocChange();
+                } else {
+                    docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
+                    docChange.setDocumentForCurrentRow();
+                    return docChange.getDocChange();
+                }
 
             } else if (tabPos.columnName === "Currency") {
                 let defaultCurrency = getSettings().new_documents.currency
