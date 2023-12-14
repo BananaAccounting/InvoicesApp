@@ -1504,6 +1504,7 @@ Item {
                     id: invoiceItemsTable
                     model: invoiceItemsModel
                     reuseItems: false
+                    clip: true
 
                     Layout.fillWidth: parent.width
                     Layout.minimumHeight: getTableHeigth()
