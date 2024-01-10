@@ -1499,726 +1499,726 @@ Item {
 
                 }
 
-                TableView {
-                    // Items table
-                    id: invoiceItemsTable
-                    model: invoiceItemsModel
-                    reuseItems: false
-                    clip: true
+                Flickable {
+                    Layout.fillWidth: true
+                    //anchors.right: parent.right
+                    height: 300 // Fixed height for the Flickable
+                    interactive: !scrollView.moving
 
-                    Layout.fillWidth: parent.width
-                    Layout.minimumHeight: getTableHeigth()
+                    //contentWidth: table.width
+                    //contentHeight: table.height
 
-                    rowSpacing: 2
-                    columnSpacing: 5 * Stylesheet.pixelScaleRatio
+                    TableView {
+                        // Items table
+                        id: invoiceItemsTable
+                        model: invoiceItemsModel
+                        anchors.fill: parent
+                        reuseItems: true
+                        clip: true
+                        contentHeight: getTableHeigth()
 
-                    flickableDirection: Flickable.AutoFlickIfNeeded
-                    pointerNavigationEnabled: !invoice.isReadOnly
-                    keyNavigationEnabled: !invoice.isReadOnly
+                        Layout.fillWidth: parent.width
+                        Layout.minimumHeight: getTableHeigth()
 
-                    selectionModel: ItemSelectionModel {}
+                        rowSpacing: 2
+                        columnSpacing: 5 * Stylesheet.pixelScaleRatio
 
-                    property int signalUpdateRowHeights: 1
-                    property int signalUpdateTableHeight: 1
+                        flickableDirection: Flickable.AutoFlickIfNeeded
+                        pointerNavigationEnabled: !invoice.isReadOnly
+                        keyNavigationEnabled: !invoice.isReadOnly
 
-                    Connections {
-                        target: appSettings
-                        function onFieldsVisibilityChanged() {
-                            invoiceItemsTable.forceLayout()
-                        }
-                    }
+                        selectionModel: ItemSelectionModel {}
 
-                    Keys.onPressed: function(event) {
-                        let curItem = null
-                        if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return || event.key === Qt.Key_Tab) {
-                            if (!invoice.isReadOnly) {
-                                curItem = invoiceItemsTable.itemAtCell(invoiceItemsTable.currentColumn, invoiceItemsTable.currentRow)
-                                if (curItem.contentItem) {
-                                    curItem.contentItem.focus = false
-                                }
-                                if (curItem) {
-                                    curItem.focus = false
-                                }
-                                event.accepted = true
-                                if (event.modifiers & Qt.ShiftModifier) {
-                                    invoiceItemsTable.selectPreviousItem()
-                                } else {
-                                    invoiceItemsTable.selectNextItem()
-                                }
-                            } else {
-                                event.accepted = true
-                            }
-                        } else if (event.key === Qt.Key_Backspace) {
-                            if (!invoice.isReadOnly) {
-                                curItem = invoiceItemsTable.itemAtCell(invoiceItemsTable.currentColumn, invoiceItemsTable.currentRow)
-                                if (curItem) {
-                                    if ('text' in curItem) {
-                                        // we are on a textfield or textarea
-                                        curItem.focus = true
-                                        curItem.text = ""
-                                        event.accepted = true
-                                    } else if (curItem.contentItem && ('text' in curItem.contentItem)) {
-                                        // we are on a combobox
-                                        curItem.focus = true
-                                        curItem.contentItem.focus = true
-                                        curItem.contentItem.text = ""
-                                        event.accepted = true
-                                    }
-                                }
-                            } else {
-                                event.accepted = true
-                            }
-                        } else if (/[A-Za-z0-9\-\.,]+/.test(event.text)) {
-                            if (!invoice.isReadOnly) {
-                                curItem = invoiceItemsTable.itemAtCell(invoiceItemsTable.currentColumn, invoiceItemsTable.currentRow)
-                                if (curItem) {
-                                    if ('text' in curItem) {
-                                        // we are on a textfield or textarea
-                                        curItem.focus = true
-                                        curItem.text = event.text
-                                        curItem.cursorPosition = 1
-                                        event.accepted = true
-                                    } else if (curItem.contentItem && ('text' in curItem.contentItem)) {
-                                        // we are on a combobox
-                                        curItem.focus = true
-                                        curItem.contentItem.focus = true
-                                        curItem.contentItem.text = event.text
-                                        curItem.contentItem.cursorPosition = 1
-                                        event.accepted = true
-                                    }
-                                }
-                            } else {
-                                event.accepted = true
-                            }
-                        }
-                    }
+                        property int signalUpdateRowHeights: 1
+                        property int signalUpdateTableHeight: 1
 
-                    columnWidthProvider: function(column) {
-                        let header = invoiceItemsModel.headers[column]
-                        if (header) {
-                            let settingIdColumnVisible = 'show_' + header.id
-                            let settingIdColumnWidth = 'width_' + header.id
-                            let viewAppearance = appSettings.data.interface.invoice.views[currentView].appearance
-                            if (settingIdColumnVisible in viewAppearance) {
-                                let visible = viewAppearance[settingIdColumnVisible]
-                                if (!visible) {
-                                    return 0
-                                }
-                            }
-                            if (settingIdColumnWidth in viewAppearance) {
-                                let width = viewAppearance[settingIdColumnWidth]
-                                if (width > 10) {
-                                    return width * Stylesheet.pixelScaleRatio
-                                }
-                            } else {
-                                //TODO: console.log("appearance flag '" + columnId + "' in view '" + currentView + "' not found")
-                            }
-                            return header.width * Stylesheet.pixelScaleRatio
-                        }
-                    }
-
-                    delegate: DelegateChooser {
-
-                        DelegateChoice {
-                            column: 0
-                            StyledTextField {
-                                required property bool current
-                                selected: current
-
-                                readOnly: true
-                                borderless: true
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: model.display
-                                verticalAlignment: Qt.AlignVCenter
+                        Connections {
+                            target: appSettings
+                            function onFieldsVisibilityChanged() {
+                                invoiceItemsTable.forceLayout()
                             }
                         }
 
-
-                        DelegateChoice {
-                            column: 1
-                            StyledKeyDescrComboBox {
-                                popupMinWidth: 300 * Stylesheet.pixelScaleRatio
-                                editable: true
-                                enabled: !invoice.isReadOnly
-                                model: itemsModel
-                                textRole: "key"
-                                filterEnabled: true
-
-                                currentIndex: -1
-                                displayText: {
-                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
-                                    undoKey = display
-                                    display
-                                }
-
-                                onCurrentKeySet: function(key, isExistingKey) {
-                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
-                                    if (invoiceItemsTable.isNewRow(row)) {
-                                        invoiceItemsTable.appendNewRow()
+                        Keys.onPressed: function(event) {
+                            let curItem = null
+                            if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return || event.key === Qt.Key_Tab) {
+                                if (!invoice.isReadOnly) {
+                                    curItem = invoiceItemsTable.itemAtCell(invoiceItemsTable.currentColumn, invoiceItemsTable.currentRow)
+                                    if (curItem.contentItem) {
+                                        curItem.contentItem.focus = false
                                     }
-
-                                    if (isExistingKey) {
-                                        var itemId = key
-                                        var vatExclusive = !isVatModeVatNone && !isVatModeVatInclusive
-                                        let item = Items.itemGet(itemId, vatExclusive)
-                                        if (item) {
-                                            var vatCode = VatCodes.vatCodeGet(item.unit_price.vat_code)
-                                            if (vatCode) {
-                                                item.unit_price.vat_rate = vatCode.rate
-                                            } else {
-                                                // Fill with the default vat amount
-                                                let hasAmount = item.unit_price.amount_vat_inclusive ||
-                                                    item.unit_price.amount_vat_exclusive;
-                                                if (hasAmount && !isVatModeVatNone && !item.unit_price.vat_rate) {
-                                                    if (appSettings.data.new_documents.default_vat_code) {
-                                                        item.unit_price.vat_code = appSettings.data.new_documents.default_vat_code
-                                                        var defaultVatCode = VatCodes.vatCodeGet(item.unit_price.vat_code)
-                                                        if (defaultVatCode) {
-                                                            item.unit_price.vat_rate = defaultVatCode.rate
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else {
-                                            item = emptyInvoiceItem()
-                                        }
-                                        invoice.json.items[row] = item
-                                        setDocumentModified()
-                                        calculateInvoice()
-                                    } else {
-                                        invoice.json.items[row].number = key
-                                        setDocumentModified()
+                                    if (curItem) {
+                                        curItem.focus = false
                                     }
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(row, column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
-                                }
-                            }
-                        }
-
-                        DelegateChoice {
-                            column: 2
-                            StyledTextField {
-                                required property bool current
-                                selected: current
-
-                                property int updateText: 1  // Binding for updating the text
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: updateText && model.display ? Banana.Converter.toLocaleDateFormat( model.display) : ""
-                                readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_date")
-
-                                onEditingFinished: {
-                                    if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
-                                        }
-
-                                        let date = text
-                                        if (date) {
-                                            date = Banana.Converter.toInternalDateFormat(date)
-                                            // Check date
-                                            let localDate = Banana.Converter.toLocaleDateFormat(date)
-                                            if (!localDate || localDate.length === 0) {
-                                                errorMessageDialog.text = qsTr("Invalid date: " + text)
-                                                errorMessageDialog.visible = true
-                                                updateText++
-                                                modified = false
-                                                focus = false
-                                                return
-                                            }
-                                        }
-                                        invoice.json.items[model.row].date = date
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', date)
-
-                                        setDocumentModified()
-                                        modified = false
-                                    }
-                                    focus = false // call at the end, if not with the tab key the edited text is lost
-                                }
-
-                                onPressed: {
-                                    if (!appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_date")) {
-                                        dlgLicense.visible = true
-                                    }
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
-                                }
-                            }
-                        }
-
-                        DelegateChoice {
-                            column: 3
-                            StyledTextArea {
-                                required property bool current
-                                selected: current
-
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: model.display
-                                readOnly: invoice.isReadOnly
-
-                                Keys.onTabPressed: function (event) {
-                                    // Steal tab key
-                                    if (focus) {
-                                        focus = false
-                                    }
+                                    event.accepted = true
                                     if (event.modifiers & Qt.ShiftModifier) {
                                         invoiceItemsTable.selectPreviousItem()
                                     } else {
                                         invoiceItemsTable.selectNextItem()
                                     }
-                                    event.accepted = true;
+                                } else {
+                                    event.accepted = true
                                 }
-
-                                onEditingFinished: {
-                                    if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
+                            } else if (event.key === Qt.Key_Backspace) {
+                                if (!invoice.isReadOnly) {
+                                    curItem = invoiceItemsTable.itemAtCell(invoiceItemsTable.currentColumn, invoiceItemsTable.currentRow)
+                                    if (curItem) {
+                                        if ('text' in curItem) {
+                                            // we are on a textfield or textarea
+                                            curItem.focus = true
+                                            curItem.text = ""
+                                            event.accepted = true
+                                        } else if (curItem.contentItem && ('text' in curItem.contentItem)) {
+                                            // we are on a combobox
+                                            curItem.focus = true
+                                            curItem.contentItem.focus = true
+                                            curItem.contentItem.text = ""
+                                            event.accepted = true
                                         }
-
-                                        invoice.json.items[model.row].description = text
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', text)
-
-                                        setDocumentModified()
-                                        modified = false
                                     }
-                                    focus = false // call at the end, if not with the tab key the edited text is lost
+                                } else {
+                                    event.accepted = true
                                 }
-
-                                // In case the lines count change we emit a signal to update the row heigth
-                                property int textLinesCount: 1
-
-                                onTextChanged: {
-                                    let newLinesCount = text.split('\n').length
-                                    if (newLinesCount !== textLinesCount) {
-                                        textLinesCount = newLinesCount
-                                        // Save text to let calculate the right row height
-                                        if (model.row >= 0 && model.row < invoice.json.items.length) {
-                                            invoice.json.items[model.row].description = text
+                            } else if (/[A-Za-z0-9\-\.,]+/.test(event.text)) {
+                                if (!invoice.isReadOnly) {
+                                    curItem = invoiceItemsTable.itemAtCell(invoiceItemsTable.currentColumn, invoiceItemsTable.currentRow)
+                                    if (curItem) {
+                                        if ('text' in curItem) {
+                                            // we are on a textfield or textarea
+                                            curItem.focus = true
+                                            curItem.text = event.text
+                                            curItem.cursorPosition = 1
+                                            event.accepted = true
+                                        } else if (curItem.contentItem && ('text' in curItem.contentItem)) {
+                                            // we are on a combobox
+                                            curItem.focus = true
+                                            curItem.contentItem.focus = true
+                                            curItem.contentItem.text = event.text
+                                            curItem.contentItem.cursorPosition = 1
+                                            event.accepted = true
                                         }
-                                        invoiceItemsTable.forceLayout()
-                                        invoiceItemsTable.signalUpdateRowHeights++
                                     }
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
+                                } else {
+                                    event.accepted = true
                                 }
                             }
                         }
 
-                        DelegateChoice {
-                            column: 4
-                            StyledTextField {
-                                required property bool current
-                                selected: current
-
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: model.display ? Banana.Converter.toLocaleNumberFormat(model.display) : ""
-                                readOnly: invoice.isReadOnly
-
-                                onEditingFinished: {
-                                    if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
-                                        }
-                                        let quantity = text ? Banana.Converter.toInternalNumberFormat(text) : ""
-                                        invoice.json.items[model.row].quantity = quantity
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', text)
-                                        setDocumentModified()
-                                        calculateInvoice()
-                                        modified = false
-                                    }
-                                    focus = false // call at the end, if not with the tab key the edited text is lost
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                        columnWidthProvider: function(column) {
+                            let header = invoiceItemsModel.headers[column]
+                            if (header) {
+                                let settingIdColumnVisible = 'show_' + header.id
+                                let settingIdColumnWidth = 'width_' + header.id
+                                let viewAppearance = appSettings.data.interface.invoice.views[currentView].appearance
+                                if (settingIdColumnVisible in viewAppearance) {
+                                    let visible = viewAppearance[settingIdColumnVisible]
+                                    if (!visible) {
+                                        return 0
                                     }
                                 }
+                                if (settingIdColumnWidth in viewAppearance) {
+                                    let width = viewAppearance[settingIdColumnWidth]
+                                    if (width > 10) {
+                                        return width * Stylesheet.pixelScaleRatio
+                                    }
+                                } else {
+                                    //TODO: console.log("appearance flag '" + columnId + "' in view '" + currentView + "' not found")
+                                }
+                                return header.width * Stylesheet.pixelScaleRatio
                             }
                         }
 
-                        DelegateChoice {
-                            column: 5
-                            StyledTextField {
-                                required property bool current
-                                selected: current
+                        delegate: DelegateChooser {
 
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: model.display
-                                readOnly: invoice.isReadOnly
+                            DelegateChoice {
+                                column: 0
+                                StyledTextField {
+                                    required property bool current
+                                    selected: current
 
-                                onEditingFinished: {
-                                    if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
-                                        }
-
-                                        invoice.json.items[model.row].mesure_unit = text
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', text)
-
-                                        setDocumentModified()
-                                        modified = false
-                                    }
-                                    focus = false // call at the end, if not with the tab key the edited text is lost
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
+                                    readOnly: true
+                                    borderless: true
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: model.display
+                                    verticalAlignment: Qt.AlignVCenter
                                 }
                             }
-                        }
 
-                        DelegateChoice {
-                            column: 6
-                            StyledTextField {
-                                required property bool current
-                                selected: current
 
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: toLocaleItemNumberFormat(model.display)
-                                readOnly: invoice.isReadOnly
+                            DelegateChoice {
+                                column: 1
+                                StyledKeyDescrComboBox {
+                                    popupMinWidth: 300 * Stylesheet.pixelScaleRatio
+                                    editable: true
+                                    enabled: !invoice.isReadOnly
+                                    model: itemsModel
+                                    textRole: "key"
+                                    filterEnabled: true
 
-                                onEditingFinished: {
-                                    if (modified) {
+                                    currentIndex: -1
+                                    displayText: {
+                                        // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
+                                        undoKey = display
+                                        display
+                                    }
+
+                                    onCurrentKeySet: function(key, isExistingKey) {
+                                        // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                         if (invoiceItemsTable.isNewRow(row)) {
                                             invoiceItemsTable.appendNewRow()
                                         }
 
-                                        let item = invoice.json.items[row];
-                                        let internalAmountFormat = text ? toInternalItemNumberFormat(text) : ""
-                                        if (isVatModeVatInclusive) {
-                                            item.unit_price.amount_vat_inclusive = internalAmountFormat
-                                            item.unit_price.amount_vat_exclusive = null
-                                        } else {
-                                            item.unit_price.amount_vat_inclusive = null
-                                            item.unit_price.amount_vat_exclusive = internalAmountFormat
-                                        }
-                                        if (internalAmountFormat && !invoice.json.items[model.row].quantity) {
-                                            // Set quantity if a price is set
-                                            invoice.json.items[model.row].quantity = "1"
-                                            // Fill quantity if a price is set
-                                            item.quantity = "1"
-                                        }
-                                        if (internalAmountFormat && !isVatModeVatNone && !item.unit_price.vat_rate) {
-                                            // Set default vat code
-                                            if (appSettings.data.new_documents.default_vat_code) {
-                                                item.unit_price.vat_code = appSettings.data.new_documents.default_vat_code
+                                        if (isExistingKey) {
+                                            var itemId = key
+                                            var vatExclusive = !isVatModeVatNone && !isVatModeVatInclusive
+                                            let item = Items.itemGet(itemId, vatExclusive)
+                                            if (item) {
                                                 var vatCode = VatCodes.vatCodeGet(item.unit_price.vat_code)
                                                 if (vatCode) {
                                                     item.unit_price.vat_rate = vatCode.rate
+                                                } else {
+                                                    // Fill with the default vat amount
+                                                    let hasAmount = item.unit_price.amount_vat_inclusive ||
+                                                        item.unit_price.amount_vat_exclusive;
+                                                    if (hasAmount && !isVatModeVatNone && !item.unit_price.vat_rate) {
+                                                        if (appSettings.data.new_documents.default_vat_code) {
+                                                            item.unit_price.vat_code = appSettings.data.new_documents.default_vat_code
+                                                            var defaultVatCode = VatCodes.vatCodeGet(item.unit_price.vat_code)
+                                                            if (defaultVatCode) {
+                                                                item.unit_price.vat_rate = defaultVatCode.rate
+                                                            }
+                                                        }
+                                                    }
                                                 }
+                                            } else {
+                                                item = emptyInvoiceItem()
                                             }
+                                            invoice.json.items[row] = item
+                                            setDocumentModified()
+                                            calculateInvoice()
+                                        } else {
+                                            invoice.json.items[row].number = key
+                                            setDocumentModified()
                                         }
-
-                                        setDocumentModified()
-                                        calculateInvoice()
-                                        modified = false
                                     }
 
-                                    focus = false // call at the end, if not with the tab key the edited text is lost
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(row, column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        DelegateChoice {
-                            column: 7
-                            StyledTextField {
-                                required property bool current
-                                selected: current
+                            DelegateChoice {
+                                column: 2
+                                StyledTextField {
+                                    required property bool current
+                                    selected: current
 
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: toLocaleItemDiscountFormat(model.display)
-                                placeholderText: hovered ? qsTr("30% or 30.00") : ""
-                                readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_discount")
-                                onEditingFinished: {
-                                    if (modified) {
+                                    property int updateText: 1  // Binding for updating the text
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: updateText && model.display ? Banana.Converter.toLocaleDateFormat( model.display) : ""
+                                    readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_date")
+
+                                    onEditingFinished: {
+                                        if (modified) {
+                                            if (invoiceItemsTable.isNewRow(row)) {
+                                                invoiceItemsTable.appendNewRow()
+                                            }
+
+                                            let date = text
+                                            if (date) {
+                                                date = Banana.Converter.toInternalDateFormat(date)
+                                                // Check date
+                                                let localDate = Banana.Converter.toLocaleDateFormat(date)
+                                                if (!localDate || localDate.length === 0) {
+                                                    errorMessageDialog.text = qsTr("Invalid date: " + text)
+                                                    errorMessageDialog.visible = true
+                                                    updateText++
+                                                    modified = false
+                                                    focus = false
+                                                    return
+                                                }
+                                            }
+                                            invoice.json.items[model.row].date = date
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsModel.setData(index, 'display', date)
+
+                                            setDocumentModified()
+                                            modified = false
+                                        }
+                                        focus = false // call at the end, if not with the tab key the edited text is lost
+                                    }
+
+                                    onPressed: {
+                                        if (!appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_date")) {
+                                            dlgLicense.visible = true
+                                        }
+                                    }
+
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
+                                    }
+                                }
+                            }
+
+                            DelegateChoice {
+                                column: 3
+                                StyledTextArea {
+                                    required property bool current
+                                    selected: current
+
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: model.display
+                                    readOnly: invoice.isReadOnly
+
+                                    Keys.onTabPressed: function (event) {
+                                        // Steal tab key
+                                        if (focus) {
+                                            focus = false
+                                        }
+                                        if (event.modifiers & Qt.ShiftModifier) {
+                                            invoiceItemsTable.selectPreviousItem()
+                                        } else {
+                                            invoiceItemsTable.selectNextItem()
+                                        }
+                                        event.accepted = true;
+                                    }
+
+                                    onEditingFinished: {
+                                        if (modified) {
+                                            if (invoiceItemsTable.isNewRow(row)) {
+                                                invoiceItemsTable.appendNewRow()
+                                            }
+
+                                            invoice.json.items[model.row].description = text
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsModel.setData(index, 'display', text)
+
+                                            setDocumentModified()
+                                            modified = false
+                                        }
+                                        focus = false // call at the end, if not with the tab key the edited text is lost
+                                    }
+
+                                    // In case the lines count change we emit a signal to update the row heigth
+                                    property int textLinesCount: 1
+
+                                    onTextChanged: {
+                                        let newLinesCount = text.split('\n').length
+                                        if (newLinesCount !== textLinesCount) {
+                                            textLinesCount = newLinesCount
+                                            // Save text to let calculate the right row height
+                                            if (model.row >= 0 && model.row < invoice.json.items.length) {
+                                                invoice.json.items[model.row].description = text
+                                            }
+                                            invoiceItemsTable.forceLayout()
+                                            invoiceItemsTable.signalUpdateRowHeights++
+                                        }
+                                    }
+
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
+                                    }
+                                }
+                            }
+
+                            DelegateChoice {
+                                column: 4
+                                StyledTextField {
+                                    required property bool current
+                                    selected: current
+
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: model.display ? Banana.Converter.toLocaleNumberFormat(model.display) : ""
+                                    readOnly: invoice.isReadOnly
+
+                                    onEditingFinished: {
+                                        if (modified) {
+                                            if (invoiceItemsTable.isNewRow(row)) {
+                                                invoiceItemsTable.appendNewRow()
+                                            }
+                                            let quantity = text ? Banana.Converter.toInternalNumberFormat(text) : ""
+                                            invoice.json.items[model.row].quantity = quantity
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsModel.setData(index, 'display', text)
+                                            setDocumentModified()
+                                            calculateInvoice()
+                                            modified = false
+                                        }
+                                        focus = false // call at the end, if not with the tab key the edited text is lost
+                                    }
+
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
+                                    }
+                                }
+                            }
+
+                            DelegateChoice {
+                                column: 5
+                                StyledTextField {
+                                    required property bool current
+                                    selected: current
+
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: model.display
+                                    readOnly: invoice.isReadOnly
+
+                                    onEditingFinished: {
+                                        if (modified) {
+                                            if (invoiceItemsTable.isNewRow(row)) {
+                                                invoiceItemsTable.appendNewRow()
+                                            }
+
+                                            invoice.json.items[model.row].mesure_unit = text
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsModel.setData(index, 'display', text)
+
+                                            setDocumentModified()
+                                            modified = false
+                                        }
+                                        focus = false // call at the end, if not with the tab key the edited text is lost
+                                    }
+
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
+                                    }
+                                }
+                            }
+
+                            DelegateChoice {
+                                column: 6
+                                StyledTextField {
+                                    required property bool current
+                                    selected: current
+
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: toLocaleItemNumberFormat(model.display)
+                                    readOnly: invoice.isReadOnly
+
+                                    onEditingFinished: {
+                                        if (modified) {
+                                            if (invoiceItemsTable.isNewRow(row)) {
+                                                invoiceItemsTable.appendNewRow()
+                                            }
+
+                                            let item = invoice.json.items[row];
+                                            let internalAmountFormat = text ? toInternalItemNumberFormat(text) : ""
+                                            if (isVatModeVatInclusive) {
+                                                item.unit_price.amount_vat_inclusive = internalAmountFormat
+                                                item.unit_price.amount_vat_exclusive = null
+                                            } else {
+                                                item.unit_price.amount_vat_inclusive = null
+                                                item.unit_price.amount_vat_exclusive = internalAmountFormat
+                                            }
+                                            if (internalAmountFormat && !invoice.json.items[model.row].quantity) {
+                                                // Set quantity if a price is set
+                                                invoice.json.items[model.row].quantity = "1"
+                                                // Fill quantity if a price is set
+                                                item.quantity = "1"
+                                            }
+                                            if (internalAmountFormat && !isVatModeVatNone && !item.unit_price.vat_rate) {
+                                                // Set default vat code
+                                                if (appSettings.data.new_documents.default_vat_code) {
+                                                    item.unit_price.vat_code = appSettings.data.new_documents.default_vat_code
+                                                    var vatCode = VatCodes.vatCodeGet(item.unit_price.vat_code)
+                                                    if (vatCode) {
+                                                        item.unit_price.vat_rate = vatCode.rate
+                                                    }
+                                                }
+                                            }
+
+                                            setDocumentModified()
+                                            calculateInvoice()
+                                            modified = false
+                                        }
+
+                                        focus = false // call at the end, if not with the tab key the edited text is lost
+                                    }
+
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
+                                    }
+                                }
+                            }
+
+                            DelegateChoice {
+                                column: 7
+                                StyledTextField {
+                                    required property bool current
+                                    selected: current
+
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: toLocaleItemDiscountFormat(model.display)
+                                    placeholderText: hovered ? qsTr("30% or 30.00") : ""
+                                    readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_discount")
+                                    onEditingFinished: {
+                                        if (modified) {
+                                            if (invoiceItemsTable.isNewRow(row)) {
+                                                invoiceItemsTable.appendNewRow()
+                                            }
+
+                                            let discount = parseDiscountFormat(text)
+                                            if (discount.isZero) {
+                                                delete invoice.json.items[model.row].discount
+                                            } else if (discount.isPercentage) {
+                                                invoice.json.items[model.row].discount = {
+                                                    'percent' : discount.value
+                                                }
+                                            } else {
+                                                invoice.json.items[model.row].discount = {
+                                                    'amount' : discount.value
+                                                }
+                                            }
+                                            setDocumentModified()
+                                            calculateInvoice()
+                                            modified = false
+                                        }
+
+                                        focus = false // call at the end, if not with the tab key the edited text is lost
+                                    }
+                                    onPressed: {
+                                        if (!appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_discount")) {
+                                            dlgLicense.visible = true
+                                        }
+                                    }
+                                }
+                            }
+
+                            DelegateChoice {
+                                column: 8
+                                StyledTextField {
+                                    required property bool current
+                                    selected: current
+
+                                    readOnly: true
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: toLocaleItemTotalFormat(model.display, model.row)
+
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
+                                    }
+                                }
+                            }
+
+                            DelegateChoice {
+                                column: 9
+                                StyledKeyDescrComboBox {
+                                    id: invoice_item_vat
+                                    popupMinWidth: 300  * Stylesheet.pixelScaleRatio
+                                    popupAlign: Qt.AlignRight
+
+                                    currentIndex: getCurrentVatCodeIndex()
+                                    displayText: getDisplayText()
+
+                                    model: taxRatesModel
+                                    textRole: "key"
+                                    editable: true // set to true to make tab navitation working
+                                    enabled: !invoice.isReadOnly
+
+                                    onCurrentKeySet: function(key, isExistingKey) {
+                                        // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                         if (invoiceItemsTable.isNewRow(row)) {
                                             invoiceItemsTable.appendNewRow()
                                         }
 
-                                        let discount = parseDiscountFormat(text)
-                                        if (discount.isZero) {
-                                            delete invoice.json.items[model.row].discount
-                                        } else if (discount.isPercentage) {
-                                            invoice.json.items[model.row].discount = {
-                                                'percent' : discount.value
-                                            }
-                                        } else {
-                                            invoice.json.items[model.row].discount = {
-                                                'amount' : discount.value
-                                            }
+                                        let vatItem = invoice_item_vat.getCurrentItem()
+                                        if (vatItem) {
+                                            invoice.json.items[row].unit_price.vat_code = vatItem.key
+                                            invoice.json.items[row].unit_price.vat_rate = vatItem.rate
+                                            setDocumentModified()
+                                            calculateInvoice()
                                         }
-                                        setDocumentModified()
-                                        calculateInvoice()
-                                        modified = false
+
                                     }
 
-                                    focus = false // call at the end, if not with the tab key the edited text is lost
-                                }
-                                onPressed: {
-                                    if (!appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_discount")) {
-                                        dlgLicense.visible = true
-                                    }
-                                }
-                            }
-                        }
-
-                        DelegateChoice {
-                            column: 8
-                            StyledTextField {
-                                required property bool current
-                                selected: current
-
-                                readOnly: true
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: toLocaleItemTotalFormat(model.display, model.row)
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
-                                }
-                            }
-                        }
-
-                        DelegateChoice {
-                            column: 9
-                            StyledKeyDescrComboBox {
-                                id: invoice_item_vat
-                                popupMinWidth: 300  * Stylesheet.pixelScaleRatio
-                                popupAlign: Qt.AlignRight
-
-                                currentIndex: getCurrentVatCodeIndex()
-                                displayText: getDisplayText()
-
-                                model: taxRatesModel
-                                textRole: "key"
-                                editable: true // set to true to make tab navitation working
-                                enabled: !invoice.isReadOnly
-
-                                onCurrentKeySet: function(key, isExistingKey) {
-                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
-                                    if (invoiceItemsTable.isNewRow(row)) {
-                                        invoiceItemsTable.appendNewRow()
-                                    }
-
-                                    let vatItem = invoice_item_vat.getCurrentItem()
-                                    if (vatItem) {
-                                        invoice.json.items[row].unit_price.vat_code = vatItem.key
-                                        invoice.json.items[row].unit_price.vat_rate = vatItem.rate
-                                        setDocumentModified()
-                                        calculateInvoice()
-                                    }
-
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(row, column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
-                                }
-
-                                function getDisplayText() {
-                                    if (display) {
-                                        return display
-                                    } else if (row >= 0 && invoice.json && row < invoice.json.items.length) {
-                                        // If the code is not set, show the rate
-                                        if (invoice.json.items[row].unit_price.vat_rate) {
-                                            return invoice.json.items[row].unit_price.vat_rate
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(row, column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
                                         }
                                     }
-                                    return "";
-                                }
 
-                                function updateInvoiceItem() {
-                                    if (row >= 0 && row < invoice.json.items.length) {
-                                        var vatRate = getCurrentVatCode()
-                                        invoice.json.items[row].unit_price.vat_rate = vatRate.rate
-                                        if (vatRate.code)
-                                            invoice.json.items[row].unit_price.vat_code = vatRate.code
-                                        else
-                                            delete invoice.json.items[row].unit_price.vat_code
-                                        setDocumentModified()
-                                        calculateInvoice()
+                                    function getDisplayText() {
+                                        if (display) {
+                                            return display
+                                        } else if (row >= 0 && invoice.json && row < invoice.json.items.length) {
+                                            // If the code is not set, show the rate
+                                            if (invoice.json.items[row].unit_price.vat_rate) {
+                                                return invoice.json.items[row].unit_price.vat_rate
+                                            }
+                                        }
+                                        return "";
                                     }
-                                }
 
-                                function getCurrentVatCodeIndex() {
-                                    if (row >= 0 && row < invoice.json && invoice.json.items.length) {
-                                        if (invoice.json.items[row].unit_price.vat_code) {
-                                            var itemVatCode = invoice.json.items[row].unit_price.vat_code
-                                            for (var i = 0; i < model.count; i++) {
-                                                if (model.get(i).code === itemVatCode) {
-                                                    return i
+                                    function updateInvoiceItem() {
+                                        if (row >= 0 && row < invoice.json.items.length) {
+                                            var vatRate = getCurrentVatCode()
+                                            invoice.json.items[row].unit_price.vat_rate = vatRate.rate
+                                            if (vatRate.code)
+                                                invoice.json.items[row].unit_price.vat_code = vatRate.code
+                                            else
+                                                delete invoice.json.items[row].unit_price.vat_code
+                                            setDocumentModified()
+                                            calculateInvoice()
+                                        }
+                                    }
+
+                                    function getCurrentVatCodeIndex() {
+                                        if (row >= 0 && row < invoice.json && invoice.json.items.length) {
+                                            if (invoice.json.items[row].unit_price.vat_code) {
+                                                var itemVatCode = invoice.json.items[row].unit_price.vat_code
+                                                for (var i = 0; i < model.count; i++) {
+                                                    if (model.get(i).code === itemVatCode) {
+                                                        return i
+                                                    }
                                                 }
                                             }
+                                            invoice_item_vat.editText = invoice.json.items[row].unit_price.vat_rate
                                         }
-                                        invoice_item_vat.editText = invoice.json.items[row].unit_price.vat_rate
-                                    }
-                                    return -1
-                                }
-
-                                function getCurrentVatCode() {
-                                    var vatRate = ""
-                                    if (currentIndex > 0) {
-                                        var currentVatRate = model.get(currentIndex)
-                                        vatRate = {
-                                            rate: currentVatRate.rate,
-                                            code: currentVatRate.code,
-                                        }
-
-                                    } else if (currentIndex === 0) {
-                                        vatRate = {
-                                            rate: ""
-                                        }
-
-                                    } else if (currentIndex < 0) {
-                                        var vatCode = VatCodes.vatCodeGet(editText)
-                                        vatRate = {
-                                            rate: editText,
-                                        }
-
-                                    } else {
-                                        vatRate = {
-                                            rate: ""
-                                        }
+                                        return -1
                                     }
 
-                                    if (Banana.SDecimal.isZero(vatRate.rate))
-                                        vatRate.rate = ""
+                                    function getCurrentVatCode() {
+                                        var vatRate = ""
+                                        if (currentIndex > 0) {
+                                            var currentVatRate = model.get(currentIndex)
+                                            vatRate = {
+                                                rate: currentVatRate.rate,
+                                                code: currentVatRate.code,
+                                            }
 
-                                    return vatRate
-                                }
-                            }
-                        }
+                                        } else if (currentIndex === 0) {
+                                            vatRate = {
+                                                rate: ""
+                                            }
 
-                        DelegateChoice {
-                            StyledTextField {
-                                required property bool selected
-                                required property bool current
+                                        } else if (currentIndex < 0) {
+                                            var vatCode = VatCodes.vatCodeGet(editText)
+                                            vatRate = {
+                                                rate: editText,
+                                            }
 
-                                horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: model.display
-                                readOnly: invoice.isReadOnly
+                                        } else {
+                                            vatRate = {
+                                                rate: ""
+                                            }
+                                        }
 
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        if (Banana.SDecimal.isZero(vatRate.rate))
+                                            vatRate.rate = ""
+
+                                        return vatRate
                                     }
                                 }
                             }
-                        }
-                    }
 
-                    onWidthChanged: {
-                        invoiceItemsTable.updateColDescrWidth()
-                    }
+                            DelegateChoice {
+                                StyledTextField {
+                                    required property bool selected
+                                    required property bool current
 
+                                    horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    text: model.display
+                                    readOnly: invoice.isReadOnly
 
-                    function appendNewRow() {
-                        // Add new item in invoice, will be set next
-                        let newItem = emptyInvoiceItem()
-                        invoice.json.items.push(newItem)
-                        // Set row nr in model
-                        let index = invoiceItemsModel.index(invoiceItemsModel.rowCount - 1, 0)
-                        invoiceItemsModel.setData(index, 'display', invoiceItemsModel.rowCount)
-                        // Add new row in model
-                        let newRowItem = invoiceItemToModelItem(newItem, '*');
-                        invoiceItemsModel.appendRow(newRowItem)
-                        signalUpdateTableHeight++
-                    }
-
-                    function getTableHeigth() {
-                        if (!invoice.json || !invoice.json.items)
-                            return 400 * Stylesheet.pixelScaleRatio
-
-                        // Just for binding
-                        if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged)
-                            return 400 * Stylesheet.pixelScaleRatio
-
-                        let maxVisibleItems = getMaxVisibleItems()
-                        if (maxVisibleItems > 0) {
-                            return (30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio
-
-                        } else {
-                            // Compute current height
-                            let height = 34;
-                            for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
-                                let linesCount = invoice.json.items[rowNr].description.split('\n').length
-                                height += 30 + 16 * (linesCount - 1)
-                            }
-                            return height * Stylesheet.pixelScaleRatio
-                        }
-                    }
-
-                    function getMaxVisibleItems() {
-                        let maxVisibleItems = 0
-                        if (currentView === appSettings.view_id_full) {
-                            return 0 // In full view all items are visible
-                        }
-                        if (appSettings.data.interface.invoice.views[currentView] &&
-                                ('invoce_max_visible_items_without_scrolling' in appSettings.data.interface.invoice.views[currentView].appearance)) {
-                            maxVisibleItems = appSettings.data.interface.invoice.views[currentView].appearance['invoce_max_visible_items_without_scrolling'];
-                        }
-                        return maxVisibleItems
-                    }
-
-                    function isNewRow(row) {
-                        if (row >= invoice.json.items.length) {
-                            return true
-                        }
-                        return false
-                    }
-
-                    function selectNextItem() {
-                        let nextItem = null
-                        let nextRow = invoiceItemsTable.currentRow
-                        let nextColumn = 0
-                        // Find next item on the same row
-                        for (nextColumn = invoiceItemsTable.currentColumn + 1; nextColumn <  invoiceItemsTable.columns; ++nextColumn) {
-                            if (invoiceItemsTable.columnWidth(nextColumn) > 0) {
-                                nextItem  = invoiceItemsTable.itemAtCell(nextColumn, nextRow)
-                                if (nextItem) {
-                                    break;
+                                    onFocusChanged: {
+                                        if (focus) {
+                                            let index = invoiceItemsModel.index(model.row, model.column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                        }
+                                    }
                                 }
                             }
                         }
-                        // Find next item on the next row
-                        if (!nextItem) {
-                            nextRow++
-                            for (nextColumn = 0; nextColumn <  invoiceItemsTable.columns; ++nextColumn) {
+
+                        onWidthChanged: {
+                            invoiceItemsTable.updateColDescrWidth()
+                        }
+
+
+                        function appendNewRow() {
+                            // Add new item in invoice, will be set next
+                            let newItem = emptyInvoiceItem()
+                            invoice.json.items.push(newItem)
+                            // Set row nr in model
+                            let index = invoiceItemsModel.index(invoiceItemsModel.rowCount - 1, 0)
+                            invoiceItemsModel.setData(index, 'display', invoiceItemsModel.rowCount)
+                            // Add new row in model
+                            let newRowItem = invoiceItemToModelItem(newItem, '*');
+                            invoiceItemsModel.appendRow(newRowItem)
+                            signalUpdateTableHeight++
+                        }
+
+                        function getTableHeigth() {
+                            if (!invoice.json || !invoice.json.items)
+                                return 400 * Stylesheet.pixelScaleRatio
+
+                            // Just for binding
+                            if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged)
+                                return 400 * Stylesheet.pixelScaleRatio
+
+                            let maxVisibleItems = getMaxVisibleItems()
+                            if (maxVisibleItems > 0) {
+                                return (30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio
+
+                            } else {
+                                // Compute current height
+                                let height = 34;
+                                for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
+                                    let linesCount = invoice.json.items[rowNr].description.split('\n').length
+                                    height += 30 + 16 * (linesCount - 1)
+                                }
+                                return height * Stylesheet.pixelScaleRatio
+                            }
+                        }
+
+                        function getMaxVisibleItems() {
+                            let maxVisibleItems = 0
+                            if (currentView === appSettings.view_id_full) {
+                                return 0 // In full view all items are visible
+                            }
+                            if (appSettings.data.interface.invoice.views[currentView] &&
+                                    ('invoce_max_visible_items_without_scrolling' in appSettings.data.interface.invoice.views[currentView].appearance)) {
+                                maxVisibleItems = appSettings.data.interface.invoice.views[currentView].appearance['invoce_max_visible_items_without_scrolling'];
+                            }
+                            return maxVisibleItems
+                        }
+
+                        function isNewRow(row) {
+                            if (row >= invoice.json.items.length) {
+                                return true
+                            }
+                            return false
+                        }
+
+                        function selectNextItem() {
+                            let nextItem = null
+                            let nextRow = invoiceItemsTable.currentRow
+                            let nextColumn = 0
+                            // Find next item on the same row
+                            for (nextColumn = invoiceItemsTable.currentColumn + 1; nextColumn <  invoiceItemsTable.columns; ++nextColumn) {
                                 if (invoiceItemsTable.columnWidth(nextColumn) > 0) {
                                     nextItem  = invoiceItemsTable.itemAtCell(nextColumn, nextRow)
                                     if (nextItem) {
@@ -2226,32 +2226,32 @@ Item {
                                     }
                                 }
                             }
-                        }
-                        if (nextItem) {
-                            let index = invoiceItemsModel.index(nextRow, nextColumn)
-                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                            return nextItem
-                        }
-                        return null
-                    }
-
-                    function selectPreviousItem() {
-                        let prevItem = null
-                        let prevRow = invoiceItemsTable.currentRow
-                        let prevColumn = 0
-                        // Find previous item on the same row
-                        for (prevColumn = invoiceItemsTable.currentColumn - 1; prevColumn >= 0; --prevColumn) {
-                            if (invoiceItemsTable.columnWidth(prevColumn) > 0) {
-                                prevItem  = invoiceItemsTable.itemAtCell(prevColumn, prevRow)
-                                if (prevItem) {
-                                    break;
+                            // Find next item on the next row
+                            if (!nextItem) {
+                                nextRow++
+                                for (nextColumn = 0; nextColumn <  invoiceItemsTable.columns; ++nextColumn) {
+                                    if (invoiceItemsTable.columnWidth(nextColumn) > 0) {
+                                        nextItem  = invoiceItemsTable.itemAtCell(nextColumn, nextRow)
+                                        if (nextItem) {
+                                            break;
+                                        }
+                                    }
                                 }
                             }
+                            if (nextItem) {
+                                let index = invoiceItemsModel.index(nextRow, nextColumn)
+                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                return nextItem
+                            }
+                            return null
                         }
-                        // Find previous item on the previous row
-                        if (!prevItem) {
-                            prevRow--
-                            for (prevColumn = invoiceItemsTable.columns - 1; prevColumn >= 0; --prevColumn) {
+
+                        function selectPreviousItem() {
+                            let prevItem = null
+                            let prevRow = invoiceItemsTable.currentRow
+                            let prevColumn = 0
+                            // Find previous item on the same row
+                            for (prevColumn = invoiceItemsTable.currentColumn - 1; prevColumn >= 0; --prevColumn) {
                                 if (invoiceItemsTable.columnWidth(prevColumn) > 0) {
                                     prevItem  = invoiceItemsTable.itemAtCell(prevColumn, prevRow)
                                     if (prevItem) {
@@ -2259,23 +2259,35 @@ Item {
                                     }
                                 }
                             }
+                            // Find previous item on the previous row
+                            if (!prevItem) {
+                                prevRow--
+                                for (prevColumn = invoiceItemsTable.columns - 1; prevColumn >= 0; --prevColumn) {
+                                    if (invoiceItemsTable.columnWidth(prevColumn) > 0) {
+                                        prevItem  = invoiceItemsTable.itemAtCell(prevColumn, prevRow)
+                                        if (prevItem) {
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (prevItem) {
+                                let index = invoiceItemsModel.index(prevRow, prevColumn)
+                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                return prevItem
+                            }
+                            return null
                         }
-                        if (prevItem) {
-                            let index = invoiceItemsModel.index(prevRow, prevColumn)
-                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                            return prevItem
-                        }
-                        return null
-                    }
 
-                    function updateColDescrWidth() {
-                        let colDescriptionIndex = 3
-                        let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
-                        let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
-                        let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
-                        let columnWidthId = 'width_' + headerColDescription.id
-                        saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
-                        invoiceItemsTable.forceLayout()
+                        function updateColDescrWidth() {
+                            let colDescriptionIndex = 3
+                            let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
+                            let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
+                            let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
+                            let columnWidthId = 'width_' + headerColDescription.id
+                            saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
+                            invoiceItemsTable.forceLayout()
+                        }
                     }
                 }
 
