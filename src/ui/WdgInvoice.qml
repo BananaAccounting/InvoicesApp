@@ -362,15 +362,24 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.topMargin: Stylesheet.defaultMargin
-            contentHeight: 4000 //ColumnLayout.currentTotalHeight
+            //contentHeight: 4000 //ColumnLayout.currentTotalHeight
 
             /*StyledLabel{
                 text:consoleLog(contentHeight)
             }*/
 
             ColumnLayout {
+                // everything that is within the Scroll
+                // - TopPar (GridLayout)
+                // - ??? (HorizontalHeaderView)
+                // - ItemsTable (TableView)
+                // - Items button bar (RowLayout)
+                // - Subtotals and Totals (GridLayout)
+                // - Internal notes
+                // Single column that contains all elements
+                // elements are inserted in Layout
                 width: scrollView.availableWidth - scrollView.ScrollBar.vertical.width - Stylesheet.defaultMargin
-                //height: scrollView.availableHeight
+                height: scrollView.availableHeight
 
                 property int currentTotalHeight: calculateTotalHeight(ColumnLayout.height)
 
@@ -385,7 +394,12 @@ Item {
                 GridLayout {  // Top part
                     columns: 3
 
-                    GridLayout { // Invoice info
+                    GridLayout {
+                        // Invoice info
+                        // in 2 columns from Invoice No up to the invoice_end_text
+                        // column 1 is for the Labels
+                        // column 2 is for the data
+
                         id: invoice_info
                         columns: 2
 
@@ -1055,6 +1069,7 @@ Item {
                     }
 
                     ColumnLayout { // Address
+                        // In a single vertical column
                         Layout.alignment: Qt.AlignTop
 
                         StyledLabel{
@@ -1400,10 +1415,12 @@ Item {
                 }
 
                 HorizontalHeaderView {
+                    // don't know what it is
                     id: horizontalHeader
                     model: invoiceItemsModel
                     syncView: invoiceItemsTable
                     reuseItems: false
+                    visible: false
 
                     Layout.fillWidth: parent.width
                     Layout.topMargin: Stylesheet.defaultMargin
@@ -2397,6 +2414,7 @@ Item {
                 }
 
                 GridLayout {
+                    // Subtotals and Totals
                     ColumnLayout {
                         Layout.alignment: Qt.AlignTop
                     }
