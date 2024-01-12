@@ -57,6 +57,7 @@ Item {
         id: scrollView
         clip: true
 
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
         anchors.fill: parent
         anchors.margins: Stylesheet.defaultMargin
         //anchors.topMargin: styleSectionSeparatorHeight / 2
@@ -73,9 +74,10 @@ Item {
                     font.bold: true
                 }
 
-                StyledLabel{
+                StyledLabel {
                     wrapMode: Text.WordWrap
-                    width: scrollView.availableWidth
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 200
                     text: qsTr("Changes to the following settings are applied to the current document and to future documents. If you only wish to change the current document use the Invoice tab.")
                 }
 
@@ -1802,6 +1804,29 @@ Item {
 
                     StyledSettingsSwitch {
                         flagId: "show_invoice_item_column_row_number"
+                        viewId: appSettings.view_id_long
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StyledLabel{
+                        text: addLicenseRequirementText(qsTr("Type"), "show_invoice_item_column_type")
+                        Layout.fillWidth: true
+                    }
+
+                    StyledSettingsSwitch {
+                        flagId: "show_invoice_item_column_type"
+                        viewId: appSettings.view_id_base
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StyledSettingsSwitch {
+                        flagId: "show_invoice_item_column_type"
+                        viewId: appSettings.view_id_short
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StyledSettingsSwitch {
+                        flagId: "show_invoice_item_column_type"
                         viewId: appSettings.view_id_long
                         Layout.alignment: Qt.AlignHCenter
                     }

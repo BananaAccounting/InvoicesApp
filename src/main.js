@@ -14,7 +14,7 @@
 
 // @id = ch.banana.application.invoice.default
 // @api = 1.0
-// @pubdate = 2023-04-05
+// @pubdate = 2023-08-04
 // @publisher = Banana.ch SA
 // @description = Estimates and Invoices extension
 // @doctype = *
@@ -25,15 +25,16 @@
 // @includejs = base/invoices.js
 // @includejs = base/contacts.js
 // @includejs = base/documentchange.js
+// @includejs = base/settings.js
 
 var JsAction = class JsAction {
 
     constructor() {
         this.version = '1.0';
 
-        this.getUiFileName = function() {
+        this.getUiFileName = function () {
             if (Banana.application.qtVersion &&
-                    Banana.compareVersion(Banana.application.qtVersion, "6.0.0") > 0) {
+                Banana.compareVersion(Banana.application.qtVersion, "6.0.0") > 0) {
                 return 'ui/DlgInvoice.qml';
             } else {
                 return 'ui/qt5/DlgInvoice.qml';
@@ -65,7 +66,6 @@ var JsAction = class JsAction {
         var invoiceObj = null;
         var changedRowFields = null;
         var docChange = null;
-
         if (tabPos.tableName === "Invoices" || tabPos.tableName === "Estimates") {
             if (tabPos.columnName === "RowId") {
                 changedRowFields = {};
@@ -76,8 +76,8 @@ var JsAction = class JsAction {
 
                     // If InvoiceData is empty and another invoice with the same number exists
                     // copy the InvoiceData too.
-                    var rowIdIs = function(rowObj,rowNr,table) {
-                       return rowObj.value('RowId') === rowId && rowObj.rowNr !== tabPos.rowNr;
+                    var rowIdIs = function (rowObj, rowNr, table) {
+                        return rowObj.value('RowId') === rowId && rowObj.rowNr !== tabPos.rowNr;
                     }
                     var rows = table.findRows(rowIdIs);
                     if (rows.length > 0) {
@@ -90,7 +90,7 @@ var JsAction = class JsAction {
                             changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
                             changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
                         }
-                        catch(e) {
+                        catch (e) {
                             // Continue
                         }
 
@@ -158,6 +158,8 @@ var JsAction = class JsAction {
                 var customer_id = table.value(tabPos.rowNr, "ContactsId");
                 invoiceObj.customer_info = contactAddressGet(customer_id);
                 invoiceObj.document_info.locale = contactLocaleGet(customer_id);
+                invoiceObj.document_info.currency = contactCurrencyGet(customer_id)
+                invoiceObj.payment_info.due_date = dateAdd(invoiceObj.document_info.date, contactPaymentTermInDaysGet(customer_id))
 
                 // Create docChange
                 changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
@@ -289,10 +291,33 @@ var JsAction = class JsAction {
                 invoiceObj = JSON.parse(Banana.document.calculateInvoice(JSON.stringify(invoiceObj)));
                 changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
                 docChange = new DocumentChange();
+                if (row.value("RowId") === "") {
+                    // Cannot return null because the readOnly field does not reset the VatAmount
+                    changedRowFields = invoiceChangedFieldsGetEmpty();
+                    docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
+                    docChange.setDocumentForCurrentRow();
+                    return docChange.getDocChange();
+                } else {
+                    docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
+                    docChange.setDocumentForCurrentRow();
+                    return docChange.getDocChange();
+                }
+
+            } else if (tabPos.columnName === "Currency") {
+                let defaultCurrency = getSettings().new_documents.currency
+                // Update invoice
+                invoiceObj = invoiceObjGet(tabPos);
+                if (!invoiceObj)
+                    invoiceObj = invoiceCreateNew(tabPos);
+                invoiceObj.document_info.currency = row.value("Currency") ? row.value("Currency") : defaultCurrency;
+
+                // Create docChange
+                changedRowFields = {};
+                changedRowFields["InvoiceData"] = invoiceUpdatedInvoiceDataFieldGet(tabPos, invoiceObj);
+                docChange = new DocumentChange();
                 docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
                 docChange.setDocumentForCurrentRow();
                 return docChange.getDocChange();
-
             }
         }
 
@@ -358,8 +383,9 @@ var JsAction = class JsAction {
 
         } else if (commandId === "print") {
             var invoiceObj = invoiceObjGet(fromTabPos);
-            if (invoiceObj) {
-                invoicePrint(invoiceObj);
+            var tableName = fromTabPos.tableName;
+            if (invoiceObj && tableName) {
+                invoicePrint(invoiceObj, tableName);
             }
             return null;
 
@@ -555,11 +581,11 @@ var JsAction = class JsAction {
 
 }
 
-Date.prototype.addDays=function(d) {
-    return new Date(this.valueOf()+24*60*60*1000*d);
+Date.prototype.addDays = function (d) {
+    return new Date(this.valueOf() + 24 * 60 * 60 * 1000 * d);
 };
 
-Date.prototype.diff=function(d) {
+Date.prototype.diff = function (d) {
     const diffTime = Math.abs(d - this);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
