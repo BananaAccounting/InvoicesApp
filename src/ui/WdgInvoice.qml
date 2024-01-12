@@ -382,10 +382,6 @@ Item {
             Layout.topMargin: Stylesheet.defaultMargin
             contentHeight: columnLayout.height
 
-            StyledLabel{
-                text:consoleLog(columnLayout.height)
-            }
-
             ColumnLayout { // everything that is within the Scroll
                 
                 id: columnLayout
