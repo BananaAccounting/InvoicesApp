@@ -403,12 +403,6 @@ Item {
 
                 spacing: Stylesheet.defaultMargin
 
-                //Connections
-                Connections {
-                    target: invoiceItemsTable
-                    onHeightChanged: columnLayout.updateTotalHeight()
-                }
-
                 GridLayout {  // Top part
                     columns: 3
 
