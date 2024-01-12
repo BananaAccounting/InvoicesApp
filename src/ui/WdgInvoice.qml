@@ -44,11 +44,6 @@ Item {
        invoiceItemsTable.forceLayout()
     }
 
-    function consoleLog(param) {
-        console.log("Log: " + param)
-        return param
-    }
-
     function createInvoiceFromEstimate() {
         if (invoice.isModified) {
             invoice.save()
@@ -1440,7 +1435,6 @@ Item {
                 }
 
                 HorizontalHeaderView {
-                    // don't know what it is
                     id: horizontalHeader
                     model: invoiceItemsModel
                     syncView: invoiceItemsTable
@@ -2349,19 +2343,16 @@ Item {
 
                     function getTableHeigth() {
                         if (!invoice.json || !invoice.json.items){
-                        //console.log(400 * Stylesheet.pixelScaleRatio)
                         return 400 * Stylesheet.pixelScaleRatio
                         }
 
                         // Just for binding
                         if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged) {
-                            //console.log(400 * Stylesheet.pixelScaleRatio)
                             return 400 * Stylesheet.pixelScaleRatio
                         }
 
                         let maxVisibleItems = getMaxVisibleItems()
                         if (maxVisibleItems > 0) {
-                            //console.log((30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio)
                             return (30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio
 
                         } else {
@@ -2371,7 +2362,6 @@ Item {
                                 let linesCount = invoice.json.items[rowNr].description.split('\n').length
                                 height += 30 + 16 * (linesCount - 1)
                             }
-                            //console.log(height * Stylesheet.pixelScaleRatio)
                             return height * Stylesheet.pixelScaleRatio
                         }
                     }
