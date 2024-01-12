@@ -269,7 +269,25 @@ Item {
         id: currenciesModel
     }
 
-    ColumnLayout {
+    ColumnLayout { // Invoice form that include all exept the save, print
+        // Column layout includes this
+        // - View Bar (RowLayout)
+        // - Invoice content (Scroll View)
+        //   - ColumnLayout 
+        //     Single column that contains all elements
+        //     elements are inserted in Layout
+        //      - Top Part (GridLayout)
+        //        All elements before the Items Table
+        //        3 columns 
+        //        - Invoice Info (GridLayout)
+        //        -  ??Space between two elements (Item)
+        //        - Address Column Layout
+        //      - Items Table Headers (HorizontalHeaderView)
+        //      - ItemsTable (TableView)
+        //      - Items button bar (RowLayout)
+        //      - Subtotals and Totals (GridLayout)
+        //      - Internal notes
+
         anchors.fill: parent
         anchors.margins: Stylesheet.defaultMargin
         spacing: Stylesheet.defaultMargin
@@ -376,17 +394,23 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.topMargin: Stylesheet.defaultMargin
+            contentHeight: columnLayout.height
 
-            ColumnLayout {
+            ColumnLayout { // everything that is within the Scroll
+                
+                id: columnLayout
                 width: scrollView.availableWidth - scrollView.ScrollBar.vertical.width - Stylesheet.defaultMargin
-                height: scrollView.availableHeight
 
                 spacing: Stylesheet.defaultMargin
 
                 GridLayout {  // Top part
                     columns: 3
 
-                    GridLayout { // Invoice info
+                    GridLayout {// Invoice info
+                        // in 2 columns from Invoice No up to the invoice_end_text
+                        // column 1 is for the Labels
+                        // column 2 is for the data
+
                         id: invoice_info
                         columns: 2
 
@@ -1051,11 +1075,12 @@ Item {
                         }
                     }
 
-                    Item {
+                    Item { // ??Space between two elements
                         Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
                     }
 
                     ColumnLayout { // Address
+                        // In a single vertical column
                         Layout.alignment: Qt.AlignTop
 
                         StyledLabel{
@@ -1408,6 +1433,7 @@ Item {
                     model: invoiceItemsModel
                     syncView: invoiceItemsTable
                     reuseItems: false
+                    visible: true
 
                     Layout.fillWidth: parent.width
                     Layout.topMargin: Stylesheet.defaultMargin
@@ -1532,7 +1558,8 @@ Item {
                     // Items table
                     id: invoiceItemsTable
                     model: invoiceItemsModel
-                    reuseItems: false
+                    reuseItems: true
+                    clip: true
 
                     Layout.fillWidth: parent.width
                     Layout.minimumHeight: getTableHeigth()
@@ -2309,12 +2336,14 @@ Item {
                     }
 
                     function getTableHeigth() {
-                        if (!invoice.json || !invoice.json.items)
-                            return 400 * Stylesheet.pixelScaleRatio
+                        if (!invoice.json || !invoice.json.items){
+                        return 400 * Stylesheet.pixelScaleRatio
+                        }
 
                         // Just for binding
-                        if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged)
+                        if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged) {
                             return 400 * Stylesheet.pixelScaleRatio
+                        }
 
                         let maxVisibleItems = getMaxVisibleItems()
                         if (maxVisibleItems > 0) {
@@ -2530,7 +2559,7 @@ Item {
 
                 }
 
-                GridLayout {
+                GridLayout {// Subtotals and Totals
                     ColumnLayout {
                         Layout.alignment: Qt.AlignTop
                     }
