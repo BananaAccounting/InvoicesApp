@@ -256,6 +256,24 @@ Item {
     }
 
     ColumnLayout {
+        // Invoice form tha include
+        // - View Bar (RowLayout)
+        // - Invoice content (Scroll View)
+        //   - ColumnLayout 
+        //     Single column that contains all elements
+        //     elements are inserted in Layout
+        //      - Top Part (GridLayout)
+        //        All elements before the Items Table
+        //        3 columns 
+        //        - Invoice Info (GridLayout)
+        //        -  ??Space between two elements (Item)
+        //        - Address Column Layout
+        //      - Items Table Headers (HorizontalHeaderView)
+        //      - ItemsTable (TableView)
+        //      - Items button bar (RowLayout)
+        //      - Subtotals and Totals (GridLayout)
+        //      - Internal notes
+
         anchors.fill: parent
         anchors.margins: Stylesheet.defaultMargin
         spacing: Stylesheet.defaultMargin
@@ -362,24 +380,16 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.topMargin: Stylesheet.defaultMargin
-            //contentHeight: 4000 //ColumnLayout.currentTotalHeight
+            contentHeight: 5000 //ColumnLayout.currentTotalHeight
 
             /*StyledLabel{
                 text:consoleLog(contentHeight)
             }*/
 
-            ColumnLayout {
-                // everything that is within the Scroll
-                // - TopPar (GridLayout)
-                // - ??? (HorizontalHeaderView)
-                // - ItemsTable (TableView)
-                // - Items button bar (RowLayout)
-                // - Subtotals and Totals (GridLayout)
-                // - Internal notes
-                // Single column that contains all elements
-                // elements are inserted in Layout
+            ColumnLayout { // everything that is within the Scroll
+                
                 width: scrollView.availableWidth - scrollView.ScrollBar.vertical.width - Stylesheet.defaultMargin
-                height: scrollView.availableHeight
+                //height: scrollView.availableHeight
 
                 property int currentTotalHeight: calculateTotalHeight(ColumnLayout.height)
 
@@ -394,8 +404,7 @@ Item {
                 GridLayout {  // Top part
                     columns: 3
 
-                    GridLayout {
-                        // Invoice info
+                    GridLayout {// Invoice info
                         // in 2 columns from Invoice No up to the invoice_end_text
                         // column 1 is for the Labels
                         // column 2 is for the data
@@ -1064,7 +1073,7 @@ Item {
                         }
                     }
 
-                    Item {
+                    Item { // ??Space between two elements
                         Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
                     }
 
@@ -1420,7 +1429,7 @@ Item {
                     model: invoiceItemsModel
                     syncView: invoiceItemsTable
                     reuseItems: false
-                    visible: false
+                    visible: true
 
                     Layout.fillWidth: parent.width
                     Layout.topMargin: Stylesheet.defaultMargin
@@ -1542,7 +1551,7 @@ Item {
                     clip: true
 
                     Layout.fillWidth: parent.width
-                    Layout.minimumHeight: getTableHeigth()
+                    Layout.minimumHeight: getTableHeigth() + 50
 
                     rowSpacing: 2
                     columnSpacing: 5 * Stylesheet.pixelScaleRatio
@@ -2413,8 +2422,7 @@ Item {
 
                 }
 
-                GridLayout {
-                    // Subtotals and Totals
+                GridLayout {// Subtotals and Totals
                     ColumnLayout {
                         Layout.alignment: Qt.AlignTop
                     }
