@@ -255,8 +255,8 @@ Item {
         id: currenciesModel
     }
 
-    ColumnLayout {
-        // Invoice form tha include
+    ColumnLayout { // Invoice form that include all exept the save, print
+        // Column layout includes this
         // - View Bar (RowLayout)
         // - Invoice content (Scroll View)
         //   - ColumnLayout 
@@ -380,18 +380,16 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.topMargin: Stylesheet.defaultMargin
-            contentHeight: 5000 //ColumnLayout.currentTotalHeight
+            contentHeight: columnLayout.height
 
-            /*StyledLabel{
-                text:consoleLog(contentHeight)
-            }*/
+            StyledLabel{
+                text:consoleLog(columnLayout.height)
+            }
 
             ColumnLayout { // everything that is within the Scroll
                 
+                id: columnLayout
                 width: scrollView.availableWidth - scrollView.ScrollBar.vertical.width - Stylesheet.defaultMargin
-                //height: scrollView.availableHeight
-
-                property int currentTotalHeight: calculateTotalHeight(ColumnLayout.height)
 
                 spacing: Stylesheet.defaultMargin
 
@@ -1551,7 +1549,7 @@ Item {
                     clip: true
 
                     Layout.fillWidth: parent.width
-                    Layout.minimumHeight: getTableHeigth() + 50
+                    Layout.minimumHeight: getTableHeigth()
 
                     rowSpacing: 2
                     columnSpacing: 5 * Stylesheet.pixelScaleRatio
@@ -1564,8 +1562,6 @@ Item {
 
                     property int signalUpdateRowHeights: 1
                     property int signalUpdateTableHeight: 1
-
-                    signal heightChanged();
 
                     Connections {
                         target: appSettings
@@ -2208,19 +2204,19 @@ Item {
 
                     function getTableHeigth() {
                         if (!invoice.json || !invoice.json.items){
-                        console.log(400 * Stylesheet.pixelScaleRatio) 
+                        //console.log(400 * Stylesheet.pixelScaleRatio)
                         return 400 * Stylesheet.pixelScaleRatio
                         }
 
                         // Just for binding
                         if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged) {
-                            console.log(400 * Stylesheet.pixelScaleRatio)
+                            //console.log(400 * Stylesheet.pixelScaleRatio)
                             return 400 * Stylesheet.pixelScaleRatio
                         }
 
                         let maxVisibleItems = getMaxVisibleItems()
                         if (maxVisibleItems > 0) {
-                            console.log((30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio)
+                            //console.log((30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio)
                             return (30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio
 
                         } else {
@@ -2230,7 +2226,7 @@ Item {
                                 let linesCount = invoice.json.items[rowNr].description.split('\n').length
                                 height += 30 + 16 * (linesCount - 1)
                             }
-                            console.log(height * Stylesheet.pixelScaleRatio)
+                            //console.log(height * Stylesheet.pixelScaleRatio)
                             return height * Stylesheet.pixelScaleRatio
                         }
                     }
@@ -2844,16 +2840,6 @@ Item {
                             setDocumentModified()
                         }
                     }
-                }
-
-                function calculateTotalHeight(currentHeight){ // calcola manualmente l'altezza di tutti gli elementi
-                    let totalHeight = currentHeight;
-                    let calcHeight = 0;
-                    calcHeight = GridLayout.height + HorizontalHeaderView.height + TableView.height + RowLayout.height + GridLayout.height + Item.height + 
-                    StyledLabel.height + StyledTextArea.height;
-                    if (calcHeight > 0) 
-                        totalHeight = calcHeight;
-                    return totalHeight;
                 }
 
             }
