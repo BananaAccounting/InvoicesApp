@@ -1,5 +1,15 @@
 # Changelog
 
+## 2024-01-15
+
+* [RELEASE BETA]
+
+* [Fix] Fix problem with scroll with BananaPlus compiled with Qt6.6.0 or newer
+* [Fix] Fix delete selected rows create new empty invoices
+* [Enhancement] Add total and header item types
+* [Enhancement] Add column payment term in days to the contacts
+* [Enhancement] Add currency field to invoices and contacts
+* 
 ## 2023-08-04
 
 * [RELEASE DEV]
