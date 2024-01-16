@@ -1,5 +1,13 @@
 # Changelog
 
+## 2024-01-16
+
+* [RELEASE BETA]
+
+* [Fix] Fix problem with HD Screens
+* [Fix] Fix problem with long texts scrolls
+* [Fix] Fix problem in column Type
+* 
 ## 2024-01-15
 
 * [RELEASE BETA]
