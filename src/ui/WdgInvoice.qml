@@ -1558,7 +1558,7 @@ Item {
                     // Items table
                     id: invoiceItemsTable
                     model: invoiceItemsModel
-                    reuseItems: true
+                    reuseItems: false
                     clip: true
 
                     Layout.fillWidth: parent.width
@@ -1684,12 +1684,12 @@ Item {
                             if (settingIdColumnWidth in viewAppearance) {
                                 let width = viewAppearance[settingIdColumnWidth]
                                 if (width > 10) {
-                                    return width * Stylesheet.pixelScaleRatio
+                                    return width
                                 }
                             } else {
                                 //TODO: console.log("appearance flag '" + columnId + "' in view '" + currentView + "' not found")
                             }
-                            return header.width * Stylesheet.pixelScaleRatio
+                            return header.width
                         }
                     }
 
@@ -2353,6 +2353,8 @@ Item {
                             // Compute current height
                             let height = 34;
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
+                                // This function does not correctly calculate the heigth when there is a word wrap.
+                                // We should try to use directly the line hiegth.
                                 let linesCount = invoice.json.items[rowNr].description.split('\n').length
                                 height += 30 + 16 * (linesCount - 1)
                             }
@@ -2363,7 +2365,9 @@ Item {
                     function getMaxVisibleItems() {
                         let maxVisibleItems = 0
                         if (currentView === appSettings.view_id_full) {
-                            return 0 // In full view all items are visible
+                            // Due to the problem with the word wrap, we set 10 visible items by default.
+                            // When maxVisibleItems is different from zero, the scroll works correctly, see comments in getTableHeigth().
+                            return 10
                         }
                         if (appSettings.data.interface.invoice.views[currentView] &&
                                 ('invoce_max_visible_items_without_scrolling' in appSettings.data.interface.invoice.views[currentView].appearance)) {

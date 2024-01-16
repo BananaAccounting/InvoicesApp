@@ -1701,7 +1701,7 @@ Item {
                     }
 
                     StyledLabel{
-                        text: qsTr("Invoice items visible without scrolling (0 = all items)")
+                        text: qsTr("Height of visible content in rows (0 = all rows)")
                         Layout.fillWidth: true
                     }
 
@@ -1713,7 +1713,13 @@ Item {
                         implicitWidth: width_reference.implicitWidth
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
-                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
+                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "10"
+
+                        Component.onCompleted: {
+                            appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
+                            appSettings.signalItemsVisibilityChanged++
+                        }
+
                         onEditingFinished: {
                             if (modified) {
                                 appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
@@ -1732,7 +1738,13 @@ Item {
                         implicitWidth: width_reference.implicitWidth
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
-                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
+                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "10"
+
+                        Component.onCompleted: {
+                            appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
+                            appSettings.signalItemsVisibilityChanged++
+                        }
+
                         onEditingFinished: {
                             if (modified) {
                                 appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
@@ -1751,7 +1763,13 @@ Item {
                         implicitWidth: width_reference.implicitWidth
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
-                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
+                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "10"
+
+                        Component.onCompleted: {
+                            appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
+                            appSettings.signalItemsVisibilityChanged++
+                        }
+
                         onEditingFinished: {
                             if (modified) {
                                 appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
@@ -1759,7 +1777,6 @@ Item {
                             }
                             focus = false
                         }
-
                     }
 
                 }
