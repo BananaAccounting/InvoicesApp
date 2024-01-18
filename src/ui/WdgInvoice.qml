@@ -41,8 +41,12 @@ Item {
                                      appSettings.view_id_base
 
     onCurrentViewChanged: {
-       invoiceItemsTable.forceLayout()
+        Qt.callLater(function() {
+            invoiceItemsTable.forceLayout()
+        });
     }
+
+
 
     function createInvoiceFromEstimate() {
         if (invoice.isModified) {
@@ -1511,7 +1515,9 @@ Item {
                                     let header = invoiceItemsModel.headers[dragColumnNo]
                                     let columnWidthId = 'width_' + header.id
                                     saveInvoiceItemColumnWidth(columnWidthId, newColWidth)
-                                    invoiceItemsTable.forceLayout()
+                                    Qt.callLater(function() {
+                                        invoiceItemsTable.forceLayout()
+                                    });
                                 }
                             } else if (isOverDragHandle(event.x)) {
                                 cursorShape = Qt.SplitHCursor
@@ -1579,7 +1585,9 @@ Item {
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
-                            invoiceItemsTable.forceLayout()
+                            Qt.callLater(function() {
+                                invoiceItemsTable.forceLayout()
+                            });
                         }
                     }
 
@@ -1969,7 +1977,9 @@ Item {
                                         if (model.row >= 0 && model.row < invoice.json.items.length) {
                                             invoice.json.items[model.row].description = text
                                         }
-                                        invoiceItemsTable.forceLayout()
+                                        Qt.callLater(function() {
+                                            invoiceItemsTable.forceLayout()
+                                        });
                                         invoiceItemsTable.signalUpdateRowHeights++
                                     }
                                 }
@@ -2342,6 +2352,7 @@ Item {
 
                         // Just for binding
                         if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged) {
+                            console.log("just for binding")
                             return 400 * Stylesheet.pixelScaleRatio
                         }
 
@@ -2356,7 +2367,12 @@ Item {
                                 // This function does not correctly calculate the heigth when there is a word wrap.
                                 // We should try to use directly the line hiegth.
                                 let linesCount = invoice.json.items[rowNr].description.split('\n').length
-                                height += 30 + 16 * (linesCount - 1)
+                                //console.log("lines count: " + linesCount)
+                                let lineHeight = 30 + 16 * (linesCount - 1)
+                                if (rowHeight(rowNr) > 0){
+                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number.
+                                }
+                                height += lineHeight
                             }
                             return height * Stylesheet.pixelScaleRatio
                         }
@@ -2365,9 +2381,7 @@ Item {
                     function getMaxVisibleItems() {
                         let maxVisibleItems = 0
                         if (currentView === appSettings.view_id_full) {
-                            // Due to the problem with the word wrap, we set 10 visible items by default.
-                            // When maxVisibleItems is different from zero, the scroll works correctly, see comments in getTableHeigth().
-                            return 10
+                            return 0
                         }
                         if (appSettings.data.interface.invoice.views[currentView] &&
                                 ('invoce_max_visible_items_without_scrolling' in appSettings.data.interface.invoice.views[currentView].appearance)) {
@@ -2466,7 +2480,9 @@ Item {
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
                         let columnWidthId = 'width_' + headerColDescription.id
                         saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
-                        invoiceItemsTable.forceLayout()
+                        Qt.callLater(function() {
+                            invoiceItemsTable.forceLayout()
+                        });
                     }
                 }
 
