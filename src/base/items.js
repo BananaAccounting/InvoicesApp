@@ -34,6 +34,7 @@ function itemGet(id, vatExclusive) {
                         "vat_code": "",
                         "vat_rate": ""
                     },
+                    "rowHeight": "", // Per salvare altezza righe
                 };
 
                 product.description = productRow.value('Description');
@@ -55,6 +56,7 @@ function itemGet(id, vatExclusive) {
 
                 product.unit_price.vat_code = productRow.value('VatCode');
                 product.unit_price.vat_rate = productRow.value('VatPercentage');
+                product.rowHeight = productRow.value('rowHeight');
                 return product;
             }
         }

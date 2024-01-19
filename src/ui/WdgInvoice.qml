@@ -32,6 +32,7 @@ Item {
 
     property bool isVatModeVatNone: false
     property bool isVatModeVatInclusive : true
+    signal updateLayoutButtonClicked()
 
     required property AppSettings appSettings
     required property Invoice invoice
@@ -41,9 +42,15 @@ Item {
                                      appSettings.view_id_base
 
     onCurrentViewChanged: {
-        Qt.callLater(function() {
-            invoiceItemsTable.forceLayout()
-        });
+        //invoiceItemsTable.updateColDescrWidth() // non aggiusta il layout
+        invoiceItemsTable.forceLayout() // non aggiusta il layout
+        //console.log("onCurrentViewChanged called")
+    }
+
+    onUpdateLayoutButtonClicked: {
+        //console.log("onButtonClickedSignal called")
+        invoiceItemsTable.updateColDescrWidth() // funziona
+        //invoiceItemsTable.forceLayout() // non funziona
     }
 
 
@@ -373,6 +380,13 @@ Item {
                         appSettings.data.interface.invoice.current_view = parent.viewId
                     }
                     cursorShape: currentView === parent.viewId ? Qt.ArrowCursor : Qt.PointingHandCursor
+                }
+            }
+
+            StyledButton {
+                text: qsTr("Update Layout")
+                onClicked: {
+                    updateLayoutButtonClicked()
                 }
             }
 
@@ -1439,7 +1453,7 @@ Item {
                     reuseItems: false
                     visible: true
 
-                    Layout.fillWidth: parent.width
+                    Layout.fillWidth: true
                     Layout.topMargin: Stylesheet.defaultMargin
 
                     Component.onCompleted: {
@@ -1515,9 +1529,7 @@ Item {
                                     let header = invoiceItemsModel.headers[dragColumnNo]
                                     let columnWidthId = 'width_' + header.id
                                     saveInvoiceItemColumnWidth(columnWidthId, newColWidth)
-                                    Qt.callLater(function() {
-                                        invoiceItemsTable.forceLayout()
-                                    });
+                                    invoiceItemsTable.forceLayout()
                                 }
                             } else if (isOverDragHandle(event.x)) {
                                 cursorShape = Qt.SplitHCursor
@@ -1567,7 +1579,7 @@ Item {
                     reuseItems: false
                     clip: true
 
-                    Layout.fillWidth: parent.width
+                    Layout.fillWidth: true
                     Layout.minimumHeight: getTableHeigth()
 
                     rowSpacing: 2
@@ -1581,15 +1593,15 @@ Item {
 
                     property int signalUpdateRowHeights: 1
                     property int signalUpdateTableHeight: 1
+                    property var rowHeights: ({})
 
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
-                            Qt.callLater(function() {
-                                invoiceItemsTable.forceLayout()
-                            });
+                            invoiceItemsTable.forceLayout()
                         }
                     }
+
 
                     Keys.onPressed: function(event) {
                         let curItem = null
@@ -1692,12 +1704,14 @@ Item {
                             if (settingIdColumnWidth in viewAppearance) {
                                 let width = viewAppearance[settingIdColumnWidth]
                                 if (width > 10) {
+                                    //console.log("column: " + header.id + " width: " + header.width)
                                     return width
                                 }
                             } else {
-                                //TODO: console.log("appearance flag '" + columnId + "' in view '" + currentView + "' not found")
                             }
+                            //console.log("column: " + header.id + " width: " + header.width)
                             return header.width
+
                         }
                     }
 
@@ -1748,12 +1762,12 @@ Item {
                                 }
 
                                 Connections {
-//                                    target: invoice
-//                                    function onInvoiceChanged() {
-//                                        if (invoice.json && invoice.json.document_info.vat_mode) {
-//                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
-//                                        }
-//                                    }
+                                    //                                    target: invoice
+                                    //                                    function onInvoiceChanged() {
+                                    //                                        if (invoice.json && invoice.json.document_info.vat_mode) {
+                                    //                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
+                                    //                                        }
+                                    //                                    }
                                 }
 
                                 onCurrentKeySet: function(key, isExistingKey) {
@@ -1797,7 +1811,7 @@ Item {
                                     onClicked: {
                                         dlgLicense.visible = true
                                     }
-                               }
+                                }
 
                             }
                         }
@@ -1813,7 +1827,7 @@ Item {
                                 textRole: "key"
                                 filterEnabled: true
 
-//                                currentIndex: -1
+                                //                                currentIndex: -1
                                 displayText: {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                     undoKey = display
@@ -1931,6 +1945,7 @@ Item {
                             column: 4
                             StyledTextArea {
                                 required property bool current
+                                id: textArea
                                 selected: current
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
@@ -1969,26 +1984,68 @@ Item {
                                 // In case the lines count change we emit a signal to update the row heigth
                                 property int textLinesCount: 1
 
-                                onTextChanged: {
-                                    let newLinesCount = text.split('\n').length
-                                    if (newLinesCount !== textLinesCount) {
-                                        textLinesCount = newLinesCount
-                                        // Save text to let calculate the right row height
-                                        if (model.row >= 0 && model.row < invoice.json.items.length) {
-                                            invoice.json.items[model.row].description = text
-                                        }
-                                        Qt.callLater(function() {
-                                            invoiceItemsTable.forceLayout()
-                                        });
-                                        invoiceItemsTable.signalUpdateRowHeights++
-                                    }
-                                }
-
                                 onFocusChanged: {
                                     if (focus) {
                                         let index = invoiceItemsModel.index(model.row, model.column)
                                         invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
                                     }
+                                }
+
+                                // FontMetrics {
+                                //     id: fontMetrics
+                                //     font: textArea.font  // Ensure the font matches the TextArea's font
+                                // }
+
+                                // function calculateNumberOfLines(text, textAreaWidth) {
+                                //     let words = text.split(" ");
+                                //     let currentLineLength = 0;
+                                //     let elementWidth = fontMetrics.advanceWidth(text);
+                                //     let numberOfLines = textAreaWidth / elementWidth
+                                //     numberOfLines = math.ceil(numberOfLines)
+                                //     // words.forEach(word => {
+                                //     //                   let wordWidth = fontMetrics.advanceWidth(word + " ");  // Include lo spazio
+                                //     //                   //console.log(wordWidth)
+                                //     //                   if (currentLineLength + wordWidth > textAreaWidth) {
+                                //     //                       numberOfLines++;
+                                //     //                       currentLineLength = wordWidth;
+                                //     //                   } else {
+                                //     //                       currentLineLength += wordWidth;
+                                //     //                   }
+                                //     //               });
+
+                                //     return numberOfLines;
+                                // }
+
+                                function calculateRowHeight(linesCount) {
+                                    const lineHeight = 34; // Altezza approssimativa di una singola riga di testo
+                                    return linesCount * lineHeight;
+                                }
+
+                                onTextChanged: {
+                                    if (model.row >= 0 && model.row < invoice.json.items.length) {
+                                        invoice.json.items[model.row].description = text;
+                                    }
+                                    let  contentHeightCalculated = invoiceItemsTable.getTableHeigth()
+                                    if (contentHeightCalculated !== invoiceItemsTable.contentHeight) {
+                                        invoiceItemsTable.forceLayout()
+                                        invoiceItemsTable.signalUpdateRowHeights++
+                                    }
+                                    // let newLinesCount = calculateNumberOfLines(text, width); // cambio metodo di calcolo per il numero di righe, ma poi cosa ci faccio ?
+                                    // //let newLinesCount = text.split('\n').length
+                                    // if (newLinesCount !== textLinesCount) {
+                                    //     textLinesCount = newLinesCount
+                                    //     // Save text to let calculate the right row height
+                                    //     var rowNewHeight = calculateRowHeight(textLinesCount)
+                                    //     if (model.row >= 0 && model.row < invoice.json.items.length) {
+                                    //         invoice.json.items[model.row].description = text;
+                                    //         invoice.json.items[model.row].rowHeight = rowNewHeight; // Dovrei aggiungere questa nuova proprietà al modello: rowHeight, come faccio in maniera corretta ?
+                                    //     }
+                                    //     // call later aggiunto per evitare che il force layout interferisca con altre modifiche in corso al layout.
+                                    //     Qt.callLater(function() {
+                                    //         invoiceItemsTable.forceLayout()
+                                    //     });
+                                    //     invoiceItemsTable.signalUpdateRowHeights++
+                                    // }
                                 }
                             }
                         }
@@ -2345,14 +2402,37 @@ Item {
                         signalUpdateTableHeight++
                     }
 
+                    FontMetrics {
+                        id: fontMetrics
+                        font: invoiceItemsTable.columnAtIndex(4).textArea.font  // Ensure the font matches the TextArea's font
+                    }
+
+                    function calculateNumberOfLines(text) {
+                        let texts = text.split("\n");
+                        let numberOfLines = texts.length;
+                        let columnWidth = invoiceItemsTable.columnWidth(4);
+                        if (columnWidth > 0 ){
+                            for (var i = 0; i < texts.length; i++) {
+                                if (texts[i].length > 1 ) {
+                                    let elementWidth = fontMetrics.advanceWidth(texts[i]);
+                                    let elementLines = elementWidth / invoiceItemsTable.columnWidth(4)
+                                    numberOfLines += Math.ceil(elementLines)
+                                } else {
+                                    numberOfLines ++;
+                                }
+                            }
+                        }
+
+                        return numberOfLines;
+                    }
+
                     function getTableHeigth() {
                         if (!invoice.json || !invoice.json.items){
-                        return 400 * Stylesheet.pixelScaleRatio
+                            return 400 * Stylesheet.pixelScaleRatio
                         }
 
                         // Just for binding
                         if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged) {
-                            console.log("just for binding")
                             return 400 * Stylesheet.pixelScaleRatio
                         }
 
@@ -2366,11 +2446,12 @@ Item {
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
                                 // This function does not correctly calculate the heigth when there is a word wrap.
                                 // We should try to use directly the line hiegth.
-                                let linesCount = invoice.json.items[rowNr].description.split('\n').length
-                                //console.log("lines count: " + linesCount)
+                                //let linesCount = invoice.json.items[rowNr].description.split('\n').length
+                                let linesCount = calculateNumberOfLines(invoice.json.items[rowNr].description)
+                                console.log(rowNr  + " / " + linesCount  )
                                 let lineHeight = 30 + 16 * (linesCount - 1)
                                 if (rowHeight(rowNr) > 0){
-                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number.
+                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number, mettere anche il rowSpacing
                                 }
                                 height += lineHeight
                             }
@@ -2473,16 +2554,18 @@ Item {
                         return null
                     }
 
-                    function updateColDescrWidth() {
+                    function updateColDescrWidth() { // vedere questa.
                         let colDescriptionIndex = 4
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
+                        // contentwidth è larghezza totale necessaria per visualizzare tutto il contenuto della TableView senza tagliarlo
+                        // il contentWidth è calcolato automaticamente in base al contenuto delle colonne, è la somma delle larghezze di tutte le sue colonne più eventuali spazi aggiunti.
+                        // Questo valore è calcolato automaticamente da QML in base alle larghezze che hai impostato per le colonne o in base a come vengono calcolate dinamicamente (ad esempio, tramite una funzione di columnWidthProvider se definita).
                         let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
                         let columnWidthId = 'width_' + headerColDescription.id
                         saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
-                        Qt.callLater(function() {
-                            invoiceItemsTable.forceLayout()
-                        });
+                        invoiceItemsTable.forceLayout()
+                        //console.log("updateColDescrWidth called")
                     }
                 }
 
