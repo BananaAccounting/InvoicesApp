@@ -42,15 +42,11 @@ Item {
                                      appSettings.view_id_base
 
     onCurrentViewChanged: {
-        //invoiceItemsTable.updateColDescrWidth() // non aggiusta il layout
-        invoiceItemsTable.forceLayout() // non aggiusta il layout
-        //console.log("onCurrentViewChanged called")
+        //invoiceItemsTable.forceLayout() // non aggiusta il layout
     }
 
     onUpdateLayoutButtonClicked: {
-        //console.log("onButtonClickedSignal called")
-        invoiceItemsTable.updateColDescrWidth() // funziona
-        //invoiceItemsTable.forceLayout() // non funziona
+        updateView() // dovrebbe far partire il segnale "OnlayoutChanged" e sistemare il layout
     }
 
 
@@ -312,6 +308,13 @@ Item {
             // Hack for qt6, to resolve overlapping items after dialog load
             visible: appSettings.loaded
 
+            StyledButton {
+                text: String.fromCodePoint(0x21BB)
+                onClicked: {
+                    updateLayoutButtonClicked()
+                }
+            }
+
             StyledLabel{
                 text: qsTr("Views:")
             }
@@ -380,13 +383,6 @@ Item {
                         appSettings.data.interface.invoice.current_view = parent.viewId
                     }
                     cursorShape: currentView === parent.viewId ? Qt.ArrowCursor : Qt.PointingHandCursor
-                }
-            }
-
-            StyledButton {
-                text: qsTr("Update Layout")
-                onClicked: {
-                    updateLayoutButtonClicked()
                 }
             }
 
@@ -1501,10 +1497,6 @@ Item {
                         }
                     }
 
-                    rowHeightProvider: function(row) {
-                        return 28 * Stylesheet.pixelScaleRatio
-                    }
-
                     MouseArea {
                         id: headerdragarea
                         anchors.fill: parent
@@ -1529,7 +1521,7 @@ Item {
                                     let header = invoiceItemsModel.headers[dragColumnNo]
                                     let columnWidthId = 'width_' + header.id
                                     saveInvoiceItemColumnWidth(columnWidthId, newColWidth)
-                                    invoiceItemsTable.forceLayout()
+                                    //invoiceItemsTable.forceLayout()
                                 }
                             } else if (isOverDragHandle(event.x)) {
                                 cursorShape = Qt.SplitHCursor
@@ -1580,8 +1572,8 @@ Item {
                     clip: true
 
                     Layout.fillWidth: true
-                    Layout.minimumHeight: getTableHeigth()
-
+                    contentHeight: getTableHeigth()
+                    Layout.minimumHeight: contentHeight
                     rowSpacing: 2
                     columnSpacing: 5 * Stylesheet.pixelScaleRatio
 
@@ -1598,8 +1590,16 @@ Item {
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
-                            invoiceItemsTable.forceLayout()
+                            //invoiceItemsTable.forceLayout()
                         }
+                    }
+
+                    onLayoutChanged: {
+                        console.log("layout changed")
+                        let curContentHeight = invoiceItemsTable.contentHeight
+                        let desiredHeight = invoiceItemsTable.getTableHeigth()
+                        if (curContentHeight !== desiredHeight)
+                            invoiceItemsTable.contentHeight = desiredHeight
                     }
 
 
@@ -1713,6 +1713,12 @@ Item {
                             return header.width
 
                         }
+                    }
+
+                    rowHeightProvider: function(row) {
+                        let height = 34;
+                        let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
+                        return height * linesCount * Stylesheet.pixelScaleRatio
                     }
 
                     delegate: DelegateChooser {
@@ -1991,61 +1997,21 @@ Item {
                                     }
                                 }
 
-                                // FontMetrics {
-                                //     id: fontMetrics
-                                //     font: textArea.font  // Ensure the font matches the TextArea's font
-                                // }
-
-                                // function calculateNumberOfLines(text, textAreaWidth) {
-                                //     let words = text.split(" ");
-                                //     let currentLineLength = 0;
-                                //     let elementWidth = fontMetrics.advanceWidth(text);
-                                //     let numberOfLines = textAreaWidth / elementWidth
-                                //     numberOfLines = math.ceil(numberOfLines)
-                                //     // words.forEach(word => {
-                                //     //                   let wordWidth = fontMetrics.advanceWidth(word + " ");  // Include lo spazio
-                                //     //                   //console.log(wordWidth)
-                                //     //                   if (currentLineLength + wordWidth > textAreaWidth) {
-                                //     //                       numberOfLines++;
-                                //     //                       currentLineLength = wordWidth;
-                                //     //                   } else {
-                                //     //                       currentLineLength += wordWidth;
-                                //     //                   }
-                                //     //               });
-
-                                //     return numberOfLines;
-                                // }
-
                                 function calculateRowHeight(linesCount) {
                                     const lineHeight = 34; // Altezza approssimativa di una singola riga di testo
                                     return linesCount * lineHeight;
                                 }
 
                                 onTextChanged: {
+                                    let oldLinesCount = invoiceItemsTable.estimateWordWrapLines(invoice.json.items[model.row].description);
+                                    let newLinesCount = invoiceItemsTable.estimateWordWrapLines(text);
                                     if (model.row >= 0 && model.row < invoice.json.items.length) {
                                         invoice.json.items[model.row].description = text;
                                     }
-                                    let  contentHeightCalculated = invoiceItemsTable.getTableHeigth()
-                                    if (contentHeightCalculated !== invoiceItemsTable.contentHeight) {
-                                        invoiceItemsTable.forceLayout()
+                                    if (oldLinesCount !== newLinesCount) {
+                                        //invoiceItemsTable.forceLayout()
                                         invoiceItemsTable.signalUpdateRowHeights++
                                     }
-                                    // let newLinesCount = calculateNumberOfLines(text, width); // cambio metodo di calcolo per il numero di righe, ma poi cosa ci faccio ?
-                                    // //let newLinesCount = text.split('\n').length
-                                    // if (newLinesCount !== textLinesCount) {
-                                    //     textLinesCount = newLinesCount
-                                    //     // Save text to let calculate the right row height
-                                    //     var rowNewHeight = calculateRowHeight(textLinesCount)
-                                    //     if (model.row >= 0 && model.row < invoice.json.items.length) {
-                                    //         invoice.json.items[model.row].description = text;
-                                    //         invoice.json.items[model.row].rowHeight = rowNewHeight; // Dovrei aggiungere questa nuova proprietà al modello: rowHeight, come faccio in maniera corretta ?
-                                    //     }
-                                    //     // call later aggiunto per evitare che il force layout interferisca con altre modifiche in corso al layout.
-                                    //     Qt.callLater(function() {
-                                    //         invoiceItemsTable.forceLayout()
-                                    //     });
-                                    //     invoiceItemsTable.signalUpdateRowHeights++
-                                    // }
                                 }
                             }
                         }
@@ -2404,14 +2370,17 @@ Item {
 
                     FontMetrics {
                         id: fontMetrics
-                        font: invoiceItemsTable.columnAtIndex(4).textArea.font  // Ensure the font matches the TextArea's font
+                        font: invoiceItemsTable.model.columnAtIndex(4).textArea.font  // Ensure the font matches the TextArea's font
                     }
 
-                    function calculateNumberOfLines(text) {
+                    function estimateWordWrapLines(text) {
                         let texts = text.split("\n");
+                        // in case columnWidth = -1 assign number of lines
                         let numberOfLines = texts.length;
                         let columnWidth = invoiceItemsTable.columnWidth(4);
+                        columnWidth = Math.max(columnWidth, 10);
                         if (columnWidth > 0 ){
+                            numberOfLines = 0;
                             for (var i = 0; i < texts.length; i++) {
                                 if (texts[i].length > 1 ) {
                                     let elementWidth = fontMetrics.advanceWidth(texts[i]);
@@ -2447,8 +2416,8 @@ Item {
                                 // This function does not correctly calculate the heigth when there is a word wrap.
                                 // We should try to use directly the line hiegth.
                                 //let linesCount = invoice.json.items[rowNr].description.split('\n').length
-                                let linesCount = calculateNumberOfLines(invoice.json.items[rowNr].description)
-                                console.log(rowNr  + " / " + linesCount  )
+                                let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
+                                //console.log(rowNr  + " / " + linesCount  )
                                 let lineHeight = 30 + 16 * (linesCount - 1)
                                 if (rowHeight(rowNr) > 0){
                                     lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number, mettere anche il rowSpacing
@@ -2458,7 +2427,6 @@ Item {
                             return height * Stylesheet.pixelScaleRatio
                         }
                     }
-
                     function getMaxVisibleItems() {
                         let maxVisibleItems = 0
                         if (currentView === appSettings.view_id_full) {
@@ -2554,18 +2522,16 @@ Item {
                         return null
                     }
 
-                    function updateColDescrWidth() { // vedere questa.
+                    function updateColDescrWidth() {
                         let colDescriptionIndex = 4
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
                         // contentwidth è larghezza totale necessaria per visualizzare tutto il contenuto della TableView senza tagliarlo
                         // il contentWidth è calcolato automaticamente in base al contenuto delle colonne, è la somma delle larghezze di tutte le sue colonne più eventuali spazi aggiunti.
-                        // Questo valore è calcolato automaticamente da QML in base alle larghezze che hai impostato per le colonne o in base a come vengono calcolate dinamicamente (ad esempio, tramite una funzione di columnWidthProvider se definita).
+                        // Questo valore è calcolato automaticamente da QML in base alle larghezze impostate per le colonne o in base a come vengono calcolate dinamicamente (ad esempio, tramite una funzione di columnWidthProvider se definita).
                         let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
                         let columnWidthId = 'width_' + headerColDescription.id
                         saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
-                        invoiceItemsTable.forceLayout()
-                        //console.log("updateColDescrWidth called")
                     }
                 }
 
