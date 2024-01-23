@@ -42,14 +42,14 @@ Item {
                                      appSettings.view_id_base
 
     onCurrentViewChanged: {
-        //invoiceItemsTable.forceLayout() // non aggiusta il layout
+        invoiceItemsTable.updateColDescrWidth() // funziona
+        invoiceItemsTable.onLayoutChanged()
     }
 
     onUpdateLayoutButtonClicked: {
-        updateView() // dovrebbe far partire il segnale "OnlayoutChanged" e sistemare il layout
+        invoiceItemsTable.updateColDescrWidth() // funziona
+        invoiceItemsTable.onLayoutChanged()
     }
-
-
 
     function createInvoiceFromEstimate() {
         if (invoice.isModified) {
@@ -121,6 +121,8 @@ Item {
         loadCustomerAddresses()
         loadItems()
         loadTaxRates()
+        invoiceItemsTable.updateColDescrWidth()
+        invoiceItemsTable.onLayoutChanged()
     }
 
     TableModel {
@@ -1542,6 +1544,7 @@ Item {
                             isDragging = false
                             if (dragColumnNo !== 3) {
                                 invoiceItemsTable.updateColDescrWidth()
+                                invoiceItemsTable.onLayoutChanged()
                             }
                         }
 
@@ -1595,7 +1598,6 @@ Item {
                     }
 
                     onLayoutChanged: {
-                        console.log("layout changed")
                         let curContentHeight = invoiceItemsTable.contentHeight
                         let desiredHeight = invoiceItemsTable.getTableHeigth()
                         if (curContentHeight !== desiredHeight)
@@ -2009,7 +2011,8 @@ Item {
                                         invoice.json.items[model.row].description = text;
                                     }
                                     if (oldLinesCount !== newLinesCount) {
-                                        //invoiceItemsTable.forceLayout()
+                                        invoiceItemsTable.forceLayout()
+                                        invoiceItemsTable.onLayoutChanged()
                                         invoiceItemsTable.signalUpdateRowHeights++
                                     }
                                 }
@@ -2352,6 +2355,7 @@ Item {
 
                     onWidthChanged: {
                         invoiceItemsTable.updateColDescrWidth()
+                        invoiceItemsTable.onLayoutChanged()
                     }
 
 
@@ -2523,8 +2527,12 @@ Item {
                     }
 
                     function updateColDescrWidth() {
+                        invoiceItemsTable.forceLayout()
                         let colDescriptionIndex = 4
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
+                        console.log("parent width: " + parent.width)
+                        console.log("content width" + contentWidth);
+                        console.log("availableWidth: " + availableWidth)
                         // contentwidth è larghezza totale necessaria per visualizzare tutto il contenuto della TableView senza tagliarlo
                         // il contentWidth è calcolato automaticamente in base al contenuto delle colonne, è la somma delle larghezze di tutte le sue colonne più eventuali spazi aggiunti.
                         // Questo valore è calcolato automaticamente da QML in base alle larghezze impostate per le colonne o in base a come vengono calcolate dinamicamente (ad esempio, tramite una funzione di columnWidthProvider se definita).
@@ -3405,6 +3413,7 @@ Item {
         updateViewVatMode()
         updateViewItems()
         invoiceItemsTable.updateColDescrWidth();
+        invoiceItemsTable.onLayoutChanged()
     }
 
     function updateViewAddress() {
