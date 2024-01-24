@@ -33,7 +33,7 @@ function itemGet(id, vatExclusive) {
                         "amount_vat_inclusive": null,
                         "vat_code": "",
                         "vat_rate": ""
-                     }
+                    },
                 };
 
                 product.description = productRow.value('Description');
