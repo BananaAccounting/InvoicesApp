@@ -1713,12 +1713,7 @@ Item {
                         implicitWidth: width_reference.implicitWidth
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
-                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "10"
-
-                        Component.onCompleted: {
-                            appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
-                            appSettings.signalItemsVisibilityChanged++
-                        }
+                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
 
                         onEditingFinished: {
                             if (modified) {
@@ -1738,12 +1733,7 @@ Item {
                         implicitWidth: width_reference.implicitWidth
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
-                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "10"
-
-                        Component.onCompleted: {
-                            appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
-                            appSettings.signalItemsVisibilityChanged++
-                        }
+                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
 
                         onEditingFinished: {
                             if (modified) {
@@ -1763,12 +1753,7 @@ Item {
                         implicitWidth: width_reference.implicitWidth
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
-                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "10"
-
-                        Component.onCompleted: {
-                            appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
-                            appSettings.signalItemsVisibilityChanged++
-                        }
+                                  appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
 
                         onEditingFinished: {
                             if (modified) {

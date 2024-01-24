@@ -41,8 +41,15 @@ Item {
                                      appSettings.view_id_base
 
     onCurrentViewChanged: {
-       invoiceItemsTable.forceLayout()
+        invoiceItemsTable.updateColDescrWidth()
+        invoiceItemsTable.onLayoutChanged()
     }
+
+    // Created for testing purposes in development.
+    // onUpdateLayoutButtonClicked: {
+    //     invoiceItemsTable.updateColDescrWidth()
+    //     invoiceItemsTable.onLayoutChanged()
+    // }
 
     function createInvoiceFromEstimate() {
         if (invoice.isModified) {
@@ -114,6 +121,8 @@ Item {
         loadCustomerAddresses()
         loadItems()
         loadTaxRates()
+        invoiceItemsTable.updateColDescrWidth()
+        invoiceItemsTable.onLayoutChanged()
     }
 
     TableModel {
@@ -273,12 +282,12 @@ Item {
         // Column layout includes this
         // - View Bar (RowLayout)
         // - Invoice content (Scroll View)
-        //   - ColumnLayout 
+        //   - ColumnLayout
         //     Single column that contains all elements
         //     elements are inserted in Layout
         //      - Top Part (GridLayout)
         //        All elements before the Items Table
-        //        3 columns 
+        //        3 columns
         //        - Invoice Info (GridLayout)
         //        -  ??Space between two elements (Item)
         //        - Address Column Layout
@@ -300,6 +309,14 @@ Item {
 
             // Hack for qt6, to resolve overlapping items after dialog load
             visible: appSettings.loaded
+
+            // See onUpdateLayoutButtonClicked
+            // StyledButton {
+            //     text: String.fromCodePoint(0x21BB)
+            //     onClicked: {
+            //         updateLayoutButtonClicked()
+            //     }
+            // }
 
             StyledLabel{
                 text: qsTr("Views:")
@@ -397,7 +414,7 @@ Item {
             contentHeight: columnLayout.height
 
             ColumnLayout { // everything that is within the Scroll
-                
+
                 id: columnLayout
                 width: scrollView.availableWidth - scrollView.ScrollBar.vertical.width - Stylesheet.defaultMargin
 
@@ -1428,6 +1445,8 @@ Item {
                     }
                 }
 
+                // There is a warning on the HorizontalHeaderView row, but apparently nothing appens.
+                // Maybe some values are not immediately loaded
                 HorizontalHeaderView {
                     id: horizontalHeader
                     model: invoiceItemsModel
@@ -1435,7 +1454,7 @@ Item {
                     reuseItems: false
                     visible: true
 
-                    Layout.fillWidth: parent.width
+                    Layout.fillWidth: true
                     Layout.topMargin: Stylesheet.defaultMargin
 
                     Component.onCompleted: {
@@ -1483,10 +1502,6 @@ Item {
                         }
                     }
 
-                    rowHeightProvider: function(row) {
-                        return 28 * Stylesheet.pixelScaleRatio
-                    }
-
                     MouseArea {
                         id: headerdragarea
                         anchors.fill: parent
@@ -1511,7 +1526,7 @@ Item {
                                     let header = invoiceItemsModel.headers[dragColumnNo]
                                     let columnWidthId = 'width_' + header.id
                                     saveInvoiceItemColumnWidth(columnWidthId, newColWidth)
-                                    invoiceItemsTable.forceLayout()
+                                    //invoiceItemsTable.forceLayout()
                                 }
                             } else if (isOverDragHandle(event.x)) {
                                 cursorShape = Qt.SplitHCursor
@@ -1532,6 +1547,7 @@ Item {
                             isDragging = false
                             if (dragColumnNo !== 3) {
                                 invoiceItemsTable.updateColDescrWidth()
+                                invoiceItemsTable.onLayoutChanged()
                             }
                         }
 
@@ -1561,9 +1577,9 @@ Item {
                     reuseItems: false
                     clip: true
 
-                    Layout.fillWidth: parent.width
-                    Layout.minimumHeight: getTableHeigth()
-
+                    Layout.fillWidth: true
+                    contentHeight: getTableHeigth()
+                    Layout.minimumHeight: contentHeight
                     rowSpacing: 2
                     columnSpacing: 5 * Stylesheet.pixelScaleRatio
 
@@ -1579,9 +1595,17 @@ Item {
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
-                            invoiceItemsTable.forceLayout()
+                            //invoiceItemsTable.forceLayout()
                         }
                     }
+
+                    onLayoutChanged: {
+                        let curContentHeight = invoiceItemsTable.contentHeight
+                        let desiredHeight = invoiceItemsTable.getTableHeigth()
+                        if (curContentHeight !== desiredHeight)
+                            invoiceItemsTable.contentHeight = desiredHeight
+                    }
+
 
                     Keys.onPressed: function(event) {
                         let curItem = null
@@ -1687,10 +1711,15 @@ Item {
                                     return width
                                 }
                             } else {
-                                //TODO: console.log("appearance flag '" + columnId + "' in view '" + currentView + "' not found")
                             }
                             return header.width
                         }
+                    }
+
+                    rowHeightProvider: function(row) {
+                        let height = 34;
+                        let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
+                        return height * linesCount * Stylesheet.pixelScaleRatio
                     }
 
                     delegate: DelegateChooser {
@@ -1740,12 +1769,12 @@ Item {
                                 }
 
                                 Connections {
-//                                    target: invoice
-//                                    function onInvoiceChanged() {
-//                                        if (invoice.json && invoice.json.document_info.vat_mode) {
-//                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
-//                                        }
-//                                    }
+                                    //                                    target: invoice
+                                    //                                    function onInvoiceChanged() {
+                                    //                                        if (invoice.json && invoice.json.document_info.vat_mode) {
+                                    //                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
+                                    //                                        }
+                                    //                                    }
                                 }
 
                                 onCurrentKeySet: function(key, isExistingKey) {
@@ -1789,7 +1818,7 @@ Item {
                                     onClicked: {
                                         dlgLicense.visible = true
                                     }
-                               }
+                                }
 
                             }
                         }
@@ -1805,7 +1834,7 @@ Item {
                                 textRole: "key"
                                 filterEnabled: true
 
-//                                currentIndex: -1
+                                //                                currentIndex: -1
                                 displayText: {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                     undoKey = display
@@ -1923,6 +1952,7 @@ Item {
                             column: 4
                             StyledTextArea {
                                 required property bool current
+                                id: textArea
                                 selected: current
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
@@ -1961,23 +1991,23 @@ Item {
                                 // In case the lines count change we emit a signal to update the row heigth
                                 property int textLinesCount: 1
 
-                                onTextChanged: {
-                                    let newLinesCount = text.split('\n').length
-                                    if (newLinesCount !== textLinesCount) {
-                                        textLinesCount = newLinesCount
-                                        // Save text to let calculate the right row height
-                                        if (model.row >= 0 && model.row < invoice.json.items.length) {
-                                            invoice.json.items[model.row].description = text
-                                        }
-                                        invoiceItemsTable.forceLayout()
-                                        invoiceItemsTable.signalUpdateRowHeights++
-                                    }
-                                }
-
                                 onFocusChanged: {
                                     if (focus) {
                                         let index = invoiceItemsModel.index(model.row, model.column)
                                         invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                    }
+                                }
+
+                                onTextChanged: {
+                                    let oldLinesCount = invoiceItemsTable.estimateWordWrapLines(invoice.json.items[model.row].description);
+                                    let newLinesCount = invoiceItemsTable.estimateWordWrapLines(text);
+                                    if (model.row >= 0 && model.row < invoice.json.items.length) {
+                                        invoice.json.items[model.row].description = text;
+                                    }
+                                    if (oldLinesCount !== newLinesCount) {
+                                        invoiceItemsTable.forceLayout()
+                                        invoiceItemsTable.onLayoutChanged()
+                                        invoiceItemsTable.signalUpdateRowHeights++
                                     }
                                 }
                             }
@@ -2319,6 +2349,7 @@ Item {
 
                     onWidthChanged: {
                         invoiceItemsTable.updateColDescrWidth()
+                        invoiceItemsTable.onLayoutChanged()
                     }
 
 
@@ -2335,9 +2366,35 @@ Item {
                         signalUpdateTableHeight++
                     }
 
+                    FontMetrics {
+                        id: fontMetrics
+                    }
+
+                    function estimateWordWrapLines(text) {
+                        let texts = text.split("\n");
+                        // in case columnWidth = -1 assign number of lines
+                        let numberOfLines = texts.length;
+                        let columnWidth = invoiceItemsTable.columnWidth(4);
+                        columnWidth = Math.max(columnWidth, 10);
+                        if (columnWidth > 0 ){
+                            numberOfLines = 0;
+                            for (var i = 0; i < texts.length; i++) {
+                                if (texts[i].length > 1 ) {
+                                    let elementWidth = fontMetrics.advanceWidth(texts[i]);
+                                    let elementLines = elementWidth / invoiceItemsTable.columnWidth(4)
+                                    numberOfLines += Math.ceil(elementLines)
+                                } else {
+                                    numberOfLines ++;
+                                }
+                            }
+                        }
+
+                        return numberOfLines;
+                    }
+
                     function getTableHeigth() {
                         if (!invoice.json || !invoice.json.items){
-                        return 400 * Stylesheet.pixelScaleRatio
+                            return 400 * Stylesheet.pixelScaleRatio
                         }
 
                         // Just for binding
@@ -2345,29 +2402,34 @@ Item {
                             return 400 * Stylesheet.pixelScaleRatio
                         }
 
-                        let maxVisibleItems = getMaxVisibleItems()
+                        // Currently we disable the mechanism wich activate the table scroll based on
+                        //the height of visible content in rows 24.01.2024
+                        /*let maxVisibleItems = getMaxVisibleItems()
                         if (maxVisibleItems > 0) {
                             return (30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio
 
-                        } else {
+                        }*/
+                        else {
                             // Compute current height
                             let height = 34;
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
                                 // This function does not correctly calculate the heigth when there is a word wrap.
                                 // We should try to use directly the line hiegth.
-                                let linesCount = invoice.json.items[rowNr].description.split('\n').length
-                                height += 30 + 16 * (linesCount - 1)
+                                //let linesCount = invoice.json.items[rowNr].description.split('\n').length
+                                let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
+                                let lineHeight = 30 + 16 * (linesCount - 1)
+                                if (rowHeight(rowNr) > 0){
+                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number
+                                }
+                                height += lineHeight
                             }
                             return height * Stylesheet.pixelScaleRatio
                         }
                     }
-
                     function getMaxVisibleItems() {
                         let maxVisibleItems = 0
                         if (currentView === appSettings.view_id_full) {
-                            // Due to the problem with the word wrap, we set 10 visible items by default.
-                            // When maxVisibleItems is different from zero, the scroll works correctly, see comments in getTableHeigth().
-                            return 10
+                            return 0
                         }
                         if (appSettings.data.interface.invoice.views[currentView] &&
                                 ('invoce_max_visible_items_without_scrolling' in appSettings.data.interface.invoice.views[currentView].appearance)) {
@@ -2460,13 +2522,15 @@ Item {
                     }
 
                     function updateColDescrWidth() {
+                        invoiceItemsTable.forceLayout()
                         let colDescriptionIndex = 4
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
+                        // "contentwidth" is total width needed to display all the content of TableView without cutting it off.
+                        // Is automatically calculated based on the content of the columns.
                         let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
                         let columnWidthId = 'width_' + headerColDescription.id
                         saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
-                        invoiceItemsTable.forceLayout()
                     }
                 }
 
@@ -3340,6 +3404,7 @@ Item {
         updateViewVatMode()
         updateViewItems()
         invoiceItemsTable.updateColDescrWidth();
+        invoiceItemsTable.onLayoutChanged()
     }
 
     function updateViewAddress() {
