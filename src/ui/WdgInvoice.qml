@@ -32,7 +32,6 @@ Item {
 
     property bool isVatModeVatNone: false
     property bool isVatModeVatInclusive : true
-    signal updateLayoutButtonClicked()
 
     required property AppSettings appSettings
     required property Invoice invoice
@@ -42,14 +41,15 @@ Item {
                                      appSettings.view_id_base
 
     onCurrentViewChanged: {
-        invoiceItemsTable.updateColDescrWidth() // funziona
+        invoiceItemsTable.updateColDescrWidth()
         invoiceItemsTable.onLayoutChanged()
     }
 
-    onUpdateLayoutButtonClicked: {
-        invoiceItemsTable.updateColDescrWidth() // funziona
-        invoiceItemsTable.onLayoutChanged()
-    }
+    // Created for testing purposes in development.
+    // onUpdateLayoutButtonClicked: {
+    //     invoiceItemsTable.updateColDescrWidth()
+    //     invoiceItemsTable.onLayoutChanged()
+    // }
 
     function createInvoiceFromEstimate() {
         if (invoice.isModified) {
@@ -282,12 +282,12 @@ Item {
         // Column layout includes this
         // - View Bar (RowLayout)
         // - Invoice content (Scroll View)
-        //   - ColumnLayout 
+        //   - ColumnLayout
         //     Single column that contains all elements
         //     elements are inserted in Layout
         //      - Top Part (GridLayout)
         //        All elements before the Items Table
-        //        3 columns 
+        //        3 columns
         //        - Invoice Info (GridLayout)
         //        -  ??Space between two elements (Item)
         //        - Address Column Layout
@@ -310,12 +310,13 @@ Item {
             // Hack for qt6, to resolve overlapping items after dialog load
             visible: appSettings.loaded
 
-            StyledButton {
-                text: String.fromCodePoint(0x21BB)
-                onClicked: {
-                    updateLayoutButtonClicked()
-                }
-            }
+            // See onUpdateLayoutButtonClicked
+            // StyledButton {
+            //     text: String.fromCodePoint(0x21BB)
+            //     onClicked: {
+            //         updateLayoutButtonClicked()
+            //     }
+            // }
 
             StyledLabel{
                 text: qsTr("Views:")
@@ -413,7 +414,7 @@ Item {
             contentHeight: columnLayout.height
 
             ColumnLayout { // everything that is within the Scroll
-                
+
                 id: columnLayout
                 width: scrollView.availableWidth - scrollView.ScrollBar.vertical.width - Stylesheet.defaultMargin
 
@@ -1706,14 +1707,11 @@ Item {
                             if (settingIdColumnWidth in viewAppearance) {
                                 let width = viewAppearance[settingIdColumnWidth]
                                 if (width > 10) {
-                                    //console.log("column: " + header.id + " width: " + header.width)
                                     return width
                                 }
                             } else {
                             }
-                            //console.log("column: " + header.id + " width: " + header.width)
                             return header.width
-
                         }
                     }
 
@@ -1997,11 +1995,6 @@ Item {
                                         let index = invoiceItemsModel.index(model.row, model.column)
                                         invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
                                     }
-                                }
-
-                                function calculateRowHeight(linesCount) {
-                                    const lineHeight = 34; // Altezza approssimativa di una singola riga di testo
-                                    return linesCount * lineHeight;
                                 }
 
                                 onTextChanged: {
@@ -2368,6 +2361,7 @@ Item {
                         invoiceItemsModel.setData(index, 'display', invoiceItemsModel.rowCount)
                         // Add new row in model
                         let newRowItem = invoiceItemToModelItem(newItem, '*');
+
                         invoiceItemsModel.appendRow(newRowItem)
                         signalUpdateTableHeight++
                     }
@@ -2424,7 +2418,6 @@ Item {
                                 // We should try to use directly the line hiegth.
                                 //let linesCount = invoice.json.items[rowNr].description.split('\n').length
                                 let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
-                                //console.log(rowNr  + " / " + linesCount  )
                                 let lineHeight = 30 + 16 * (linesCount - 1)
                                 if (rowHeight(rowNr) > 0){
                                     lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number
@@ -2533,12 +2526,8 @@ Item {
                         invoiceItemsTable.forceLayout()
                         let colDescriptionIndex = 4
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
-                        console.log("parent width: " + parent.width)
-                        console.log("content width" + contentWidth);
-                        console.log("availableWidth: " + availableWidth)
-                        // contentwidth è larghezza totale necessaria per visualizzare tutto il contenuto della TableView senza tagliarlo
-                        // il contentWidth è calcolato automaticamente in base al contenuto delle colonne, è la somma delle larghezze di tutte le sue colonne più eventuali spazi aggiunti.
-                        // Questo valore è calcolato automaticamente da QML in base alle larghezze impostate per le colonne o in base a come vengono calcolate dinamicamente (ad esempio, tramite una funzione di columnWidthProvider se definita).
+                        // "contentwidth" is total width needed to display all the content of TableView without cutting it off.
+                        // Is automatically calculated based on the content of the columns.
                         let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
                         let columnWidthId = 'width_' + headerColDescription.id
