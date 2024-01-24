@@ -1445,6 +1445,8 @@ Item {
                     }
                 }
 
+                // There is a warning on the HorizontalHeaderView row, but apparently nothing appens.
+                // Maybe some values are not immediately loaded
                 HorizontalHeaderView {
                     id: horizontalHeader
                     model: invoiceItemsModel
@@ -2368,7 +2370,6 @@ Item {
 
                     FontMetrics {
                         id: fontMetrics
-                        font: invoiceItemsTable.model.columnAtIndex(4).textArea.font  // Ensure the font matches the TextArea's font
                     }
 
                     function estimateWordWrapLines(text) {
