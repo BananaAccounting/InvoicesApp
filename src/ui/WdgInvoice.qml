@@ -2409,11 +2409,14 @@ Item {
                             return 400 * Stylesheet.pixelScaleRatio
                         }
 
-                        let maxVisibleItems = getMaxVisibleItems()
+                        // Currently we disable the mechanism wich activate the table scroll based on
+                        //the height of visible content in rows 24.01.2024
+                        /*let maxVisibleItems = getMaxVisibleItems()
                         if (maxVisibleItems > 0) {
                             return (30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio
 
-                        } else {
+                        }*/
+                        else {
                             // Compute current height
                             let height = 34;
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
@@ -2424,7 +2427,7 @@ Item {
                                 //console.log(rowNr  + " / " + linesCount  )
                                 let lineHeight = 30 + 16 * (linesCount - 1)
                                 if (rowHeight(rowNr) > 0){
-                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number, mettere anche il rowSpacing
+                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number
                                 }
                                 height += lineHeight
                             }
