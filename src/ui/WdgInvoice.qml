@@ -1591,7 +1591,6 @@ Item {
 
                     property int signalUpdateRowHeights: 1
                     property int signalUpdateTableHeight: 1
-                    property var rowHeights: ({})
 
                     Connections {
                         target: appSettings
@@ -2363,7 +2362,6 @@ Item {
                         invoiceItemsModel.setData(index, 'display', invoiceItemsModel.rowCount)
                         // Add new row in model
                         let newRowItem = invoiceItemToModelItem(newItem, '*');
-
                         invoiceItemsModel.appendRow(newRowItem)
                         signalUpdateTableHeight++
                     }
