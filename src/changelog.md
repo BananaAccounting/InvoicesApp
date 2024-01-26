@@ -1,5 +1,13 @@
 # Changelog
 
+## 2024-01-25
+
+* [RELEASE BETA]
+* [ReleaseNote] This release uses QML components available from Qt version 6.5.0, users with MacOs should use the stable version for now.
+
+* [Fix] Fix the problem with Table width
+* [Fix] Fix problem with long texts scrolls without using the max height of visible content 
+
 ## 2024-01-16
 
 * [RELEASE BETA]
