@@ -397,7 +397,7 @@ Item {
                 font.bold: true
                 //Layout.minimumWidth: 320 * Stylesheet.pixelScaleRatio
                 text: qsTr("Total") + (invoice.signalInvoiceChanged && invoice.json && invoice.json.document_info.currency ? " " + invoice.json.document_info.currency.toLocaleUpperCase() : "") +
-                      " " + toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
+                      " " + toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_outstanding : "", true)
             }
 
         }
@@ -2844,8 +2844,19 @@ Item {
                                       true)
                         }
 
+                        //Deposit (Deprecated 26.01.2024) We keep it for compatibilityw with old versions.
                         RowLayout {
-                            visible: invoice_totals_deposit.visible
+                            id: deposit_row_layout
+                            visible: setDepositVisible() // Function created for compatibility for those who use the compatibility field.
+
+                            function setDepositVisible() {
+                                if (invoice_totals_deposit.visible) {
+                                    if (!Banana.SDecimal.isZero(deposit_amount.text)) {
+                                        return true
+                                    }
+                                }
+                                return false
+                            }
 
                             StyledTextField {
                                 text: getDepositDescription()
@@ -2906,14 +2917,24 @@ Item {
                             }
                         }
 
+                        //Deposit total (Deprecated 26.01.2024) We keep it for compatibilityw with old versions.
                         StyledTextField {
                             id: invoice_totals_deposit
                             readOnly: true
                             borderless: true
                             text: invoice.json ? getDepositAmount() : ""
                             Layout.alignment: Qt.AlignRight
-                            visible: deposit_amount.focus ||
-                                     isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text))
+                            visible: setDepositTotalVisible()
+
+                            function setDepositTotalVisible() {
+                                if (deposit_amount.focus ||
+                                        isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text))) {
+                                    if (!Banana.SDecimal.isZero(deposit_amount.text)) {
+                                        return true
+                                    }
+                                }
+                                return false
+                            }
 
                             function getDepositAmount() {
                                 if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_advance_payment) {
@@ -2922,6 +2943,97 @@ Item {
                                 return toLocaleNumberFormat("", true);
                             }
                         }
+
+                        // Amount Paid (Sobstitute Deposit)
+                        RowLayout {
+                            id: amount_paid_row_layout
+                            visible: setAmountPaidVisible()
+
+                            StyledTextField {
+                                text: getAmountPaidDescription()
+                                readOnly: invoice.isReadOnly
+                                borderless: !hovered && !focus
+                                Layout.minimumWidth: 150 * Stylesheet.pixelScaleRatio
+
+                                onEditingFinished: {
+                                    if (modified) {
+                                        setDepositDescription(text)
+                                        if (!text)
+                                            text = qsTr("Amount Paid");
+                                    }
+                                }
+
+                                function getAmountPaidDescription() {
+                                    if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions_description) {
+                                        return invoice.json.billing_info.total_transactions_description
+                                    }
+                                    return qsTr("Amount Paid");
+                                }
+
+                                function setAmountPaidDescription(description) {
+                                    if (!invoice.json || !invoice.json.billing_info)
+                                        return
+                                    invoice.json.billing_info.total_transactions_description = description
+                                    setDocumentModified()
+                                }
+                            }
+
+                            StyledTextField {
+                                id: amount_paid_amount
+                                horizontalAlignment: Text.AlignRight
+                                Layout.alignment: Qt.AlignRight
+                                Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
+                                readOnly: invoice.isReadOnly
+                                text: toLocaleNumberFormat(invoice.json ? getDepositAmount() : "")
+
+                                onEditingFinished: {
+                                    if (modified) {
+                                        let amount = ""
+                                        if (!isLocaleZero(text)) {
+                                            amount = toInternalNumberFormat(text)
+                                            amount = Banana.SDecimal.invert(amount)
+                                            amount = Banana.SDecimal.round(amount, {'decimals': getRoundingDecimals()})
+                                        }
+                                        invoice.json.billing_info.total_transactions = amount
+                                        calculateInvoice()
+                                    }
+                                }
+
+                                function getDepositAmount() {
+                                    if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions) {
+                                        return Banana.SDecimal.invert(invoice.json.billing_info.total_transactions)
+                                    }
+                                    return "";
+                                }
+                            }
+
+                            function setAmountPaidVisible(){
+                                if (!deposit_row_layout.visible) { // ... Implementare logica per visibilità in base alla tab settings o sempre visibile ?
+                                    return true
+                                }
+
+                                return false
+                            }
+                        }
+
+                        // Amount Paid Total (Sobstitute Deposit)
+                        StyledTextField {
+                            id: invoice_totals_amount_paid
+                            readOnly: true
+                            borderless: true
+                            text: invoice.json ? getDepositAmount() : ""
+                            Layout.alignment: Qt.AlignRight
+                            visible: amount_paid_row_layout.visible
+
+                            function getDepositAmount() {
+                                if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions) {
+                                    return toLocaleNumberFormat(invoice.json.billing_info.total_transactions)
+                                }
+                                return toLocaleNumberFormat("", true);
+                            }
+                        }
+
+
 
                         RowLayout {
                             StyledTextField {
@@ -2942,7 +3054,7 @@ Item {
                             horizontalAlignment: Text.AlignRight
                             Layout.alignment: Qt.AlignRight
                             Layout.minimumWidth: 120 * Stylesheet.pixelScaleRatio
-                            text: toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
+                            text: toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_outstanding : "", true)
                         }
 
                         StyledLabel{
