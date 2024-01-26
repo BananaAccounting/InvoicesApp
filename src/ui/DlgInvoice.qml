@@ -30,6 +30,7 @@ Item {
 
     // Placehoder for setTitle function, it is set by c++
     property var setTitle: null
+    property string refQtVersion: "6.5.0";
 
     property int result: 0;
 
@@ -106,7 +107,7 @@ Item {
     }
 
     function result() {
-        return wdgInvoice.result()
+        return wdgInvoiceLoader.item.result()
     }
 
     function setIsNew(newDocument) {
@@ -128,7 +129,7 @@ Item {
 
     function setInvoice(json) {
         invoice.setInvoice(json)
-        wdgInvoice.updateView()
+        wdgInvoiceLoader.item.updateView()
         updateTitle()
     }
 
@@ -293,17 +294,27 @@ Item {
 
         currentIndex: tabBar.currentIndex
 
-        WdgInvoice {
-            id: wdgInvoice
-            invoice: invoice
-            appSettings: appSettings
+        Loader {
+            id: wdgInvoiceLoader
+            source: Banana.application.qtVersion >= refQtVersion ? "WdgInvoice.qml" : "WdgInvoice_OldV.qml"
+            onLoaded: {
+                item.invoice = invoice
+                item.appSettings = appSettings
+            }
         }
+
+        // Per ora al suo posto usiamo il loader e usiamo wdgInvoiceLoader.item invece di wdgInvoice
+        // WdgInvoice {
+        //     id: wdgInvoice
+        //     invoice: invoice
+        //     appSettings: appSettings
+        // }
 
         WdgSettings {
             id: wdgAppSettings
             invoice: invoice
             appSettings: appSettings
-            wdgInvoice: wdgInvoice
+            wdgInvoice: wdgInvoiceLoader.item
         }
 
         WdgSource {
@@ -330,7 +341,7 @@ Item {
                             invoiceObj = JSON.parse(Banana.document.calculateInvoice(JSON.stringify(invoiceObj)));
                             invoice.json = invoiceObj
                             invoice.setIsModified(true)
-                            wdgInvoice.updateView()
+                            wdgInvoiceLoader.item.updateView()
 
                         } catch (err) {
                             setError(err.message, err.lineNumber)
@@ -397,7 +408,7 @@ Item {
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes
                 focus = true
-                wdgInvoice.printInvoice()
+                wdgInvoiceLoader.item.printInvoice()
             }
         }
 
@@ -407,7 +418,7 @@ Item {
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes
                 focus = true
-                wdgInvoice.createInvoiceFromEstimate()
+                wdgInvoiceLoader.item.createInvoiceFromEstimate()
             }
         }
 
@@ -418,7 +429,7 @@ Item {
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes
                 focus = true
-                wdgInvoice.duplicateInvoice()
+                wdgInvoiceLoader.item.duplicateInvoice()
             }
         }
 
