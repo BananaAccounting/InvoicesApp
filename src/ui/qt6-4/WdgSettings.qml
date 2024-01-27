@@ -16,8 +16,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../base/settings.js" as Settings
-import "../base/vatcodes.js" as VatCodes
+import "../../base/settings.js" as Settings
+import "../../base/vatcodes.js" as VatCodes
 import "./components"
 
 Item {

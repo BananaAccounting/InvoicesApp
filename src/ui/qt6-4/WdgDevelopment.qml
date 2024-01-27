@@ -19,7 +19,7 @@ import QtQuick.Window
 
 import "./components"
 
-import "../base/invoice.js" as Invoice
+import "../../base/invoice.js" as Invoice
 
 Item {
     id: root

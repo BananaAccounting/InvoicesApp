@@ -14,7 +14,7 @@
 
 import QtQuick
 
-import "../base/invoice.js" as Invoice
+import "../../base/invoice.js" as Invoice
 
 QtObject {
     // Constants

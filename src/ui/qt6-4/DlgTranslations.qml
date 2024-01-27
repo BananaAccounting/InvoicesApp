@@ -18,8 +18,8 @@ import QtQuick.Layouts
 import QtQuick.Window
 
 import "./components"
-import "../base/languages.js" as Languages
-import "../base/settings.js" as Settings
+import "../../base/languages.js" as Languages
+import "../../base/settings.js" as Settings
 
 Window {
     id: dialog

@@ -20,12 +20,12 @@ import Qt.labs.qmlmodels
 import "."
 import "./components"
 
-import "../base/utils.js" as Utils
-import "../base/invoice.js" as Invoice
-import "../base/contacts.js" as Contacts
-import "../base/items.js" as Items
-import "../base/settings.js" as Settings
-import "../base/vatcodes.js" as VatCodes
+import "../../base/utils.js" as Utils
+import "../../base/invoice.js" as Invoice
+import "../../base/contacts.js" as Contacts
+import "../../base/items.js" as Items
+import "../../base/settings.js" as Settings
+import "../../base/vatcodes.js" as VatCodes
 
 Item {
     id: window

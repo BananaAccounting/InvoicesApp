@@ -14,7 +14,7 @@
 
 import QtQuick
 
-import "../base/settings.js" as Settings
+import "../../base/settings.js" as Settings
 
 QtObject {
     // Constants

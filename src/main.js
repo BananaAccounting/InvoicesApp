@@ -31,12 +31,17 @@ var JsAction = class JsAction {
 
     constructor() {
         this.version = '1.0';
-
         this.getUiFileName = function () {
             if (Banana.application.qtVersion &&
-                Banana.compareVersion(Banana.application.qtVersion, "6.0.0") > 0) {
+                Banana.compareVersion(Banana.application.qtVersion, "6.5.0") > 0) {
+                console.log("QT last")
                 return 'ui/DlgInvoice.qml';
-            } else {
+            } else if (Banana.application.qtVersion &&
+                       Banana.compareVersion(Banana.application.qtVersion, "6.4.0") > 0){
+                console.log("QT6.4")
+                return 'ui/qt6-4/DlgInvoice.qml';
+            }else {
+                console.log("QT5")
                 return 'ui/qt5/DlgInvoice.qml';
             }
         }
