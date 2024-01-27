@@ -1743,6 +1743,88 @@ Item {
                                         invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
                                     }
                                 }
+                                Menu {
+                                    id: myContextMenu
+
+                                    MenuItem {
+                                        text: qsTr("Move Up")
+                                        enabled: !invoice.isReadOnly && (invoiceItemsTable.currentRow > 0 && invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1)
+                                        onTriggered: {
+                                            var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
+                                            var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
+                                            itemMoveUp(itemRow, itemCol );
+                                        }
+                                    }
+
+                                    MenuItem {
+                                        text: qsTr("Move Down")
+                                        enabled: !invoice.isReadOnly && (invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1)
+                                        onTriggered: {
+                                            var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
+                                            var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
+                                            itemMoveDown(itemRow, itemCol );
+                                        }
+                                    }
+
+                                    MenuSeparator {
+                                    }
+
+                                    MenuItem { text: qsTr("Add Before");
+                                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow < invoiceItemsModel.rowCount
+                                        onTriggered: {
+                                            var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
+                                            if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount) {
+                                                itemAddToInvoice(rowIndex, emptyInvoiceItem())
+                                            }
+                                        }
+                                    }
+                                    MenuItem {
+                                        text: qsTr("Add After");
+                                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1
+                                        onTriggered: {
+                                            var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
+                                            if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount - 1) {
+                                                itemAddToInvoice(rowIndex + 1, emptyInvoiceItem())
+                                            }
+                                        }
+                                    }
+
+                                    MenuItem {
+                                        text: qsTr("Duplicate");
+                                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1
+                                        onTriggered: {
+                                            var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
+                                            if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount - 1) {
+                                                var itemCopy = invoice.json.items[rowIndex]
+                                                itemAddToInvoice(rowIndex + 1, itemCopy)
+                                            }
+                                        }
+                                    }
+
+                                    MenuSeparator {
+                                    }
+                                    MenuItem {
+                                        text: qsTr("Remove");
+                                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && (invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1)
+                                        onTriggered: {
+                                            var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
+                                            if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount - 1) {
+                                                itemRemoveFromInvoice(rowIndex);
+                                            }
+                                        }
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.RightButton
+                                    onClicked: {
+                                        onClicked: {
+                                            let index = invoiceItemsModel.index(row, column)
+                                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                                            myContextMenu.popup()
+                                        }
+                                    }
+                                }
 
                             }
                         }
@@ -2544,28 +2626,21 @@ Item {
                         onClicked: {
                             var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
                             if (rowIndex < 0 || (rowIndex + 1 < rowIndex.count)) {
-                                invoice.json.items.push(emptyInvoiceItem())
+                                itemAddToInvoice(rowIndex, emptyInvoiceItem())
                             } else {
-                                invoice.json.items.splice(rowIndex + 1, 0, emptyInvoiceItem())
+                                itemAddToInvoice(rowIndex + 1, emptyInvoiceItem())
                             }
-                            invoice.setIsModified(true)
-                            updateViewItems()
-                            invoiceItemsTable.signalUpdateTableHeight++
                         }
                     }
 
                     StyledButton { // Remove item button
                         text: qsTr("Remove")
-                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0
+                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && (invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1)
                         onClicked: {
                             var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
-                            if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount) {
-                                invoice.json.items.splice(rowIndex, 1)
+                            if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount - 1) {
+                                itemRemoveFromInvoice(rowIndex);
                             }
-                            invoice.setIsModified(true)
-                            calculateInvoice()
-                            updateView()
-                            //signalUpdateTableHeight++ not necessary cz updateView
                         }
                     }
 
@@ -2575,44 +2650,21 @@ Item {
 
                     StyledButton { // Move up button
                         text: qsTr("Move up")
-                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow > 0
+                        enabled: !invoice.isReadOnly && (invoiceItemsTable.currentRow > 0 && invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1)
                         onClicked: {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
                             var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
-                            if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
-                                var itemCopy = invoice.json.items[itemRow]
-                                if (!itemCopy)
-                                    itemCopy = emptyInvoiceItem()
-                                invoice.json.items[itemRow] = invoice.json.items[itemRow-1]
-                                invoice.json.items[itemRow - 1] = itemCopy
-                                calculateInvoice()
-                                updateViewItems()
-                                invoiceItemsTable.focus = true
-
-                                let index = invoiceItemsModel.index(itemRow - 1, itemCol)
-                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                             }
+                            itemMoveUp(itemRow, itemCol );
                         }
                     }
 
                     StyledButton { // Move down button
                         text: qsTr("Move Down")
-                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 &&
-                                 ((invoiceItemsTable.currentRow + 2) < invoiceItemsTable.rows)
+                        enabled: !invoice.isReadOnly && (invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow < invoiceItemsModel.rowCount - 1)
                         onClicked: {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
                             var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
-                            if (itemRow >= 0 && itemRow < invoiceItemsModel.rowCount - 1) {
-                                var itemCopy = invoice.json.items[itemRow]
-                                invoice.json.items[itemRow] = invoice.json.items[itemRow+1]
-                                invoice.json.items[itemRow + 1] = itemCopy
-                                calculateInvoice()
-                                updateViewItems()
-                                invoiceItemsTable.focus = true
-
-                                let index = invoiceItemsModel.index(itemRow + 1, itemCol)
-                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                            }
+                            itemMoveDown(itemRow, itemCol );
                         }
                     }
 
@@ -3253,20 +3305,59 @@ Item {
         return modelItem
     }
 
-    function addItemToInvoice(invoiceItem) {
+    function itemAddToInvoice(rowIndex, invoiceItem) {
         if (invoiceItem) {
-            if (invoiceItemsTable.currentRow < 0) {
+            if (rowIndex < 0) {
                 invoice.json.items.push(invoiceItem)
             } else {
-                invoice.json.items.splice(invoiceItemsTable.currentRow, 0, invoiceItem)
+                invoice.json.items.splice(rowIndex, 0, invoiceItem)
             }
+            invoice.setIsModified(true)
             calculateInvoice()
-            invoiceItemsTable.selection.clear()
-            invoiceItemsTable.currentRow = insertPos
-            invoiceItemsTable.selection.select(insertPos)
+            updateViewItems()
+            invoiceItemsTable.signalUpdateTableHeight++
         }
     }
 
+    function itemRemoveFromInvoice(rowIndex) {
+        if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount) {
+            invoice.json.items.splice(rowIndex, 1)
+            invoice.setIsModified(true)
+            calculateInvoice()
+            updateView()
+            //signalUpdateTableHeight++ not necessary cz updateView
+        }
+    }
+
+    function itemMoveDown(itemRow, itemCol ) {
+        if (itemRow >= 0 && itemRow < invoiceItemsModel.rowCount - 1) {
+            var itemCopy = invoice.json.items[itemRow]
+            invoice.json.items[itemRow] = invoice.json.items[itemRow+1]
+            invoice.json.items[itemRow + 1] = itemCopy
+            calculateInvoice()
+            updateViewItems()
+            invoiceItemsTable.focus = true
+
+            let index = invoiceItemsModel.index(itemRow + 1, itemCol)
+            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+        }
+    }
+
+    function itemMoveUp(itemRow, itemCol ) {
+        if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
+            var itemCopy = invoice.json.items[itemRow]
+            if (!itemCopy)
+                itemCopy = emptyInvoiceItem()
+            invoice.json.items[itemRow] = invoice.json.items[itemRow-1]
+            invoice.json.items[itemRow - 1] = itemCopy
+            calculateInvoice()
+            updateViewItems()
+            invoiceItemsTable.focus = true
+
+            let index = invoiceItemsModel.index(itemRow - 1, itemCol)
+            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+         }
+    }
     // Address methods
     function addressToModelAddress(addressRow) {
         var invoiceAddress = {
