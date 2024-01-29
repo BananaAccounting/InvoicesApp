@@ -32,13 +32,28 @@ Item {
 
     property bool isVatModeVatNone: false
     property bool isVatModeVatInclusive : true
-
-    required property AppSettings appSettings
-    required property Invoice invoice
+    property var appSettings: getAppSettingsFromLoader() //required property AppSettings appSettings
+    property var wdgInvoice: getInvoiceFromLoader()  //required property Invoice invoice
 
     property string currentView: appSettings.data.interface.invoice.current_view ?
                                      appSettings.data.interface.invoice.current_view :
                                      appSettings.view_id_base
+
+    function getAppSettingsFromLoader(){
+        if (wdgInvoiceLoader.item !== null) {
+            console.log("app settings ok")
+            return wdgInvoiceLoader.item.appSettings;
+        }
+        return ""
+    }
+
+    function getInvoiceFromLoader(){
+        if (wdgInvoiceLoader.item !== null) {
+            console.log("invoice ok")
+            return wdgInvoiceLoader.item.invoice;
+        }
+        return ""
+    }
 
     onCurrentViewChanged: {
         invoiceItemsTable.updateColDescrWidth()
@@ -739,8 +754,8 @@ Item {
                                 if (modified) {
                                     invoice.json.document_info.rounding_total =
                                             Banana.Converter.toInternalNumberFormat(text)
-                                    wdgInvoice.setDocumentModified(true)
-                                    wdgInvoice.calculateInvoice()
+                                    wdgInvoiceLoader.item.setDocumentModified(true)
+                                    wdgInvoiceLoader.item.calculateInvoice()
                                 }
                             }
                         }

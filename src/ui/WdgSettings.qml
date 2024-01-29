@@ -25,7 +25,7 @@ Item {
 
     required property Invoice invoice
     required property AppSettings appSettings
-    required property WdgInvoice wdgInvoice
+    property var wdgInvoice: wdgInvoiceLoader.item //property WdgInvoice wdgInvoice
 
     // Style properties
     property int stylePropertyWidth: 220 * Stylesheet.pixelScaleRatio

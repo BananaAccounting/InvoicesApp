@@ -296,10 +296,21 @@ Item {
 
         Loader {
             id: wdgInvoiceLoader
-            source: Banana.application.qtVersion >= refQtVersion ? "WdgInvoice.qml" : "WdgInvoice_OldV.qml"
+            source: getCorrectFileVersion()
             onLoaded: {
                 item.invoice = invoice
                 item.appSettings = appSettings
+            }
+
+            function getCorrectFileVersion(){
+                if (Banana.application.qtVersion &&
+                    Banana.compareVersion(Banana.application.qtVersion, refQtVersion) >= 0) {
+                    console.log("version: " + Banana.application.qtVersion + " / " + "WdgInvoice.qml")
+                    return 'WdgInvoice.qml';
+                } else {
+                    console.log("version: " + Banana.application.qtVersion + " / " + "WdgInvoice_OldVersion.qml")
+                    return 'WdgInvoice_OldVersion.qml';
+                }
             }
         }
 

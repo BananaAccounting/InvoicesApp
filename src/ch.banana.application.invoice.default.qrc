@@ -87,5 +87,6 @@
         <file>ui/qt5/WdgSettings.qml</file>
         <file>ui/qt5/WdgSource.qml</file>
         <file>ui/InvoiceItemTypesModel.qml</file>
+        <file>ui/WdgInvoice_OldVersion.qml</file>
     </qresource>
 </RCC>
