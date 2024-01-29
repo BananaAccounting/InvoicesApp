@@ -31,12 +31,35 @@ var JsAction = class JsAction {
 
     constructor() {
         this.version = '1.0';
-
+        // Create a new version when changes to the InvoiceApp are no more compatible
+        // with a previous version of Banana that use an older version of QT
+        //
+        // When you have to create a new version follow this steps:
+        // - create a new directory under ui example QTXX
+        // - copy the files under UI and the components directory under QTXX
+        // - Open with an editor the ch.banana.application.invoice.default.qrc
+        //   create the entries for the new files, by copying the existing one
+        //   and add the /QTXX at the begin of the file name
+        // - Go through alla new files and change when you find the include
+        //   from import "../base/.." "../../base/.."
         this.getUiFileName = function () {
             if (Banana.application.qtVersion &&
-                Banana.compareVersion(Banana.application.qtVersion, "6.0.0") > 0) {
+                Banana.compareVersion(Banana.application.qtVersion, "6.5.0") > 0) {
                 return 'ui/DlgInvoice.qml';
-            } else {
+            } else if (Banana.application.qtVersion &&
+                       Banana.compareVersion(Banana.application.qtVersion, "6.4.0") > 0){
+                // Qt 6.5 has introduced changes to the TableView
+                // The existing QML create scroll problems
+                // The fix require the use of a function onLayoutCompleted() that did not exists
+                // on Qt 6.4
+                // So it has been necessary to maintain a separate verion that works with
+                // Banana version 10.8 that use Qt 6.4
+                // We have used for qt6-4 the realease tagged R230725
+                // It does not contains the ItemType (Total)
+                // So total are not backwards compatible.
+                return 'ui/qt6-4/DlgInvoice.qml';
+            }else {
+                console.log("QT5")
                 return 'ui/qt5/DlgInvoice.qml';
             }
         }
