@@ -1,5 +1,12 @@
 # Changelog
 
+## 2024-01-29
+
+* [RELEASE BETA]
+* [ReleaseNote] This release allows MacOs users to work also with BETA version, but basically they work with the same material as the RELEASE STABLE.
+
+* [Fix] Fix the problem with non-existent components in the Banana version 6.4.3 for MacOs
+
 ## 2024-01-25
 
 * [RELEASE BETA]
