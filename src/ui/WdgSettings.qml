@@ -1679,11 +1679,15 @@ Item {
                     }
                 }
 
+                // Currently we hide the content in the gridLayout below because is unused due to the changes done to the tableview.
+                // We commentend also the code block related into WdgInvoice->getTableHeight()
+
                 GridLayout {
                     columns: 4
                     columnSpacing: styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
+                    visible: false;
 
                     StyledLabel{
                         text: qsTr("Items")
@@ -1763,7 +1767,6 @@ Item {
                             focus = false
                         }
                     }
-
                 }
 
                 GridLayout {

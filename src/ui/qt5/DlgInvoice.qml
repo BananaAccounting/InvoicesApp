@@ -202,7 +202,7 @@ Item {
     RowLayout {
         id: messageBar
 
-        visible: appSettings.isNotificationVisible("show_updated_version_installed")
+        visible: true
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -211,11 +211,9 @@ Item {
 
         StyledLabel {
              text: "&#x24D8; " +
-                   //qsTr("An updated version of Estimate and Invoices extension is available. To use the new version you have to update BananaPlus. See %1.")
-                   qsTr("An updated version of Estimate and Invoices extension has been installed. The new version is %1. See %2.")
-                   .arg(Banana.script.getParamValue('pubdate'))
-                   .arg("<a href=\"dlginvoiceedit::changelog\">%1</a>")
-                   .arg(qsTr("what's new"))
+                   qsTr("New version of Banana Accounting available %1.")
+                   .arg("<a href=\"appmsg::versionepiurecentedisponibile\">%1</a>")
+                   .arg(qsTr("More info"))
              textFormat: Text.RichText
              onLinkActivated: (link) => Banana.Ui.showHelp(link);
         }
@@ -224,15 +222,15 @@ Item {
             Layout.fillWidth: true
         }
 
-        StyledLabel {
-             text: "Close"
-             MouseArea {
-                 anchors.fill: parent
-                 onClicked: {
-                     appSettings.setNotificationVisible("show_updated_version_installed", false)
-                 }
-             }
-        }
+        // StyledLabel {
+        //      text: "Close"
+        //      MouseArea {
+        //          anchors.fill: parent
+        //          onClicked: {
+        //              appSettings.setNotificationVisible("show_updated_version_installed", false)
+        //          }
+        //      }
+        // }
     }
 
     StyledTabBar {
