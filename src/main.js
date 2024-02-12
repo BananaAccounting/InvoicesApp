@@ -211,9 +211,9 @@ var JsAction = class JsAction {
                 invoiceObj = invoiceObjGet(tabPos);
                 if (!invoiceObj) invoiceObj = invoiceCreateNew(tabPos);
                 invoiceObj.note = [{
-                    'date': null,
-                    'description': row.value("Notes")
-                }];
+                                       'date': null,
+                                       'description': row.value("Notes")
+                                   }];
 
                 // Create docChange
                 changedRowFields = {};
@@ -292,7 +292,7 @@ var JsAction = class JsAction {
                 // Read invoice
                 invoiceObj = invoiceObjGet(tabPos);
                 if (!invoiceObj)
-                    return null;
+                return null;
 
                 // Create docChange
                 invoiceObj = JSON.parse(Banana.document.calculateInvoice(JSON.stringify(invoiceObj)));
@@ -314,7 +314,12 @@ var JsAction = class JsAction {
                 invoiceObj = JSON.parse(Banana.document.calculateInvoice(JSON.stringify(invoiceObj)));
                 changedRowFields = invoiceChangedFieldsGet(invoiceObj, row);
                 docChange = new DocumentChange();
-                if (row.value("RowId") === "") {
+                /*
+                    Check if rowId and InvoiceData are not empty to avoid creating empty invoices when deleting one.
+                    We check both because when we import invoices with the extensions the field is "RowId" is
+                    empty, for that reason we check also if some data are present in "InvoiceData".
+                */
+                if (row.value("RowId") === "" && row.value("InvoiceData") === "") {
                     // Cannot return null because the readOnly field does not reset the VatAmount
                     changedRowFields = invoiceChangedFieldsGetEmpty();
                     docChange.addOperationRowModify(tabPos.tableName, tabPos.rowNr, changedRowFields);
@@ -331,7 +336,7 @@ var JsAction = class JsAction {
                 // Update invoice
                 invoiceObj = invoiceObjGet(tabPos);
                 if (!invoiceObj)
-                    invoiceObj = invoiceCreateNew(tabPos);
+                invoiceObj = invoiceCreateNew(tabPos);
                 invoiceObj.document_info.currency = row.value("Currency") ? row.value("Currency") : defaultCurrency;
 
                 // Create docChange
