@@ -42,7 +42,7 @@ Item {
 
     onCurrentViewChanged: {
         invoiceItemsTable.updateColDescrWidth()
-        invoiceItemsTable.onLayoutChanged()
+        //invoiceItemsTable.onLayoutChanged()
     }
 
     // Created for testing purposes in development.
@@ -122,7 +122,7 @@ Item {
         loadItems()
         loadTaxRates()
         invoiceItemsTable.updateColDescrWidth()
-        invoiceItemsTable.onLayoutChanged()
+        //invoiceItemsTable.onLayoutChanged()
     }
 
     TableModel {
@@ -1547,7 +1547,7 @@ Item {
                             isDragging = false
                             if (dragColumnNo !== 3) {
                                 invoiceItemsTable.updateColDescrWidth()
-                                invoiceItemsTable.onLayoutChanged()
+                                //invoiceItemsTable.onLayoutChanged()
                             }
                         }
 
@@ -1595,15 +1595,18 @@ Item {
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
-                            //invoiceItemsTable.forceLayout()
                         }
                     }
 
-                    onLayoutChanged: {
+                    // spostato sotto connections secondo gli esempi.
+                    Connections {
+                        target: invoiceItemsTable
+                        function onLayoutChanged() {
                         let curContentHeight = invoiceItemsTable.contentHeight
                         let desiredHeight = invoiceItemsTable.getTableHeigth()
                         if (curContentHeight !== desiredHeight)
                             invoiceItemsTable.contentHeight = desiredHeight
+                        }
                     }
 
 
@@ -2006,8 +2009,8 @@ Item {
                                     }
                                     if (oldLinesCount !== newLinesCount) {
                                         invoiceItemsTable.forceLayout()
-                                        invoiceItemsTable.onLayoutChanged()
-                                        invoiceItemsTable.signalUpdateRowHeights++
+                                        //invoiceItemsTable.onLayoutChanged()
+                                        invoiceItemsTable.signalUpdateRowHeights++ // 6.7.0 da un type error.
                                     }
                                 }
                             }
@@ -2349,7 +2352,7 @@ Item {
 
                     onWidthChanged: {
                         invoiceItemsTable.updateColDescrWidth()
-                        invoiceItemsTable.onLayoutChanged()
+                        //invoiceItemsTable.onLayoutChanged()
                     }
 
 
@@ -3404,7 +3407,7 @@ Item {
         updateViewVatMode()
         updateViewItems()
         invoiceItemsTable.updateColDescrWidth();
-        invoiceItemsTable.onLayoutChanged()
+        //invoiceItemsTable.onLayoutChanged()
     }
 
     function updateViewAddress() {
