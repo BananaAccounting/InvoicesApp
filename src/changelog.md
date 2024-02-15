@@ -1,5 +1,11 @@
 # Changelog
 
+## 2024-02-15
+
+* [RELEASE BETA]
+
+* [Fix] Fix error with Qt 6.7.0 version.
+
 ## 2024-02-13
 
 * [RELEASE BETA]
