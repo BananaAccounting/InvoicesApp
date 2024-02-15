@@ -42,7 +42,6 @@ Item {
 
     onCurrentViewChanged: {
         invoiceItemsTable.updateColDescrWidth()
-        invoiceItemsTable.onLayoutChanged()
     }
 
     // Created for testing purposes in development.
@@ -122,7 +121,6 @@ Item {
         loadItems()
         loadTaxRates()
         invoiceItemsTable.updateColDescrWidth()
-        invoiceItemsTable.onLayoutChanged()
     }
 
     TableModel {
@@ -1547,7 +1545,6 @@ Item {
                             isDragging = false
                             if (dragColumnNo !== 3) {
                                 invoiceItemsTable.updateColDescrWidth()
-                                invoiceItemsTable.onLayoutChanged()
                             }
                         }
 
@@ -1595,15 +1592,17 @@ Item {
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
-                            //invoiceItemsTable.forceLayout()
                         }
                     }
 
-                    onLayoutChanged: {
+                    Connections {
+                        target: invoiceItemsTable
+                        function onLayoutChanged() {
                         let curContentHeight = invoiceItemsTable.contentHeight
                         let desiredHeight = invoiceItemsTable.getTableHeigth()
                         if (curContentHeight !== desiredHeight)
                             invoiceItemsTable.contentHeight = desiredHeight
+                        }
                     }
 
 
@@ -2006,7 +2005,6 @@ Item {
                                     }
                                     if (oldLinesCount !== newLinesCount) {
                                         invoiceItemsTable.forceLayout()
-                                        invoiceItemsTable.onLayoutChanged()
                                         invoiceItemsTable.signalUpdateRowHeights++
                                     }
                                 }
@@ -2349,7 +2347,6 @@ Item {
 
                     onWidthChanged: {
                         invoiceItemsTable.updateColDescrWidth()
-                        invoiceItemsTable.onLayoutChanged()
                     }
 
 
@@ -3404,7 +3401,6 @@ Item {
         updateViewVatMode()
         updateViewItems()
         invoiceItemsTable.updateColDescrWidth();
-        invoiceItemsTable.onLayoutChanged()
     }
 
     function updateViewAddress() {
