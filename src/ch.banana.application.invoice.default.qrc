@@ -8,29 +8,40 @@
         <file>base/utils.js</file>
         <file>base/settings.js</file>
         <file>base/vatcodes.js</file>
-        <file>ui/Invoice.qml</file>
-        <file>ui/AppSettings.qml</file>
-        <file>ui/DlgEditSource.qml</file>
-        <file>ui/DlgInvoice.qml</file>
-        <file>ui/WdgInvoice.qml</file>
-        <file>ui/WdgSettings.qml</file>
-        <file>ui/WdgSource.qml</file>
+        <file>ui/components/check-mark.png</file>
+        <file>ui/components/NotificationPopUp.qml</file>
+        <file>ui/components/qmldir</file>
         <file>ui/components/SearchBar.qml</file>
         <file>ui/components/SimpleMessageDialog.qml</file>
+        <file>ui/components/StyledBranchIndicator.qml</file>
         <file>ui/components/StyledButton.qml</file>
         <file>ui/components/StyledCheckBox.qml</file>
         <file>ui/components/StyledComboBox.qml</file>
+        <file>ui/components/StyledKeyDescrComboBox.qml</file>
+        <file>ui/components/StyledLabel.qml</file>
         <file>ui/components/StyledRadioButton.qml</file>
         <file>ui/components/StyledScrollableTextArea.qml</file>
+        <file>ui/components/StyledSettingsSwitch.qml</file>
+        <file>ui/components/StyledSwitch.qml</file>
+        <file>ui/components/StyledTabBar.qml</file>
+        <file>ui/components/StyledTabButton.qml</file>
         <file>ui/components/StyledTextArea.qml</file>
         <file>ui/components/StyledTextField.qml</file>
         <file>ui/components/Stylesheet.qml</file>
-        <file>ui/components/check-mark.png</file>
-        <file>ui/components/qmldir</file>
-        <file>ui/components/NotificationPopUp.qml</file>
-        <file>ui/components/StyledTabBar.qml</file>
-        <file>ui/components/StyledTabButton.qml</file>
-        <file>ui/components/StyledBranchIndicator.qml</file>
+        <file>ui/AppSettings.qml</file>
+        <file>ui/DevSettings.qml</file>
+        <file>ui/DlgEditSource.qml</file>
+        <file>ui/DlgInvoice.qml</file>
+        <file>ui/DlgLincense.qml</file>
+        <file>ui/DlgPixelMetrics.qml</file>
+        <file>ui/DlgTranslations.qml</file>
+        <file>ui/Invoice.qml</file>
+        <file>ui/VatModesModel.qml</file>
+        <file>ui/WdgChangelog.qml</file>
+        <file>ui/WdgDevelopment.qml</file>
+        <file>ui/WdgInvoice.qml</file>
+        <file>ui/WdgSettings.qml</file>
+        <file>ui/WdgSource.qml</file>
         <file>translations/translations_it.qm</file>
         <file>translations/translations_de.qm</file>
         <file>translations/translations_es.qm</file>
@@ -38,20 +49,43 @@
         <file>translations/translations_nl.qm</file>
         <file>translations/translations_pt.qm</file>
         <file>translations/translations_zh_cn.qm</file>
-        <file>ui/WdgDevelopment.qml</file>
-        <file>ui/DevSettings.qml</file>
-        <file>ui/VatModesModel.qml</file>
-        <file>ui/DlgLincense.qml</file>
-        <file>ui/WdgChangelog.qml</file>
         <file>changelog.md</file>
-        <file>ui/components/StyledLabel.qml</file>
-        <file>ui/components/StyledSwitch.qml</file>
-        <file>ui/components/StyledSettingsSwitch.qml</file>
-        <file>ui/DlgTranslations.qml</file>
         <file>base/languages.js</file>
         <file>base/invoices.js</file>
-        <file>ui/components/StyledKeyDescrComboBox.qml</file>
-        <file>ui/DlgPixelMetrics.qml</file>
+        <file>ui/qt6-4/components/check-mark.png</file>
+        <file>ui/qt6-4/components/NotificationPopUp.qml</file>
+        <file>ui/qt6-4/components/qmldir</file>
+        <file>ui/qt6-4/components/SearchBar.qml</file>
+        <file>ui/qt6-4/components/SimpleMessageDialog.qml</file>
+        <file>ui/qt6-4/components/StyledBranchIndicator.qml</file>
+        <file>ui/qt6-4/components/StyledButton.qml</file>
+        <file>ui/qt6-4/components/StyledCheckBox.qml</file>
+        <file>ui/qt6-4/components/StyledComboBox.qml</file>
+        <file>ui/qt6-4/components/StyledKeyDescrComboBox.qml</file>
+        <file>ui/qt6-4/components/StyledLabel.qml</file>
+        <file>ui/qt6-4/components/StyledRadioButton.qml</file>
+        <file>ui/qt6-4/components/StyledScrollableTextArea.qml</file>
+        <file>ui/qt6-4/components/StyledSettingsSwitch.qml</file>
+        <file>ui/qt6-4/components/StyledSwitch.qml</file>
+        <file>ui/qt6-4/components/StyledTabBar.qml</file>
+        <file>ui/qt6-4/components/StyledTabButton.qml</file>
+        <file>ui/qt6-4/components/StyledTextArea.qml</file>
+        <file>ui/qt6-4/components/StyledTextField.qml</file>
+        <file>ui/qt6-4/components/Stylesheet.qml</file>
+        <file>ui/qt6-4/AppSettings.qml</file>
+        <file>ui/qt6-4/DevSettings.qml</file>
+        <file>ui/qt6-4/DlgEditSource.qml</file>
+        <file>ui/qt6-4/DlgInvoice.qml</file>
+        <file>ui/qt6-4/DlgLincense.qml</file>
+        <file>ui/qt6-4/DlgPixelMetrics.qml</file>
+        <file>ui/qt6-4/DlgTranslations.qml</file>
+        <file>ui/qt6-4/Invoice.qml</file>
+        <file>ui/qt6-4/VatModesModel.qml</file>
+        <file>ui/qt6-4/WdgChangelog.qml</file>
+        <file>ui/qt6-4/WdgDevelopment.qml</file>
+        <file>ui/qt6-4/WdgInvoice.qml</file>
+        <file>ui/qt6-4/WdgSettings.qml</file>
+        <file>ui/qt6-4/WdgSource.qml</file>
         <file>ui/qt5/components/check-mark.png</file>
         <file>ui/qt5/components/NotificationPopUp.qml</file>
         <file>ui/qt5/components/qmldir</file>

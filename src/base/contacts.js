@@ -246,15 +246,14 @@ function contactCurrencyGet(customer_id) {
 }
 
 function contactPaymentTermInDaysGet(customer_id) {
+    let defaultPaymentTerm = getSettings().new_documents.payment_term_days
     var tableContacts = contactsTableGet()
     if (tableContacts) {
         var contactRow = tableContacts.findRowByValue("RowId", customer_id)
         if (contactRow) {
             let paymentTermInDays = contactRow.value("PaymentTermInDays")
             if (paymentTermInDays)
-                paymentTermInDays
+                return paymentTermInDays ? paymentTermInDays : defaultPaymentTerm
         }
     }
-    let defaultPaymentTerm = getSettings().new_documents.payment_term_days
-    return defaultPaymentTerm
 }

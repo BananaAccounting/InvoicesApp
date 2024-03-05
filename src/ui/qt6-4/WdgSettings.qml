@@ -16,8 +16,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import "../base/settings.js" as Settings
-import "../base/vatcodes.js" as VatCodes
+import "../../base/settings.js" as Settings
+import "../../base/vatcodes.js" as VatCodes
 import "./components"
 
 Item {
@@ -1679,15 +1679,11 @@ Item {
                     }
                 }
 
-                // Currently we hide the content in the gridLayout below because is unused due to the changes done to the tableview.
-                // We commentend also the code block related into WdgInvoice->getTableHeight()
-
                 GridLayout {
                     columns: 4
                     columnSpacing: styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
-                    visible: false;
 
                     StyledLabel{
                         text: qsTr("Items")
@@ -1705,7 +1701,7 @@ Item {
                     }
 
                     StyledLabel{
-                        text: qsTr("Height of visible content in rows (0 = all rows)")
+                        text: qsTr("Invoice items visible without scrolling (0 = all items)")
                         Layout.fillWidth: true
                     }
 
@@ -1718,7 +1714,6 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
                                   appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
-
                         onEditingFinished: {
                             if (modified) {
                                 appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
@@ -1738,7 +1733,6 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
                                   appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
-
                         onEditingFinished: {
                             if (modified) {
                                 appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
@@ -1758,7 +1752,6 @@ Item {
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.data.interface.invoice.views[viewId].appearance[flagId] ?
                                   appSettings.data.interface.invoice.views[viewId].appearance[flagId].toString() : "0"
-
                         onEditingFinished: {
                             if (modified) {
                                 appSettings.data.interface.invoice.views[viewId].appearance[flagId] = Number(text)
@@ -1766,7 +1759,9 @@ Item {
                             }
                             focus = false
                         }
+
                     }
+
                 }
 
                 GridLayout {
@@ -1809,29 +1804,6 @@ Item {
 
                     StyledSettingsSwitch {
                         flagId: "show_invoice_item_column_row_number"
-                        viewId: appSettings.view_id_long
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-
-                    StyledLabel{
-                        text: addLicenseRequirementText(qsTr("Type"), "show_invoice_item_column_type")
-                        Layout.fillWidth: true
-                    }
-
-                    StyledSettingsSwitch {
-                        flagId: "show_invoice_item_column_type"
-                        viewId: appSettings.view_id_base
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-
-                    StyledSettingsSwitch {
-                        flagId: "show_invoice_item_column_type"
-                        viewId: appSettings.view_id_short
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-
-                    StyledSettingsSwitch {
-                        flagId: "show_invoice_item_column_type"
                         viewId: appSettings.view_id_long
                         Layout.alignment: Qt.AlignHCenter
                     }

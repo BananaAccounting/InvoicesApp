@@ -1,5 +1,51 @@
 # Changelog
 
+## 2024-02-15
+
+* [RELEASE BETA]
+
+* [Fix] Fix error with Qt 6.7.0 version.
+
+## 2024-02-13
+
+* [RELEASE BETA]
+
+* [Fix] Fix problem with import in invoices table with document change.
+* [Fix] Fix problem with column payment term in days not working in the contacts table.
+
+## 2024-02-01
+
+* [RELEASE STABLE] Released as Stable
+
+- Problems since version Qt 6.5.4, solved for Qt version from 6.5.0 or newer:
+  * [Fix] Fix the problem with Table width
+  * [Fix] Fix problem with long texts
+  * [Fix] Fix problem with HD Screens
+  * [Fix] Fix problem with scroll
+- Changes Qt version from 6.5.0 or newer
+  * [Fix] Hides the "Items" settings into the Settings section.
+  * [Fix] Fix delete selected rows create new empty invoices
+  * [Fix] Fix button move up and button move down
+  * [Enhancement] Add subtotal items
+  * [Enhancement] Add total and header item types
+  * [Enhancement] Add column payment term in days to the contacts
+  * [Enhancement] Add currency field to invoices and contacts
+- Changes for Qt version lower than 6.5.0
+  * [Fix] Change the update message
+  
+[RELEASE BETA]
+- Changes Qt version from 6.5.0 or newer
+  * [Fix] Hides the "Items" settings into the Settings section.
+- Changes for Qt version lower than 6.5.0
+  * [Fix] Change the update message
+
+## 2024-01-29
+
+* [RELEASE BETA]
+* [ReleaseNote] This release allows MacOs users to work also with BETA version, but basically they work with the same material as the RELEASE STABLE.
+
+* [Fix] Fix the problem with non-existent components in the Banana version 6.4.3 for MacOs
+
 ## 2024-01-25
 
 * [RELEASE BETA]

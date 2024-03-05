@@ -20,12 +20,12 @@ import Qt.labs.qmlmodels
 import "."
 import "./components"
 
-import "../base/utils.js" as Utils
-import "../base/invoice.js" as Invoice
-import "../base/contacts.js" as Contacts
-import "../base/items.js" as Items
-import "../base/settings.js" as Settings
-import "../base/vatcodes.js" as VatCodes
+import "../../base/utils.js" as Utils
+import "../../base/invoice.js" as Invoice
+import "../../base/contacts.js" as Contacts
+import "../../base/items.js" as Items
+import "../../base/settings.js" as Settings
+import "../../base/vatcodes.js" as VatCodes
 
 Item {
     id: window
@@ -41,14 +41,8 @@ Item {
                                      appSettings.view_id_base
 
     onCurrentViewChanged: {
-        invoiceItemsTable.updateColDescrWidth()
+       invoiceItemsTable.forceLayout()
     }
-
-    // Created for testing purposes in development.
-    // onUpdateLayoutButtonClicked: {
-    //     invoiceItemsTable.updateColDescrWidth()
-    //     invoiceItemsTable.onLayoutChanged()
-    // }
 
     function createInvoiceFromEstimate() {
         if (invoice.isModified) {
@@ -120,14 +114,12 @@ Item {
         loadCustomerAddresses()
         loadItems()
         loadTaxRates()
-        invoiceItemsTable.updateColDescrWidth()
     }
 
     TableModel {
         id: invoiceItemsModel
 
         TableModelColumn { display: "row"}
-        TableModelColumn { display: "item_type"}
         TableModelColumn { display: "number"}
         TableModelColumn { display: "date"}
         TableModelColumn { display: "description"}
@@ -141,7 +133,6 @@ Item {
         rows: [
             {
                 "row": "",
-                "item_type": "",
                 "number": "",
                 "date": "",
                 "description": "",
@@ -162,14 +153,6 @@ Item {
                 'title': qsTr("#"),
                 'visible': true,
                 'width': 30
-            },
-            {
-                'id': 'invoice_item_column_type',
-                'align': Text.AlignLeft,
-                'role':  'item_type',
-                'title': qsTr("Type"),
-                'visible': true,
-                'width': 100
             },
             {
                 'id': 'invoice_item_column_number',
@@ -251,11 +234,6 @@ Item {
         id: vatModesModel
     }
 
-    InvoiceItemTypesModel {
-
-        id: invoiceItemTypesModel
-    }
-
     ListModel {
         id: taxRatesModel
     }
@@ -276,25 +254,7 @@ Item {
         id: currenciesModel
     }
 
-    ColumnLayout { // Invoice form that include all exept the save, print
-        // Column layout includes this
-        // - View Bar (RowLayout)
-        // - Invoice content (Scroll View)
-        //   - ColumnLayout
-        //     Single column that contains all elements
-        //     elements are inserted in Layout
-        //      - Top Part (GridLayout)
-        //        All elements before the Items Table
-        //        3 columns
-        //        - Invoice Info (GridLayout)
-        //        -  ??Space between two elements (Item)
-        //        - Address Column Layout
-        //      - Items Table Headers (HorizontalHeaderView)
-        //      - ItemsTable (TableView)
-        //      - Items button bar (RowLayout)
-        //      - Subtotals and Totals (GridLayout)
-        //      - Internal notes
-
+    ColumnLayout {
         anchors.fill: parent
         anchors.margins: Stylesheet.defaultMargin
         spacing: Stylesheet.defaultMargin
@@ -307,14 +267,6 @@ Item {
 
             // Hack for qt6, to resolve overlapping items after dialog load
             visible: appSettings.loaded
-
-            // See onUpdateLayoutButtonClicked
-            // StyledButton {
-            //     text: String.fromCodePoint(0x21BB)
-            //     onClicked: {
-            //         updateLayoutButtonClicked()
-            //     }
-            // }
 
             StyledLabel{
                 text: qsTr("Views:")
@@ -395,7 +347,7 @@ Item {
                 font.bold: true
                 //Layout.minimumWidth: 320 * Stylesheet.pixelScaleRatio
                 text: qsTr("Total") + (invoice.signalInvoiceChanged && invoice.json && invoice.json.document_info.currency ? " " + invoice.json.document_info.currency.toLocaleUpperCase() : "") +
-                      " " + toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_outstanding : "", true)
+                      " " + toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
             }
 
         }
@@ -409,23 +361,17 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.topMargin: Stylesheet.defaultMargin
-            contentHeight: columnLayout.height
 
-            ColumnLayout { // everything that is within the Scroll
-
-                id: columnLayout
+            ColumnLayout {
                 width: scrollView.availableWidth - scrollView.ScrollBar.vertical.width - Stylesheet.defaultMargin
+                height: scrollView.availableHeight
 
                 spacing: Stylesheet.defaultMargin
 
                 GridLayout {  // Top part
                     columns: 3
 
-                    GridLayout {// Invoice info
-                        // in 2 columns from Invoice No up to the invoice_end_text
-                        // column 1 is for the Labels
-                        // column 2 is for the data
-
+                    GridLayout { // Invoice info
                         id: invoice_info
                         columns: 2
 
@@ -1090,12 +1036,11 @@ Item {
                         }
                     }
 
-                    Item { // ??Space between two elements
+                    Item {
                         Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
                     }
 
                     ColumnLayout { // Address
-                        // In a single vertical column
                         Layout.alignment: Qt.AlignTop
 
                         StyledLabel{
@@ -1133,9 +1078,6 @@ Item {
                                     invoice.json.customer_info = Contacts.contactAddressGet(contactId)
                                     invoice.json.customer_info.number = contactId
                                     setDocumentLocale(Contacts.contactLocaleGet(contactId))
-                                    setDocumentCurrency(Contacts.contactCurrencyGet(contactId))
-                                    setDocumentDueDate(Contacts.contactPaymentTermInDaysGet(contactId))
-                                    invoice_due_date.update()
                                     updateViewAddress()
                                 } else {
                                     invoice.json.customer_info.number = ""
@@ -1443,16 +1385,13 @@ Item {
                     }
                 }
 
-                // There is a warning on the HorizontalHeaderView row, but apparently nothing appens.
-                // Maybe some values are not immediately loaded
                 HorizontalHeaderView {
                     id: horizontalHeader
                     model: invoiceItemsModel
                     syncView: invoiceItemsTable
                     reuseItems: false
-                    visible: true
 
-                    Layout.fillWidth: true
+                    Layout.fillWidth: parent.width
                     Layout.topMargin: Stylesheet.defaultMargin
 
                     Component.onCompleted: {
@@ -1500,6 +1439,10 @@ Item {
                         }
                     }
 
+                    rowHeightProvider: function(row) {
+                        return 28 * Stylesheet.pixelScaleRatio
+                    }
+
                     MouseArea {
                         id: headerdragarea
                         anchors.fill: parent
@@ -1524,7 +1467,7 @@ Item {
                                     let header = invoiceItemsModel.headers[dragColumnNo]
                                     let columnWidthId = 'width_' + header.id
                                     saveInvoiceItemColumnWidth(columnWidthId, newColWidth)
-                                    //invoiceItemsTable.forceLayout()
+                                    invoiceItemsTable.forceLayout()
                                 }
                             } else if (isOverDragHandle(event.x)) {
                                 cursorShape = Qt.SplitHCursor
@@ -1572,11 +1515,10 @@ Item {
                     id: invoiceItemsTable
                     model: invoiceItemsModel
                     reuseItems: false
-                    clip: true
 
-                    Layout.fillWidth: true
-                    contentHeight: getTableHeigth()
-                    Layout.minimumHeight: contentHeight
+                    Layout.fillWidth: parent.width
+                    Layout.minimumHeight: getTableHeigth()
+
                     rowSpacing: 2
                     columnSpacing: 5 * Stylesheet.pixelScaleRatio
 
@@ -1592,19 +1534,9 @@ Item {
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
+                            invoiceItemsTable.forceLayout()
                         }
                     }
-
-                    Connections {
-                        target: invoiceItemsTable
-                        function onLayoutChanged() {
-                        let curContentHeight = invoiceItemsTable.contentHeight
-                        let desiredHeight = invoiceItemsTable.getTableHeigth()
-                        if (curContentHeight !== desiredHeight)
-                            invoiceItemsTable.contentHeight = desiredHeight
-                        }
-                    }
-
 
                     Keys.onPressed: function(event) {
                         let curItem = null
@@ -1694,37 +1626,22 @@ Item {
                                 if (!visible) {
                                     return 0
                                 }
-                            } else {
-                                let defaultViewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
-                                if (settingIdColumnVisible in defaultViewAppearance) {
-                                    let visible = defaultViewAppearance[settingIdColumnVisible]
-                                    if (!visible) {
-                                        return 0
-                                    }
-                                }
                             }
-
                             if (settingIdColumnWidth in viewAppearance) {
                                 let width = viewAppearance[settingIdColumnWidth]
                                 if (width > 10) {
-                                    return width
+                                    return width * Stylesheet.pixelScaleRatio
                                 }
                             } else {
+                                //TODO: console.log("appearance flag '" + columnId + "' in view '" + currentView + "' not found")
                             }
-                            return header.width
+                            return header.width * Stylesheet.pixelScaleRatio
                         }
-                    }
-
-                    rowHeightProvider: function(row) {
-                        let height = 34;
-                        let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
-                        return height * linesCount * Stylesheet.pixelScaleRatio
                     }
 
                     delegate: DelegateChooser {
 
                         DelegateChoice {
-                            // Column row number
                             column: 0
                             StyledTextField {
                                 required property bool current
@@ -1735,96 +1652,12 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
                                 verticalAlignment: Qt.AlignVCenter
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(row, column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
-                                }
-
                             }
                         }
 
+
                         DelegateChoice {
-                            // Column item type
                             column: 1
-                            StyledKeyDescrComboBox {
-                                id: invoice_item_types
-                                Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                                enabled: !invoice.isReadOnly
-
-                                editable: false
-                                model: invoiceItemTypesModel
-                                textRole: "descr"
-                                filterEnabled: true
-                                currentIndex: -1
-                                listItemTextIncludesKey: false
-
-                                displayText: {
-                                    // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
-                                    undoKey = display
-                                    getDisplayText()
-                                }
-
-                                Connections {
-                                    //                                    target: invoice
-                                    //                                    function onInvoiceChanged() {
-                                    //                                        if (invoice.json && invoice.json.document_info.vat_mode) {
-                                    //                                            invoice_vat_mode.setCurrentKey(invoice.json.document_info.vat_mode)
-                                    //                                        }
-                                    //                                    }
-                                }
-
-                                onCurrentKeySet: function(key, isExistingKey) {
-                                    if (invoiceItemsTable.isNewRow(row)) {
-                                        invoiceItemsTable.appendNewRow()
-                                    }
-                                    if (isExistingKey) {
-                                        invoice.json.items[row].item_type = key
-                                        if (!invoice.json.items[row].description) {
-                                            if (key === "total" || key === "total1" || key === "total2") {
-                                                let index = findKey(key)
-                                                invoice.json.items[row].description = invoiceItemTypesModel.get(index).descr
-                                            }
-                                        }
-                                        setDocumentModified()
-                                        calculateInvoice()
-                                    }
-                                }
-
-                                onFocusChanged: {
-                                    if (focus) {
-                                        let index = invoiceItemsModel.index(row, column)
-                                        invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                                    }
-                                }
-
-                                function getDisplayText() {
-                                    if (row >= 0 && invoice.json && row < invoice.json.items.length) {
-                                        let itemType = invoice.json.items[row].item_type
-                                        let index = findKey(itemType)
-                                        if (index > 0) {
-                                            return invoiceItemTypesModel.get(index).descr
-                                        }
-                                    }
-                                    return "";
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    enabled: !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_type")
-                                    onClicked: {
-                                        dlgLicense.visible = true
-                                    }
-                                }
-
-                            }
-                        }
-
-                        DelegateChoice {
-                            // Column article number
-                            column: 2
                             StyledKeyDescrComboBox {
                                 popupMinWidth: 300 * Stylesheet.pixelScaleRatio
                                 editable: true
@@ -1833,7 +1666,7 @@ Item {
                                 textRole: "key"
                                 filterEnabled: true
 
-                                //                                currentIndex: -1
+                                currentIndex: -1
                                 displayText: {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                     undoKey = display
@@ -1890,8 +1723,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column date
-                            column: 3
+                            column: 2
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -1947,11 +1779,9 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column description
-                            column: 4
+                            column: 3
                             StyledTextArea {
                                 required property bool current
-                                id: textArea
                                 selected: current
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
@@ -1990,30 +1820,30 @@ Item {
                                 // In case the lines count change we emit a signal to update the row heigth
                                 property int textLinesCount: 1
 
+                                onTextChanged: {
+                                    let newLinesCount = text.split('\n').length
+                                    if (newLinesCount !== textLinesCount) {
+                                        textLinesCount = newLinesCount
+                                        // Save text to let calculate the right row height
+                                        if (model.row >= 0 && model.row < invoice.json.items.length) {
+                                            invoice.json.items[model.row].description = text
+                                        }
+                                        invoiceItemsTable.forceLayout()
+                                        invoiceItemsTable.signalUpdateRowHeights++
+                                    }
+                                }
+
                                 onFocusChanged: {
                                     if (focus) {
                                         let index = invoiceItemsModel.index(model.row, model.column)
                                         invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
                                     }
                                 }
-
-                                onTextChanged: {
-                                    let oldLinesCount = invoiceItemsTable.estimateWordWrapLines(invoice.json.items[model.row].description);
-                                    let newLinesCount = invoiceItemsTable.estimateWordWrapLines(text);
-                                    if (model.row >= 0 && model.row < invoice.json.items.length) {
-                                        invoice.json.items[model.row].description = text;
-                                    }
-                                    if (oldLinesCount !== newLinesCount) {
-                                        invoiceItemsTable.forceLayout()
-                                        invoiceItemsTable.signalUpdateRowHeights++
-                                    }
-                                }
                             }
                         }
 
                         DelegateChoice {
-                            // Column quantity
-                            column: 5
+                            column: 4
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2021,7 +1851,6 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display ? Banana.Converter.toLocaleNumberFormat(model.display) : ""
                                 readOnly: invoice.isReadOnly
-                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -2049,8 +1878,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column mesure unit
-                            column: 6
+                            column: 5
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2058,7 +1886,6 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
                                 readOnly: invoice.isReadOnly
-                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -2086,8 +1913,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column quantity
-                            column: 7
+                            column: 6
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2095,7 +1921,6 @@ Item {
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: toLocaleItemNumberFormat(model.display)
                                 readOnly: invoice.isReadOnly
-                                enabled: !invoiceItemsTable.isTotalRow(model.row)
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -2147,8 +1972,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column discount
-                            column: 8
+                            column: 7
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2157,8 +1981,6 @@ Item {
                                 text: toLocaleItemDiscountFormat(model.display)
                                 placeholderText: hovered ? qsTr("30% or 30.00") : ""
                                 readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_item_column_discount")
-                                enabled: !invoiceItemsTable.isTotalRow(model.row)
-
                                 onEditingFinished: {
                                     if (modified) {
                                         if (invoiceItemsTable.isNewRow(row)) {
@@ -2193,8 +2015,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column total
-                            column: 9
+                            column: 8
                             StyledTextField {
                                 required property bool current
                                 selected: current
@@ -2213,8 +2034,7 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column vat
-                            column: 10
+                            column: 9
                             StyledKeyDescrComboBox {
                                 id: invoice_item_vat
                                 popupMinWidth: 300  * Stylesheet.pixelScaleRatio
@@ -2226,7 +2046,7 @@ Item {
                                 model: taxRatesModel
                                 textRole: "key"
                                 editable: true // set to true to make tab navitation working
-                                enabled: !invoice.isReadOnly && !invoiceItemsTable.isTotalRow(row)
+                                enabled: !invoice.isReadOnly
 
                                 onCurrentKeySet: function(key, isExistingKey) {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
@@ -2326,7 +2146,6 @@ Item {
                         }
 
                         DelegateChoice {
-                            // Column default (not used)
                             StyledTextField {
                                 required property bool selected
                                 required property bool current
@@ -2363,70 +2182,33 @@ Item {
                         signalUpdateTableHeight++
                     }
 
-                    FontMetrics {
-                        id: fontMetrics
-                    }
-
-                    function estimateWordWrapLines(text) {
-                        let texts = text.split("\n");
-                        // in case columnWidth = -1 assign number of lines
-                        let numberOfLines = texts.length;
-                        let columnWidth = invoiceItemsTable.columnWidth(4);
-                        columnWidth = Math.max(columnWidth, 10);
-                        if (columnWidth > 0 ){
-                            numberOfLines = 0;
-                            for (var i = 0; i < texts.length; i++) {
-                                if (texts[i].length > 1 ) {
-                                    let elementWidth = fontMetrics.advanceWidth(texts[i]);
-                                    let elementLines = elementWidth / invoiceItemsTable.columnWidth(4)
-                                    numberOfLines += Math.ceil(elementLines)
-                                } else {
-                                    numberOfLines ++;
-                                }
-                            }
-                        }
-
-                        return numberOfLines;
-                    }
-
                     function getTableHeigth() {
-                        if (!invoice.json || !invoice.json.items){
+                        if (!invoice.json || !invoice.json.items)
                             return 400 * Stylesheet.pixelScaleRatio
-                        }
 
                         // Just for binding
-                        if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged) {
+                        if (!signalUpdateRowHeights || !signalUpdateTableHeight || !appSettings.signalItemsVisibilityChanged)
                             return 400 * Stylesheet.pixelScaleRatio
-                        }
 
-                        // Currently we disable the mechanism wich activate the table scroll based on
-                        //the height of visible content in rows 24.01.2024
-                        /*let maxVisibleItems = getMaxVisibleItems()
+                        let maxVisibleItems = getMaxVisibleItems()
                         if (maxVisibleItems > 0) {
                             return (30 + 30 * maxVisibleItems)  * Stylesheet.pixelScaleRatio
 
-                        }*/
-                        else {
+                        } else {
                             // Compute current height
                             let height = 34;
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
-                                // This function does not correctly calculate the heigth when there is a word wrap.
-                                // We should try to use directly the line hiegth.
-                                //let linesCount = invoice.json.items[rowNr].description.split('\n').length
-                                let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
-                                let lineHeight = 30 + 16 * (linesCount - 1)
-                                if (rowHeight(rowNr) > 0){
-                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number
-                                }
-                                height += lineHeight
+                                let linesCount = invoice.json.items[rowNr].description.split('\n').length
+                                height += 30 + 16 * (linesCount - 1)
                             }
                             return height * Stylesheet.pixelScaleRatio
                         }
                     }
+
                     function getMaxVisibleItems() {
                         let maxVisibleItems = 0
                         if (currentView === appSettings.view_id_full) {
-                            return 0
+                            return 0 // In full view all items are visible
                         }
                         if (appSettings.data.interface.invoice.views[currentView] &&
                                 ('invoce_max_visible_items_without_scrolling' in appSettings.data.interface.invoice.views[currentView].appearance)) {
@@ -2438,16 +2220,6 @@ Item {
                     function isNewRow(row) {
                         if (row >= invoice.json.items.length) {
                             return true
-                        }
-                        return false
-                    }
-
-                    function isTotalRow(row) {
-                        if (row >= 0 && invoice && invoice.json && invoice.json.items && row < invoice.json.items.length) {
-                            let item_type = invoice.json.items[row].item_type
-                            if (item_type === "total" || item_type === "total1" || item_type === "total2") {
-                                return true
-                            }
                         }
                         return false
                     }
@@ -2519,15 +2291,13 @@ Item {
                     }
 
                     function updateColDescrWidth() {
-                        invoiceItemsTable.forceLayout()
-                        let colDescriptionIndex = 4
+                        let colDescriptionIndex = 3
                         let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
-                        // "contentwidth" is total width needed to display all the content of TableView without cutting it off.
-                        // Is automatically calculated based on the content of the columns.
                         let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
                         let columnWidthId = 'width_' + headerColDescription.id
                         saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
+                        invoiceItemsTable.forceLayout()
                     }
                 }
 
@@ -2575,7 +2345,6 @@ Item {
                         enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow > 0
                         onClicked: {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
-                            var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
                             if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
                                 var itemCopy = invoice.json.items[itemRow]
                                 if (!itemCopy)
@@ -2584,31 +2353,30 @@ Item {
                                 invoice.json.items[itemRow - 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
+//                                invoiceItemsTable.currentRow--
                                 invoiceItemsTable.focus = true
 
-                                let index = invoiceItemsModel.index(itemRow - 1, itemCol)
-                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                             }
+                                //                                    invoiceItemsTable.currentRow = itemRow
+                                //                                    invoiceItemsTable.selection.clear()
+                                //                                    invoiceItemsTable.selection.select(itemRow)
+                                //                                    invoiceItemsTable.forceActiveFocus()
+                            }
                         }
                     }
 
                     StyledButton { // Move down button
                         text: qsTr("Move Down")
-                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 &&
-                                 ((invoiceItemsTable.currentRow + 2) < invoiceItemsTable.rows)
+                        enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 && invoiceItemsTable.currentRow + 1 < invoiceItemsTable.rows
                         onClicked: {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
-                            var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
                             if (itemRow >= 0 && itemRow < invoiceItemsModel.rowCount - 1) {
                                 var itemCopy = invoice.json.items[itemRow]
                                 invoice.json.items[itemRow] = invoice.json.items[itemRow+1]
                                 invoice.json.items[itemRow + 1] = itemCopy
                                 calculateInvoice()
                                 updateViewItems()
+//                                invoiceItemsTable.currentRow++
                                 invoiceItemsTable.focus = true
-
-                                let index = invoiceItemsModel.index(itemRow + 1, itemCol)
-                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
                             }
                         }
                     }
@@ -2624,7 +2392,7 @@ Item {
 
                 }
 
-                GridLayout {// Subtotals and Totals
+                GridLayout {
                     ColumnLayout {
                         Layout.alignment: Qt.AlignTop
                     }
@@ -2841,19 +2609,8 @@ Item {
                                       true)
                         }
 
-                        //Deposit (Deprecated 26.01.2024) We keep it for compatibilityw with old versions.
                         RowLayout {
-                            id: deposit_row_layout
-                            visible: setDepositVisible() // Function created for compatibility for those who use the compatibility field.
-
-                            function setDepositVisible() {
-                                if (invoice_totals_deposit.visible) {
-                                    if (!Banana.SDecimal.isZero(deposit_amount.text)) {
-                                        return true
-                                    }
-                                }
-                                return false
-                            }
+                            visible: invoice_totals_deposit.visible
 
                             StyledTextField {
                                 text: getDepositDescription()
@@ -2914,24 +2671,14 @@ Item {
                             }
                         }
 
-                        //Deposit total (Deprecated 26.01.2024) We keep it for compatibilityw with old versions.
                         StyledTextField {
                             id: invoice_totals_deposit
                             readOnly: true
                             borderless: true
                             text: invoice.json ? getDepositAmount() : ""
                             Layout.alignment: Qt.AlignRight
-                            visible: setDepositTotalVisible()
-
-                            function setDepositTotalVisible() {
-                                if (deposit_amount.focus ||
-                                        isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text))) {
-                                    if (!Banana.SDecimal.isZero(deposit_amount.text)) {
-                                        return true
-                                    }
-                                }
-                                return false
-                            }
+                            visible: deposit_amount.focus ||
+                                     isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text))
 
                             function getDepositAmount() {
                                 if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_advance_payment) {
@@ -2940,97 +2687,6 @@ Item {
                                 return toLocaleNumberFormat("", true);
                             }
                         }
-
-                        // Amount Paid (Sobstitute Deposit)
-                        RowLayout {
-                            id: amount_paid_row_layout
-                            visible: setAmountPaidVisible()
-
-                            StyledTextField {
-                                text: getAmountPaidDescription()
-                                readOnly: invoice.isReadOnly
-                                borderless: !hovered && !focus
-                                Layout.minimumWidth: 150 * Stylesheet.pixelScaleRatio
-
-                                onEditingFinished: {
-                                    if (modified) {
-                                        setDepositDescription(text)
-                                        if (!text)
-                                            text = qsTr("Amount Paid");
-                                    }
-                                }
-
-                                function getAmountPaidDescription() {
-                                    if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions_description) {
-                                        return invoice.json.billing_info.total_transactions_description
-                                    }
-                                    return qsTr("Amount Paid");
-                                }
-
-                                function setAmountPaidDescription(description) {
-                                    if (!invoice.json || !invoice.json.billing_info)
-                                        return
-                                    invoice.json.billing_info.total_transactions_description = description
-                                    setDocumentModified()
-                                }
-                            }
-
-                            StyledTextField {
-                                id: amount_paid_amount
-                                horizontalAlignment: Text.AlignRight
-                                Layout.alignment: Qt.AlignRight
-                                Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
-                                readOnly: invoice.isReadOnly
-                                text: toLocaleNumberFormat(invoice.json ? getDepositAmount() : "")
-
-                                onEditingFinished: {
-                                    if (modified) {
-                                        let amount = ""
-                                        if (!isLocaleZero(text)) {
-                                            amount = toInternalNumberFormat(text)
-                                            amount = Banana.SDecimal.invert(amount)
-                                            amount = Banana.SDecimal.round(amount, {'decimals': getRoundingDecimals()})
-                                        }
-                                        invoice.json.billing_info.total_transactions = amount
-                                        calculateInvoice()
-                                    }
-                                }
-
-                                function getDepositAmount() {
-                                    if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions) {
-                                        return Banana.SDecimal.invert(invoice.json.billing_info.total_transactions)
-                                    }
-                                    return "";
-                                }
-                            }
-
-                            function setAmountPaidVisible(){
-                                if (!deposit_row_layout.visible) { // ... Implementare logica per visibilità in base alla tab settings o sempre visibile ?
-                                    return true
-                                }
-
-                                return false
-                            }
-                        }
-
-                        // Amount Paid Total (Sobstitute Deposit)
-                        StyledTextField {
-                            id: invoice_totals_amount_paid
-                            readOnly: true
-                            borderless: true
-                            text: invoice.json ? getDepositAmount() : ""
-                            Layout.alignment: Qt.AlignRight
-                            visible: amount_paid_row_layout.visible
-
-                            function getDepositAmount() {
-                                if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions) {
-                                    return toLocaleNumberFormat(invoice.json.billing_info.total_transactions)
-                                }
-                                return toLocaleNumberFormat("", true);
-                            }
-                        }
-
-
 
                         RowLayout {
                             StyledTextField {
@@ -3051,7 +2707,7 @@ Item {
                             horizontalAlignment: Text.AlignRight
                             Layout.alignment: Qt.AlignRight
                             Layout.minimumWidth: 120 * Stylesheet.pixelScaleRatio
-                            text: toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_outstanding : "", true)
+                            text: toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
                         }
 
                         StyledLabel{
@@ -3226,36 +2882,6 @@ Item {
             }
             invoice.json.document_info.locale = lang;
             invoiceUpdateCustomFields();
-            setDocumentModified()
-        }
-    }
-
-    function setDocumentCurrency(currency) {
-        let defaultCurrency = appSettings.data.new_documents.currency
-        if (currency) {
-            let curCurrency = invoice.json.document_info.currency
-            if (curCurrency !== currency) {
-                // Update currency
-                invoice.json.document_info.currency = currency
-            }
-            setDocumentModified()
-        } else {
-            invoice.json.document_info.currency = defaultCurrency
-            setDocumentModified()
-        }
-    }
-
-    function setDocumentDueDate(paymentTermInDays) {
-        let defaultPaymentTerm = appSettings.data.new_documents.payment_term_days;
-        if (paymentTermInDays) {
-            let curPaymentTermInDays = dateDiff(invoice.json.document_info.date, invoice.json.payment_info.due_date)
-            if (curPaymentTermInDays !== Number(paymentTermInDays)) {
-                // Update due date
-                invoice.json.payment_info.due_date = dateAdd(invoice.json.document_info.date, paymentTermInDays)
-                setDocumentModified()
-            }
-        } else {
-            invoice.json.payment_info.due_date = dateAdd(invoice.json.document_info.date, defaultPaymentTerm)
             setDocumentModified()
         }
     }
@@ -3899,18 +3525,7 @@ Item {
                     return false
                 }
             } else {
-                viewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
-                if (fieldId in viewAppearance) {
-                    if (viewAppearance[fieldId]) {
-                        return true
-                    } else if (isNotEmpty && viewAppearance.show_invoice_fields_if_not_empty) {
-                        return true
-                    } else {
-                        return false
-                    }
-                } else {
-                    viewAppearance = Settings.getDefaultSettings().interface.invoice.views[currentView].appearance
-                }
+                console.log("appearance flag '" + fieldId + "' in view '" + currentView + "' not found")
             }
         }
         return true;
