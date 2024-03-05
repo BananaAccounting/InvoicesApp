@@ -2841,42 +2841,38 @@ Item {
                                       true)
                         }
 
-                        //Deposit (Deprecated 26.01.2024) We keep it for compatibilityw with old versions.
+                        /**
+                          - Deduction -
+                          La deduzione è il vecchio campo "Acconto" mantenuto per compatibilità con le vecchie versioni, modificando
+                          una deduzione va incrementato ( o creato) nel json il valore nel campo: "total_advance_payment". Sulla base del valore presente nel total_advance_payment
+                          viene poi aggiornato il campo "total_to_pay", il quale mostra quindi sempre il valore al netto delle deduzioni (salvate nel campo total_advance_payment).
+                        */
                         RowLayout {
-                            id: deposit_row_layout
-                            visible: setDepositVisible() // Function created for compatibility for those who use the compatibility field.
-
-                            function setDepositVisible() {
-                                if (invoice_totals_deposit.visible) {
-                                    if (!Banana.SDecimal.isZero(deposit_amount.text)) {
-                                        return true
-                                    }
-                                }
-                                return false
-                            }
+                            id: deduction_row_layout
+                            visible: invoice_totals_deduction.visible
 
                             StyledTextField {
-                                text: getDepositDescription()
+                                text: getDeductionDescription()
                                 readOnly: invoice.isReadOnly
                                 borderless: !hovered && !focus
                                 Layout.minimumWidth: 150 * Stylesheet.pixelScaleRatio
 
                                 onEditingFinished: {
                                     if (modified) {
-                                        setDepositDescription(text)
+                                        setDeductionDescription(text)
                                         if (!text)
-                                            text = qsTr("Deposit")
+                                            text = qsTr("Deduction")
                                     }
                                 }
 
-                                function getDepositDescription() {
+                                function getDeductionDescription() {
                                     if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_advance_payment_description) {
                                         return invoice.json.billing_info.total_advance_payment_description
                                     }
-                                    return qsTr("Deposit");
+                                    return qsTr("Deduction");
                                 }
 
-                                function setDepositDescription(description) {
+                                function setDeductionDescription(description) {
                                     if (!invoice.json || !invoice.json.billing_info)
                                         return
                                     invoice.json.billing_info.total_advance_payment_description = description
@@ -2885,12 +2881,12 @@ Item {
                             }
 
                             StyledTextField {
-                                id: deposit_amount
+                                id: deduction_amount
                                 horizontalAlignment: Text.AlignRight
                                 Layout.alignment: Qt.AlignRight
                                 Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
                                 readOnly: invoice.isReadOnly
-                                text: toLocaleNumberFormat(invoice.json ? getDepositAmount() : "")
+                                text: toLocaleNumberFormat(invoice.json ? getDeductionAmount() : "")
 
                                 onEditingFinished: {
                                     if (modified) {
@@ -2905,7 +2901,7 @@ Item {
                                     }
                                 }
 
-                                function getDepositAmount() {
+                                function getDeductionAmount() {
                                     if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_advance_payment) {
                                         return Banana.SDecimal.invert(invoice.json.billing_info.total_advance_payment)
                                     }
@@ -2914,26 +2910,17 @@ Item {
                             }
                         }
 
-                        //Deposit total (Deprecated 26.01.2024) We keep it for compatibilityw with old versions.
+                        //Deduction total
                         StyledTextField {
-                            id: invoice_totals_deposit
+                            id: invoice_totals_deduction
                             readOnly: true
                             borderless: true
-                            text: invoice.json ? getDepositAmount() : ""
+                            text: invoice.json ? getDeductionAmount() : ""
                             Layout.alignment: Qt.AlignRight
-                            visible: setDepositTotalVisible()
+                            visible: deduction_amount.focus ||
+                                     isInvoiceFieldVisible("show_invoice_deduction", !isLocaleZero(text))
 
-                            function setDepositTotalVisible() {
-                                if (deposit_amount.focus ||
-                                        isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text))) {
-                                    if (!Banana.SDecimal.isZero(deposit_amount.text)) {
-                                        return true
-                                    }
-                                }
-                                return false
-                            }
-
-                            function getDepositAmount() {
+                            function getDeductionAmount() {
                                 if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_advance_payment) {
                                     return toLocaleNumberFormat(invoice.json.billing_info.total_advance_payment)
                                 }
@@ -2941,42 +2928,23 @@ Item {
                             }
                         }
 
-                        // Amount Paid (Sobstitute Deposit)
+                        /** - Deposit -
+                          È il nuovo campo Acconto, l'importo va salvato nel nuovo campo "total_transactions", in questa maniera nel "Billing_info" usiamo gli stessi campi
+                          sia con le offerte e fatture che con la fatturazione integrata.
+                          */
                         RowLayout {
                             id: amount_paid_row_layout
-                            visible: setAmountPaidVisible()
+                            visible: invoice_totals_deposit.visible
 
                             StyledTextField {
-                                text: getAmountPaidDescription()
-                                readOnly: invoice.isReadOnly
+                                text: qsTr("Deposit");
+                                readOnly: true
                                 borderless: !hovered && !focus
                                 Layout.minimumWidth: 150 * Stylesheet.pixelScaleRatio
-
-                                onEditingFinished: {
-                                    if (modified) {
-                                        setDepositDescription(text)
-                                        if (!text)
-                                            text = qsTr("Amount Paid");
-                                    }
-                                }
-
-                                function getAmountPaidDescription() {
-                                    if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions_description) {
-                                        return invoice.json.billing_info.total_transactions_description
-                                    }
-                                    return qsTr("Amount Paid");
-                                }
-
-                                function setAmountPaidDescription(description) {
-                                    if (!invoice.json || !invoice.json.billing_info)
-                                        return
-                                    invoice.json.billing_info.total_transactions_description = description
-                                    setDocumentModified()
-                                }
                             }
 
                             StyledTextField {
-                                id: amount_paid_amount
+                                id: deposit_amount
                                 horizontalAlignment: Text.AlignRight
                                 Layout.alignment: Qt.AlignRight
                                 Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
@@ -3004,23 +2972,17 @@ Item {
                                 }
                             }
 
-                            function setAmountPaidVisible(){
-                                if (!deposit_row_layout.visible) { // ... Implementare logica per visibilità in base alla tab settings o sempre visibile ?
-                                    return true
-                                }
-
-                                return false
-                            }
                         }
 
-                        // Amount Paid Total (Sobstitute Deposit)
+                        // Deposit total
                         StyledTextField {
-                            id: invoice_totals_amount_paid
+                            id: invoice_totals_deposit
                             readOnly: true
                             borderless: true
                             text: invoice.json ? getDepositAmount() : ""
                             Layout.alignment: Qt.AlignRight
-                            visible: amount_paid_row_layout.visible
+                            visible: deposit_amount.focus ||
+                                     isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text))
 
                             function getDepositAmount() {
                                 if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions) {
@@ -3051,7 +3013,26 @@ Item {
                             horizontalAlignment: Text.AlignRight
                             Layout.alignment: Qt.AlignRight
                             Layout.minimumWidth: 120 * Stylesheet.pixelScaleRatio
-                            text: toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_outstanding : "", true)
+                            text: toLocaleNumberFormat(getTotal(), true)
+
+                            /**
+                              This function has been created to keep the compatibility with the old versions of the invoices who
+                              does not have the "total_outstanding" field yet. Once the invoice is recalculated, the new field is added automatically, but if
+                              no amount is modified, the current total remain saved in the "total_to_pay" field.
+                            */
+                            function getTotal(){
+                                let total = "";
+                                if (!invoice.json)
+                                    return "";
+                                if (invoice.json.billing_info.total_outstanding && invoice.json.billing_info.total_outstanding !== "") {
+                                    Banana.console.debug("total_outstanding: " +invoice.json.billing_info.total_outstanding);
+                                    return invoice.json.billing_info.total_outstanding;
+                                }
+                                else {
+                                    Banana.console.debug("total_to_pay: " + invoice.json.billing_info.total_to_pay);
+                                    return invoice.json.billing_info.total_to_pay;
+                                }
+                            }
                         }
 
                         StyledLabel{

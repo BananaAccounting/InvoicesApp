@@ -241,7 +241,8 @@ function getDefaultSettings() {
                             'show_invoice_discount': true,
                             'show_invoice_vat': false,
                             'show_invoice_rounding': false,
-                            'show_invoice_deposit': true,
+                            'show_invoice_deduction': false,
+                            'show_invoice_deposit': false,
                             'show_invoice_summary': false
                         }
                     },
@@ -318,6 +319,7 @@ function getDefaultSettings() {
                             'show_invoice_discount': false,
                             'show_invoice_vat': false,
                             'show_invoice_rounding': false,
+                            'show_invoice_deduction': false,
                             'show_invoice_deposit': false,
                             'show_invoice_summary': false
                         }
@@ -395,6 +397,7 @@ function getDefaultSettings() {
                             'show_invoice_discount': true,
                             'show_invoice_vat': false,
                             'show_invoice_rounding': false,
+                            'show_invoice_deduction': true,
                             'show_invoice_deposit': true,
                             'show_invoice_summary': true
                         }

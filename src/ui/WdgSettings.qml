@@ -2020,6 +2020,29 @@ Item {
                     }
 
                     StyledLabel{
+                        text: qsTr("Deduction")
+                        Layout.fillWidth: true
+                    }
+
+                    StyledSettingsSwitch {
+                        flagId: "show_invoice_deduction"
+                        viewId: appSettings.view_id_base
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StyledSettingsSwitch {
+                        flagId: "show_invoice_deduction"
+                        viewId: appSettings.view_id_short
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StyledSettingsSwitch {
+                        flagId: "show_invoice_deduction"
+                        viewId: appSettings.view_id_long
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    StyledLabel{
                         text: qsTr("Deposit")
                         Layout.fillWidth: true
                     }
