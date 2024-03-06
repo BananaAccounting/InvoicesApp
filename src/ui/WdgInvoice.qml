@@ -2920,7 +2920,7 @@ Item {
 
                             StyledTextField {
                                 text: getDepositDescription()
-                                readOnly: true
+                                readOnly: invoice.isReadOnly
                                 borderless: !hovered && !focus
                                 Layout.minimumWidth: 150 * Stylesheet.pixelScaleRatio
 
