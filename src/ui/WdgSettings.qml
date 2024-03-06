@@ -17,6 +17,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import "../base/settings.js" as Settings
+import "../base/utils.js" as Utils
 import "../base/vatcodes.js" as VatCodes
 import "./components"
 
@@ -2045,24 +2046,28 @@ Item {
                     StyledLabel{
                         text: qsTr("Deposit")
                         Layout.fillWidth: true
+                        visible: Utils.isCompatibleBananaVersion();
                     }
 
                     StyledSettingsSwitch {
                         flagId: "show_invoice_deposit"
                         viewId: appSettings.view_id_base
                         Layout.alignment: Qt.AlignHCenter
+                        visible: Utils.isCompatibleBananaVersion();
                     }
 
                     StyledSettingsSwitch {
                         flagId: "show_invoice_deposit"
                         viewId: appSettings.view_id_short
                         Layout.alignment: Qt.AlignHCenter
+                        visible: Utils.isCompatibleBananaVersion();
                     }
 
                     StyledSettingsSwitch {
                         flagId: "show_invoice_deposit"
                         viewId: appSettings.view_id_long
                         Layout.alignment: Qt.AlignHCenter
+                        visible: Utils.isCompatibleBananaVersion();
                     }
 
                     StyledLabel{

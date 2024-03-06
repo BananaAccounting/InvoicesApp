@@ -2852,32 +2852,11 @@ Item {
                             visible: invoice_totals_deduction.visible
 
                             StyledTextField {
-                                text: getDeductionDescription()
-                                readOnly: invoice.isReadOnly
+                                text: qsTr("Deduction");
+                                readOnly: true
                                 borderless: !hovered && !focus
                                 Layout.minimumWidth: 150 * Stylesheet.pixelScaleRatio
 
-                                onEditingFinished: {
-                                    if (modified) {
-                                        setDeductionDescription(text)
-                                        if (!text)
-                                            text = qsTr("Deduction")
-                                    }
-                                }
-
-                                function getDeductionDescription() {
-                                    if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_advance_payment_description) {
-                                        return invoice.json.billing_info.total_advance_payment_description
-                                    }
-                                    return qsTr("Deduction");
-                                }
-
-                                function setDeductionDescription(description) {
-                                    if (!invoice.json || !invoice.json.billing_info)
-                                        return
-                                    invoice.json.billing_info.total_advance_payment_description = description
-                                    setDocumentModified()
-                                }
                             }
 
                             StyledTextField {
@@ -2928,19 +2907,44 @@ Item {
                             }
                         }
 
+
                         /** - Deposit -
                           È il nuovo campo Acconto, l'importo va salvato nel nuovo campo "total_transactions", in questa maniera nel "Billing_info" usiamo gli stessi campi
                           sia con le offerte e fatture che con la fatturazione integrata.
+                          Il campo è visibile solo da una certa versione del Banana, in quanto lavora con dei campi del JSON che prima non esistono
+                          nelle versioni precedenti.
                           */
                         RowLayout {
                             id: amount_paid_row_layout
-                            visible: invoice_totals_deposit.visible
+                            visible: Utils.isCompatibleBananaVersion() && invoice_totals_deposit.visible
 
                             StyledTextField {
-                                text: qsTr("Deposit");
+                                text: getDepositDescription()
                                 readOnly: true
                                 borderless: !hovered && !focus
                                 Layout.minimumWidth: 150 * Stylesheet.pixelScaleRatio
+
+                                onEditingFinished: {
+                                    if (modified) {
+                                        setDepositDescription(text)
+                                        if (!text)
+                                            text = qsTr("Deposit");
+                                    }
+                                }
+
+                                function getDepositDescription() {
+                                    if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions_description) {
+                                        return invoice.json.billing_info.total_transactions_description
+                                    }
+                                    return qsTr("Deposit");
+                                }
+
+                                function setDepositDescription(description) {
+                                    if (!invoice.json || !invoice.json.billing_info)
+                                        return
+                                    invoice.json.billing_info.total_transactions_description = description
+                                    setDocumentModified()
+                                }
                             }
 
                             StyledTextField {
@@ -2981,8 +2985,8 @@ Item {
                             borderless: true
                             text: invoice.json ? getDepositAmount() : ""
                             Layout.alignment: Qt.AlignRight
-                            visible: deposit_amount.focus ||
-                                     isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text))
+                            visible: Utils.isCompatibleBananaVersion() && (deposit_amount.focus ||
+                                     isInvoiceFieldVisible("show_invoice_deposit", !isLocaleZero(text)))
 
                             function getDepositAmount() {
                                 if (invoice.json && invoice.json.billing_info && invoice.json.billing_info.total_transactions) {

@@ -84,3 +84,19 @@ function textMatchSearch(text, search) {
     }
     return false
 }
+
+/** Check if the Application version is equal or greater than 10.0.19.
+  This function has been created after some changes to the JSON structure
+  to hide in the older versions some components who works only with the new json structure
+  available from the 10.0.19.
+  */
+
+function isCompatibleBananaVersion(){
+    let requiredVersion = "10.1.19";
+   if (Banana.compareVersion(Banana.application.version,requiredVersion) >= 0 ) {
+        Banana.console.debug(Banana.application.version + " / " + requiredVersion);
+        Banana.console.debug("Is compatible");
+       return true;
+   }
+   return false;
+}
