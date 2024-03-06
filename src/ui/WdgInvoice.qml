@@ -3029,11 +3029,9 @@ Item {
                                 if (!invoice.json)
                                     return "";
                                 if (invoice.json.billing_info.total_outstanding && invoice.json.billing_info.total_outstanding !== "") {
-                                    Banana.console.debug("total_outstanding: " +invoice.json.billing_info.total_outstanding);
                                     return invoice.json.billing_info.total_outstanding;
                                 }
                                 else {
-                                    Banana.console.debug("total_to_pay: " + invoice.json.billing_info.total_to_pay);
                                     return invoice.json.billing_info.total_to_pay;
                                 }
                             }

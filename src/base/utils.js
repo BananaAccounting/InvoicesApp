@@ -94,8 +94,6 @@ function textMatchSearch(text, search) {
 function isCompatibleBananaVersion(){
     let requiredVersion = "10.1.19";
    if (Banana.compareVersion(Banana.application.version,requiredVersion) >= 0 ) {
-        Banana.console.debug(Banana.application.version + " / " + requiredVersion);
-        Banana.console.debug("Is compatible");
        return true;
    }
    return false;
