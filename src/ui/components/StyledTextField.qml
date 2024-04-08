@@ -70,9 +70,21 @@ TextField {
    onEditingFinished: function() {
        cursorPosition = 0
        ensureVisible(0)
+       modified = true
    }
 
    onTextEdited: function() {
+       /**
+         Questa segnale viene chiamato solamente se nella colonna della
+         quantità vengono inseriti almeno 2 caratteri, con un solo carattere
+         il segnale non viene chiamato, non sappiamo esattamente perchè, ma di conseguenza
+         il valore inserito non viene salvato nel modello dei dati e quindi la quantitâ
+         durante il ricacolo della fattura, risulta vuota.
+
+         Per ora la soluzione che stiamo testando e la forzatura dell'aggiornamento della veriabile "modified"
+         a true, nel segnale sopra "onEditingFinished", modifica da testare.
+*/
+       //Banana.console.debug("onTextEdited");
        modified = true
    }
 

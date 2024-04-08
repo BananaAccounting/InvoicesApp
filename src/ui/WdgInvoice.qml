@@ -1998,14 +1998,19 @@ Item {
                                 }
 
                                 onTextChanged: {
-                                    let oldLinesCount = invoiceItemsTable.estimateWordWrapLines(invoice.json.items[model.row].description);
-                                    let newLinesCount = invoiceItemsTable.estimateWordWrapLines(text);
-                                    if (model.row >= 0 && model.row < invoice.json.items.length) {
-                                        invoice.json.items[model.row].description = text;
-                                    }
-                                    if (oldLinesCount !== newLinesCount) {
-                                        invoiceItemsTable.forceLayout()
-                                        invoiceItemsTable.signalUpdateRowHeights++
+                                    /** Abbiamo aggiunto il nuovo controllo sull'esistenza della riga del modello perchè è apparso un warning nuovo
+                                        che prima non cera, inizialmente non viene trovato l'oggetto: invoice.json.items[model.row]. Sembra che il controllo non cambi il comportamento corretto del programma, ma è
+                                        da testare*/
+                                    if (invoice.json.items[model.row]){
+                                        let oldLinesCount = invoiceItemsTable.estimateWordWrapLines(invoice.json.items[model.row].description);
+                                        let newLinesCount = invoiceItemsTable.estimateWordWrapLines(text);
+                                        if (model.row >= 0 && model.row < invoice.json.items.length) {
+                                            invoice.json.items[model.row].description = text;
+                                        }
+                                        if (oldLinesCount !== newLinesCount) {
+                                            invoiceItemsTable.forceLayout()
+                                            invoiceItemsTable.signalUpdateRowHeights++
+                                        }
                                     }
                                 }
                             }
@@ -2019,7 +2024,12 @@ Item {
                                 selected: current
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
-                                text: model.display ? Banana.Converter.toLocaleNumberFormat(model.display) : ""
+                                /**
+                                  Abbiamo rimosso il "Banana.Converter.toLocaleNumberFormat(model.display)" per permettere
+                                  all'utente di inserire la quantità come un testo libero, in modo che i decimali non vengano
+                                  sempre formattati allo stesso modo. Sarà da aggiungere un controllo per non permettere all'utente di
+                                  inserire un testo, come già accade per altri campi (vedi data) */
+                                text: model.display  ? model.display: "";
                                 readOnly: invoice.isReadOnly
                                 enabled: !invoiceItemsTable.isTotalRow(model.row)
 
