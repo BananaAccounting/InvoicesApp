@@ -1830,10 +1830,12 @@ Item {
                                 editable: true
                                 enabled: !invoice.isReadOnly
                                 model: itemsModel
-                                textRole: "key"
+                                /** Usiamo "descr" al posto di "key" come già viene fatto dai altri combobox (vedi address_customer_selector) per
+                                risolvere il problema della selezione con il click dalla lista*/
+                                textRole: "descr"
                                 filterEnabled: true
 
-                                //                                currentIndex: -1
+                                //currentIndex: -1
                                 displayText: {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
                                     undoKey = display
