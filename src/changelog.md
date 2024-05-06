@@ -1,8 +1,18 @@
 # Changelog
 
-## 2024-02-15
+## 2024-05-06
 
 * [RELEASE BETA]
+
+* [Fix] Fix problem quantity decimals.
+  * Now its possible to define quantity without decimals.
+  * Solve problem when inserting a quantity with only one digit (when using description and/or date column)
+* [Fix] Fix warning with table row model.
+* [Fix] Fix problem with item selection from combobox.
+
+## 2024-02-15
+
+* [RELEASE BETA & RELEASE STABLE]
 
 * [Fix] Fix error with Qt 6.7.0 version.
 
