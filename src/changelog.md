@@ -1,5 +1,11 @@
 # Changelog
 
+## 2025-06-30
+
+* [RELEASE BETA]
+
+* [Enhancement] Add Building Number field.
+
 ## 2024-05-06
 
 * [RELEASE BETA]
