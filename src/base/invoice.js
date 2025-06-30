@@ -64,6 +64,7 @@ function invoiceCreateNew(tabPos, id) {
             'first_name': '',
             'last_name': '',
             'address1': '',
+            'building_number': '',
             'address2': '',
             'address3': '',
             'postal_code': '',
@@ -349,6 +350,7 @@ function invoiceSupplierInfoGet() {
     supplier_info.first_name = Banana.document.info('AccountingDataBase', 'Name');
     supplier_info.last_name = Banana.document.info('AccountingDataBase', 'FamilyName');
     supplier_info.address1 = Banana.document.info('AccountingDataBase', 'Address1');
+    supplier_info.building_number = Banana.document.info('AccountingDataBase', 'BuildingNumber');
     supplier_info.address2 = Banana.document.info('AccountingDataBase', 'Address2');
     supplier_info.address3 = "";
     supplier_info.postal_code = Banana.document.info('AccountingDataBase', 'Zip');

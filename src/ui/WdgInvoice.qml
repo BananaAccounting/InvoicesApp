@@ -1299,6 +1299,20 @@ Item {
                         }
 
                         StyledTextField {
+                            id: address_building_number
+                            Layout.preferredWidth: 320 * Stylesheet.pixelScaleRatio
+                            visible: focus || isInvoiceFieldVisible("show_invoice_address_building_number", text)
+                            readOnly: invoice.isReadOnly
+                            placeholderText: qsTr("Building number")
+                            onEditingFinished: {
+                                if (modified) {
+                                    invoice.json.customer_info.building_number = text
+                                    setDocumentModified()
+                                }
+                            }
+                        }
+
+                        StyledTextField {
                             id: address_address2
                             visible: focus || isInvoiceFieldVisible("show_invoice_address_extra", text)
                             readOnly: invoice.isReadOnly
@@ -3285,6 +3299,7 @@ Item {
             'first_name' : addressRow.ContactFirstName,
             'last_name' : addressRow.ContactLastName,
             'address1' : addressRow.ContactAddress1,
+            'building_number' : addressRow.ContactBuildingNumber,
             'address2' : addressRow.ContactAddress2,
             'address3' : addressRow.ContactAddress3,
             'postal_code' : addressRow.ContactPostalCode,
@@ -3428,6 +3443,7 @@ Item {
         address_first_name.text = invoice.json.customer_info.first_name
         address_last_name.text = invoice.json.customer_info.last_name
         address_address1.text = invoice.json.customer_info.address1 ? invoice.json.customer_info.address1 : ""
+        address_building_number.text = invoice.json.customer_info.building_number ? invoice.json.customer_info.building_number : ""
         address_address2.text = invoice.json.customer_info.address2 ? invoice.json.customer_info.address2 : ""
         address_address3.text = invoice.json.customer_info.address3 ? invoice.json.customer_info.address3 : ""
         address_postal_code.text = invoice.json.customer_info.postal_code
@@ -3495,6 +3511,7 @@ Item {
             invoice.customer_info.first_name = address.first_name
             invoice.customer_info.last_name = address.last_name
             invoice.customer_info.address1 = address.address1
+            invoice.customer_info.building_number = address.building_number
             invoice.customer_info.address2 = address.address2
             invoice.customer_info.address3 = address.address3
             invoice.customer_info.postal_code = address.postal_code
@@ -3518,6 +3535,7 @@ Item {
             invoice.shipping_info.first_name = address.first_name
             invoice.shipping_info.last_name = address.last_name
             invoice.shipping_info.address1 = address.address1
+            invoice.shipping_info.building_number = address.building_number
             invoice.shipping_info.address2 = address.address2
             invoice.shipping_info.address3 = address.address3
             invoice.shipping_info.postal_code = address.postal_code

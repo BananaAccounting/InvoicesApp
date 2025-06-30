@@ -5,3 +5,4 @@ src/ch.banana.application.invoice.default.sbaa
 src/CMakeLists.txt.user
 src/.vs
 src/out/build
+src/build

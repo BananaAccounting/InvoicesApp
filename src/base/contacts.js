@@ -26,6 +26,7 @@ function contactAddressGet(id) {
         'first_name': '',
         'last_name': '',
         'address1': '',
+        'building_number': '',
         'address2': '',
         'address3': '',
         'postal_code': '',
@@ -51,6 +52,7 @@ function contactAddressGet(id) {
             customer_info.first_name = contactRow.value('FirstName');
             customer_info.last_name = contactRow.value('FamilyName');
             customer_info.address1 = contactRow.value('Street');
+            customer_info.building_number = contactRow.value('BuildingNumber');
             customer_info.address2 = contactRow.value('AddressExtra');
             customer_info.address3 = contactRow.value('POBox');
             customer_info.postal_code = contactRow.value('PostalCode');

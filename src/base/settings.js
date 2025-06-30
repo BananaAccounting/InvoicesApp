@@ -58,7 +58,7 @@ function upgradeSettings(settings) {
     }
 
     if (Banana.compareVersion(settings.version, _settings_version) < 0) {
-        // Setting have an older previous version compated to the current versione
+        // Setting have an older previous version compared to the current version
 
         let defaultSettings = getDefaultSettings();
 
@@ -209,6 +209,7 @@ function getDefaultSettings() {
                             'show_invoice_address_courtesy': true,
                             'show_invoice_address_first_and_last_name': true,
                             'show_invoice_address_street': true,
+                            'show_invoice_address_building_number': true,
                             'show_invoice_address_extra': true,
                             'show_invoice_address_postbox': true,
                             'show_invoice_address_country_and_locality': true,
@@ -286,6 +287,7 @@ function getDefaultSettings() {
                             'show_invoice_address_courtesy': false,
                             'show_invoice_address_first_and_last_name': true,
                             'show_invoice_address_street': false,
+                            'show_invoice_address_building_number': false,
                             'show_invoice_address_extra': false,
                             'show_invoice_address_postbox': false,
                             'show_invoice_address_country_and_locality': true,
@@ -363,6 +365,7 @@ function getDefaultSettings() {
                             'show_invoice_address_courtesy': false,
                             'show_invoice_address_first_and_last_name': true,
                             'show_invoice_address_street': true,
+                            'show_invoice_address_building_number': true,
                             'show_invoice_address_extra': true,
                             'show_invoice_address_postbox': true,
                             'show_invoice_address_country_and_locality': true,
