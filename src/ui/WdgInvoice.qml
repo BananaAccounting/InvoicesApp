@@ -1461,7 +1461,10 @@ Item {
                 // Maybe some values are not immediately loaded
                 HorizontalHeaderView {
                     id: horizontalHeader
-                    model: invoiceItemsModel
+                    //Do NOT set 'model' when using syncView.
+                    //From Qt 6.10 this causes the header to render one row per data row.
+                    //Compatible with previous versions
+                    // model: invoiceItemsModel
                     syncView: invoiceItemsTable
                     reuseItems: false
                     visible: true

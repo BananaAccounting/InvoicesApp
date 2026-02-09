@@ -254,8 +254,7 @@ function contactPaymentTermInDaysGet(customer_id) {
         var contactRow = tableContacts.findRowByValue("RowId", customer_id)
         if (contactRow) {
             let paymentTermInDays = contactRow.value("PaymentTermInDays")
-            if (paymentTermInDays)
-                return paymentTermInDays ? paymentTermInDays : defaultPaymentTerm
+            return paymentTermInDays ? paymentTermInDays : defaultPaymentTerm
         }
     }
 }
