@@ -132,7 +132,7 @@ function invoiceCreateFromEstimateObj(estimateObj) {
 function invoiceGetNextNumber(isEstimate) {
     let table = Banana.document.table(isEstimate ? "Estimates" : "Invoices");
     if (table) {
-        console.log(Banana.application.apiVersion);
+        //console.log(Banana.application.apiVersion);
         if (Banana.application.apiVersion &&
             (Banana.compareVersion(Banana.application.apiVersion, "1.2.2") >= 0)) {
             return table.progressiveNumber('RowId', true);

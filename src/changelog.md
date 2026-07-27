@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-27
+* [RELEASE BETA] Fixed an error when using the console.log() function
+
+## 2026-02-18
+* [RELEASE STABLE] promoted the beta version of 2026-02-09 to stable release
+
+## 2026-02-09
+* [RELEASE BETA] Fixed the display of the dialog and the paymenttermindays
+
 ## 2025-06-30
 
 * [RELEASE BETA]

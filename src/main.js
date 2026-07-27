@@ -14,7 +14,7 @@
 
 // @id = ch.banana.application.invoice.default
 // @api = 1.0
-// @pubdate = 2024-02-01
+// @pubdate = 2026-07-27
 // @publisher = Banana.ch SA
 // @description = Estimates and Invoices extension
 // @doctype = *
@@ -59,7 +59,7 @@ var JsAction = class JsAction {
                 // So total are not backwards compatible.
                 return 'ui/qt6-4/DlgInvoice.qml';
             }else {
-                console.log("QT5")
+                //console.log("QT5")
                 return 'ui/qt5/DlgInvoice.qml';
             }
         }
