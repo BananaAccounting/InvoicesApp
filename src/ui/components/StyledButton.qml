@@ -24,6 +24,10 @@ Button {
    // A primary button uses the banana blue accent, for the main action of a dialog (e.g. Save).
    property bool primary: false
 
+   // Disabled buttons always fall back to the plain neutral look, primary or not:
+   // a disabled accent-colored button reads as "active but oddly colored", not "off".
+   readonly property bool showAsPrimary: primary && enabled
+
    leftPadding: Stylesheet.defaultMargin
    rightPadding: Stylesheet.defaultMargin
 
@@ -37,25 +41,25 @@ Button {
    contentItem: Label {
       id: labelId
       text: button.text
-      font.bold: button.primary
+      font.bold: button.showAsPrimary
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
       color: !button.enabled ? Stylesheet.mutedTextColor :
-                 button.primary ? Stylesheet.accentTextColor : Stylesheet.textColor
+                 button.showAsPrimary ? Stylesheet.accentTextColor : Stylesheet.textColor
    }
 
    states: [State {
       name: "Hovering"
          PropertyChanges {
             target: background
-            color: button.primary ? Stylesheet.accentColorHover : Stylesheet.hoverColor
+            color: button.showAsPrimary ? Stylesheet.accentColorHover : Stylesheet.hoverColor
          }
       },
    State {
       name: "Pressed"
       PropertyChanges {
          target: background
-         color: button.primary ? Stylesheet.accentColorPressed : Stylesheet.pressedColor
+         color: button.showAsPrimary ? Stylesheet.accentColorPressed : Stylesheet.pressedColor
       }
    }]
 
@@ -77,19 +81,16 @@ Button {
    ]
 
    background: Rectangle {
-      color: button.primary ? Stylesheet.accentColor : Stylesheet.buttonColor
+      color: button.showAsPrimary ? Stylesheet.accentColor : Stylesheet.buttonColor
       implicitHeight: 34 * Stylesheet.pixelScaleRatio
       // implicitWidth: contentItem.Width
       radius: Stylesheet.cornerRadius
-      border.width: button.primary ? 0 : 1
+      border.width: button.showAsPrimary ? 0 : 1
       border.color: Stylesheet.borderColor
-
-      Behavior on color {
-          ColorAnimation { duration: 150 }
-      }
    }
 
    MouseArea {
+        enabled: button.enabled
         hoverEnabled: true
         anchors.fill: button
         onEntered: { button.state='Hovering'}
