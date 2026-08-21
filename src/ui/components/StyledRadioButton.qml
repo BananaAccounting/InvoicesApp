@@ -25,7 +25,8 @@ RadioButton {
              x: control.leftPadding
              y: parent.height / 2 - height / 2
              radius: 8 * Stylesheet.pixelScaleRatio
-             border.color: "darkgrey"
+             color: "transparent"
+             border.color: control.checked ? Stylesheet.accentColor : Stylesheet.borderColorStrong
 
              Rectangle {
                  width: 8 * Stylesheet.pixelScaleRatio
@@ -33,7 +34,7 @@ RadioButton {
                  x: 4 * Stylesheet.pixelScaleRatio
                  y: 4 * Stylesheet.pixelScaleRatio
                  radius: 4 * Stylesheet.pixelScaleRatio
-                 color: control.down ? "darkgrey" : "black"
+                 color: control.down ? Stylesheet.accentColorPressed : Stylesheet.accentColor
                  visible: control.checked
              }
          }

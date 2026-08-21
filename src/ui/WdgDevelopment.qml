@@ -125,21 +125,6 @@ Item {
 
             RowLayout {
                 StyledLabel {
-                    text: "Show version notification bar"
-                    Layout.fillWidth: true
-                }
-
-                StyledSwitch {
-                    enabled: Banana.application.isInternal
-                    checked: appSettings.isNotificationVisible("show_updated_version_installed")
-                    onToggled: {
-                        appSettings.setNotificationVisible("show_updated_version_installed", checked)
-                    }
-                }
-            }
-
-            RowLayout {
-                StyledLabel {
                     text: "Switch invoice read only flag"
                     Layout.fillWidth: true
                 }

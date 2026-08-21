@@ -22,12 +22,15 @@ CheckBox {
    indicator: Rectangle {
              implicitWidth: 22 * Stylesheet.pixelScaleRatio
              implicitHeight: 22 * Stylesheet.pixelScaleRatio
-             radius: 2 * Stylesheet.pixelScaleRatio
+             radius: Stylesheet.cornerRadiusSmall
              x: control.leftPadding
              y: parent.height / 2 - height / 2
-             border.color: "#bdbebf"
+             color: "transparent"
+             border.width: 1
+             border.color: control.checked ? "transparent" : Stylesheet.borderColorStrong
 
              Image {
+                // The icon already draws its own accent-colored border + check mark
                 anchors.fill: parent
                 source: "check-mark.png"
                 visible: control.checked

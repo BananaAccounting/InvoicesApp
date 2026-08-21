@@ -32,8 +32,8 @@ Dialog {
     background: Rectangle {
       // implicitWidth: contentItem.Width
       color: Stylesheet.baseColor
-      radius: 2.0 * Stylesheet.pixelScaleRatio
-      border.color: "#bdbebf"
+      radius: Stylesheet.cornerRadius
+      border.color: Stylesheet.borderColor
     }
 
     Text {

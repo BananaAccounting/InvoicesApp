@@ -28,25 +28,27 @@ Switch {
 
     indicator: Rectangle {
         implicitWidth: 40 * Stylesheet.pixelScaleRatio
-        implicitHeight: 16 * Stylesheet.pixelScaleRatio
+        implicitHeight: 20 * Stylesheet.pixelScaleRatio
 
         x: control.leftPadding + (control.availableWidth - width) / 2
         y: control.topPadding + (control.availableHeight - height) / 2
 
-        color: control.checked ? "#c7e2ff" : "#e6e6e6"
-        border.color: control.checked ? "#7891ab" : "#a6a9a9"
+        color: control.checked ? Stylesheet.accentColor : Stylesheet.hoverColor
+        border.color: control.checked ? Stylesheet.accentColor : Stylesheet.borderColorStrong
         border.width: control.visualFocus ? 2 : 1
-        radius: 2
+        radius: height / 2
+
+        Behavior on color {
+            ColorAnimation { duration: 120 }
+        }
 
         Rectangle {
-            x: Math.max(0, Math.min(parent.width - width, control.visualPosition * parent.width - (width / 2)))
+            x: Math.max(2, Math.min(parent.width - width - 2, control.visualPosition * parent.width - (width / 2)))
             y: (parent.height - height) / 2
-            width: 20 * Stylesheet.pixelScaleRatio
+            width: 16 * Stylesheet.pixelScaleRatio
             height: 16 * Stylesheet.pixelScaleRatio
-            color: Stylesheet.buttonColor
-            border.width: control.visualFocus ? 2 : 1
-            border.color: "#a6a9a9"
-            radius: 2
+            color: "white"
+            radius: height / 2
 
             Behavior on x {
                 enabled: !control.down

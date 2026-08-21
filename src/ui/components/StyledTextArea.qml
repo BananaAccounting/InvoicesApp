@@ -28,9 +28,13 @@ TextArea {
 
    background: Rectangle {
       color: Stylesheet.baseColor
-      border.color: textArea.activeFocus | selected ? "#354793" : "#bdbebf"
-      border.width: 1
-      radius: 2.0 * Stylesheet.pixelScaleRatio
+      border.color: textArea.activeFocus || selected ? Stylesheet.accentColor : Stylesheet.borderColor
+      border.width: textArea.activeFocus || selected ? 2 : 1
+      radius: Stylesheet.cornerRadiusSmall
+
+      Behavior on border.color {
+          ColorAnimation { duration: 120 }
+      }
    }
 
 

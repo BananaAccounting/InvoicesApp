@@ -21,6 +21,9 @@ Button {
    id: button
    scale: state === "Pressed" ? 0.98 : 1.0
 
+   // A primary button uses the banana blue accent, for the main action of a dialog (e.g. Save).
+   property bool primary: false
+
    leftPadding: Stylesheet.defaultMargin
    rightPadding: Stylesheet.defaultMargin
 
@@ -34,24 +37,25 @@ Button {
    contentItem: Label {
       id: labelId
       text: button.text
+      font.bold: button.primary
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
-      color: button.enabled ? Stylesheet.textColor : "gray"
+      color: !button.enabled ? Stylesheet.mutedTextColor :
+                 button.primary ? Stylesheet.accentTextColor : Stylesheet.textColor
    }
 
    states: [State {
       name: "Hovering"
          PropertyChanges {
             target: background
-            color: "#e6e6e6"
+            color: button.primary ? Stylesheet.accentColorHover : Stylesheet.hoverColor
          }
       },
    State {
       name: "Pressed"
       PropertyChanges {
          target: background
-         color: "#e6e6e6"
-         border.color: "white"
+         color: button.primary ? Stylesheet.accentColorPressed : Stylesheet.pressedColor
       }
    }]
 
@@ -73,12 +77,16 @@ Button {
    ]
 
    background: Rectangle {
-      color: Stylesheet.buttonColor
+      color: button.primary ? Stylesheet.accentColor : Stylesheet.buttonColor
       implicitHeight: 34 * Stylesheet.pixelScaleRatio
       // implicitWidth: contentItem.Width
-      radius: 2.0 * Stylesheet.pixelScaleRatio
-      border.width: 1
-      border.color: "#e6e6e6"
+      radius: Stylesheet.cornerRadius
+      border.width: button.primary ? 0 : 1
+      border.color: Stylesheet.borderColor
+
+      Behavior on color {
+          ColorAnimation { duration: 150 }
+      }
    }
 
    MouseArea {

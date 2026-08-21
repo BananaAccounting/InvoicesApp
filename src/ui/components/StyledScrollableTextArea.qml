@@ -47,9 +47,13 @@ Item {
 
       background : Rectangle {
          color: Stylesheet.baseColor
-         border.color: scrollView.activeFocus ? "#354793" : "#bdbebf"
-         border.width: scrollView.activeFocus ? 1 : 1
-         radius: scrollView.activeFocus ? 2 * Stylesheet.pixelScaleRatio : 1
+         border.color: scrollView.activeFocus ? Stylesheet.accentColor : Stylesheet.borderColor
+         border.width: scrollView.activeFocus ? 2 : 1
+         radius: Stylesheet.cornerRadiusSmall
+
+         Behavior on border.color {
+             ColorAnimation { duration: 120 }
+         }
       }
 
       TextArea {

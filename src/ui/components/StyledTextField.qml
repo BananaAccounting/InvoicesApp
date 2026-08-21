@@ -32,9 +32,13 @@ TextField {
 
    background: Rectangle {
       color: Stylesheet.baseColor
-      border.color: textField.activeFocus || selected ? "#354793" : borderless ? Stylesheet.baseColor : "#bdbebf"
-      border.width: 1
-      radius: 2.0 * Stylesheet.pixelScaleRatio
+      border.color: textField.activeFocus || selected ? Stylesheet.accentColor : borderless ? Stylesheet.baseColor : Stylesheet.borderColor
+      border.width: textField.activeFocus || selected ? 2 : 1
+      radius: Stylesheet.cornerRadiusSmall
+
+      Behavior on border.color {
+          ColorAnimation { duration: 120 }
+      }
    }
 
    /** Context menu of text field */

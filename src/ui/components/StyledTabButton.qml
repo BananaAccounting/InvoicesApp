@@ -18,33 +18,33 @@ import QtQuick.Controls
 TabButton {
     id: control
 
+    hoverEnabled: true
+
     background: Item {
         implicitHeight: 34 * Stylesheet.pixelScaleRatio
         implicitWidth: 120 * Stylesheet.pixelScaleRatio
 
         Rectangle {
-            width: parent.width
-            color: Stylesheet.systemPalette.dark
-            height: parent.height
-            anchors.top: parent.top
-            anchors.right: parent.right
+            anchors.fill: parent
+            color: control.checked ? Stylesheet.baseColor :
+                       control.hovered ? Stylesheet.hoverColor : Stylesheet.buttonColor
         }
 
         Rectangle {
-            anchors.leftMargin: 1
-            anchors.topMargin: 1
-            anchors.top: parent.top
+            // Active-tab indicator, in the banana blue accent
             anchors.left: parent.left
-            width: parent.width - 2
-            height: parent.height - 1
-            color: control.checked ? Stylesheet.baseColor : Stylesheet.buttonColor
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 3 * Stylesheet.pixelScaleRatio
+            color: Stylesheet.accentColor
+            visible: control.checked
         }
     }
 
     contentItem: Label {
         text: control.text
         font.bold: control.checked
-        color: Stylesheet.textColor
+        color: control.checked ? Stylesheet.textColor : Stylesheet.mutedTextColor
         verticalAlignment: Text.AlignVCenter
         horizontalAlignment: Text.AlignHCenter
     }

@@ -48,7 +48,7 @@ Item {
                         if ((event.key === Qt.Key_9) &&
                             (event.modifiers & Qt.AltModifier) &&
                             (event.modifiers & Qt.ControlModifier)) {
-                            // Ctrl + Shift + 9
+                            // Ctrl + Alt + 9
                             pixelMetricsDialog.visible = true
                             event.accepted = true
                         }
@@ -68,12 +68,6 @@ Item {
             setIsEstimate(false)
         else
             setIsEstimate(true)
-
-        if (!appSettings.data.creator ||
-                (appSettings.data.creator.pubdate < Banana.script.getParamValue('pubdate'))) {
-            // Show notification message "updated extention was installed"
-            appSettings.setNotificationVisible("show_updated_version_installed", true)
-        }
     }
 
     // Interface
@@ -103,10 +97,6 @@ Item {
             title += " *"
         }
         return title
-    }
-
-    function result() {
-        return wdgInvoice.result()
     }
 
     function setIsNew(newDocument) {
@@ -200,56 +190,11 @@ Item {
         color: Stylesheet.buttonColor
     }
 
-    Rectangle {
-        // Notification bar background
-        visible: messageBar.visible
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: tabBar.top
-        color: Stylesheet.notificationBarColor
-    }
-
-    RowLayout {
-        id: messageBar
-
-        visible: appSettings.isNotificationVisible("show_updated_version_installed")
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: Stylesheet.defaultMargin
-
-        StyledLabel {
-             text: "&#x24D8; " +
-                   qsTr("An updated version of Estimate and Invoices extension has been installed. The new version is %1. See %2.")
-                   .arg(Banana.script.getParamValue('pubdate'))
-                   .arg("<a href=\"dlginvoiceedit::changelog\">%1</a>")
-                   .arg(qsTr("what's new"))
-             textFormat: Text.RichText
-             onLinkActivated: (link) => Banana.Ui.showHelp(link);
-        }
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        StyledLabel {
-             text: "Close"
-             MouseArea {
-                 anchors.fill: parent
-                 onClicked: {
-                     appSettings.setNotificationVisible("show_updated_version_installed", false)
-                 }
-             }
-        }
-    }
-
     StyledTabBar {
         id: tabBar
 
         anchors.left: parent.left
-        anchors.top: messageBar.visible ? messageBar.bottom : parent.top
+        anchors.top: parent.top
         anchors.leftMargin: -1 // Don't draw left button border
         anchors.topMargin: tabBarTopMargin
 
@@ -424,6 +369,7 @@ Item {
 
         StyledButton {
             text: qsTr("Save")
+            primary: true
             visible: !invoice.isReadOnly
             enabled: invoice.isModified
             onClicked: {

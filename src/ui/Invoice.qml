@@ -62,7 +62,7 @@ QtObject {
                 return true
             } catch(err) {
                 error = true
-                errorString = err.message()
+                errorString = err.message
             }
         }
         return false
@@ -95,7 +95,7 @@ QtObject {
                         invoice.tabPos.tableName,
                         invoice.tabPos.rowNr,
                         changedRowFields);
-            docChangeRowAddAdded = true;
+            docChangeRowModifyAdded = true;
         } else {
             // new invoice / estimate
             if (docChangeRowAddAdded)

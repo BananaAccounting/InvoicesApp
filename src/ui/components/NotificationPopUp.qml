@@ -23,18 +23,32 @@ Dialog {
 
     background: Rectangle {
       // implicitWidth: contentItem.Width
-      radius: 2.0 * Stylesheet.pixelScaleRatio
-      border.color: "#bdbebf"
+      color: Stylesheet.baseColor
+      radius: Stylesheet.cornerRadius
+      border.width: 1
+      border.color: Stylesheet.borderColor
+
+      Rectangle {
+          // Accent stripe, marks this as a status/confirmation message
+          anchors.left: parent.left
+          anchors.top: parent.top
+          anchors.bottom: parent.bottom
+          anchors.margins: 1
+          width: 4 * Stylesheet.pixelScaleRatio
+          radius: Stylesheet.cornerRadiusSmall
+          color: Stylesheet.accentColor
+      }
     }
 
     width: 300 * Stylesheet.pixelScaleRatio
     height: 50 * Stylesheet.pixelScaleRatio
 
     x: (parent.width - width) / 2
-    y: 0
+    y: 45 * Stylesheet.pixelScaleRatio
 
     contentItem: Text {
         id: label
+        color: Stylesheet.textColor
         wrapMode: Text.Wrap
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
@@ -50,11 +64,11 @@ Dialog {
     standardButtons: Dialog.NoButton
 
     enter: Transition {
-        NumberAnimation { property: "opacity"; from: 0.0; to: 0.7 }
+        NumberAnimation { property: "opacity"; from: 0.0; to: 1.0 }
     }
 
     exit: Transition {
-        NumberAnimation { property: "opacity"; from: 0.7; to: 0.0 }
+        NumberAnimation { property: "opacity"; from: 1.0; to: 0.0 }
     }
 
     Timer {

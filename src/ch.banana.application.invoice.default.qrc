@@ -27,6 +27,7 @@
         <file>ui/components/StyledTabButton.qml</file>
         <file>ui/components/StyledTextArea.qml</file>
         <file>ui/components/StyledTextField.qml</file>
+        <file>ui/components/StyledViewLink.qml</file>
         <file>ui/components/Stylesheet.qml</file>
         <file>ui/AppSettings.qml</file>
         <file>ui/DevSettings.qml</file>

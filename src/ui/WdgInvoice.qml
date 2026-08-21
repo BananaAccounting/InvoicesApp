@@ -303,7 +303,7 @@ Item {
         visible: appSettings.loaded
 
         RowLayout { // Views bar
-            spacing: 20 * Stylesheet.pixelScaleRatio
+            spacing: 6 * Stylesheet.pixelScaleRatio
 
             // Hack for qt6, to resolve overlapping items after dialog load
             visible: appSettings.loaded
@@ -320,70 +320,46 @@ Item {
                 text: qsTr("Views:")
             }
 
-            StyledLabel{
+            StyledViewLink {
                 property string viewId: appSettings.view_id_base
                 text: appSettings.getViewTitle(viewId)
                 visible: appSettings.isViewVisible(viewId)
-                font.bold: currentView === viewId
-                font.underline: currentView != viewId
-                color: currentView === viewId ? Stylesheet.textColor : Stylesheet.linkColor
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        currentView = parent.viewId
-                        appSettings.data.interface.invoice.current_view = parent.viewId
-                    }
-                    cursorShape: currentView === parent.viewId ? Qt.ArrowCursor : Qt.PointingHandCursor
+                selected: currentView === viewId
+                onClicked: {
+                    currentView = viewId
+                    appSettings.data.interface.invoice.current_view = viewId
                 }
             }
 
-            StyledLabel{
+            StyledViewLink {
                 property string viewId: appSettings.view_id_short
                 text: appSettings.getViewTitle(viewId)
                 visible: appSettings.isViewVisible(viewId)
-                font.bold: currentView === viewId
-                font.underline: currentView != viewId
-                color: currentView === viewId ? Stylesheet.textColor : Stylesheet.linkColor
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        currentView = parent.viewId
-                        appSettings.data.interface.invoice.current_view = parent.viewId
-                    }
-                    cursorShape: currentView === parent.viewId ? Qt.ArrowCursor : Qt.PointingHandCursor
+                selected: currentView === viewId
+                onClicked: {
+                    currentView = viewId
+                    appSettings.data.interface.invoice.current_view = viewId
                 }
             }
 
-            StyledLabel{
+            StyledViewLink {
                 property string viewId: appSettings.view_id_long
                 text: appSettings.getViewTitle(viewId)
                 visible: appSettings.isViewVisible(viewId)
-                font.bold: currentView === viewId
-                font.underline: currentView != viewId
-                color: currentView === viewId ? Stylesheet.textColor : Stylesheet.linkColor
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        currentView = parent.viewId
-                        appSettings.data.interface.invoice.current_view = parent.viewId
-                    }
-                    cursorShape: currentView === parent.viewId ? Qt.ArrowCursor : Qt.PointingHandCursor
+                selected: currentView === viewId
+                onClicked: {
+                    currentView = viewId
+                    appSettings.data.interface.invoice.current_view = viewId
                 }
             }
 
-            StyledLabel{
+            StyledViewLink {
                 property string viewId: appSettings.view_id_full
                 text: appSettings.getDefaultViewTitle(viewId)
-                font.bold: currentView === viewId
-                font.underline: currentView != viewId
-                color: currentView === viewId ? Stylesheet.textColor : Stylesheet.linkColor
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        currentView = parent.viewId
-                        appSettings.data.interface.invoice.current_view = parent.viewId
-                    }
-                    cursorShape: currentView === parent.viewId ? Qt.ArrowCursor : Qt.PointingHandCursor
+                selected: currentView === viewId
+                onClicked: {
+                    currentView = viewId
+                    appSettings.data.interface.invoice.current_view = viewId
                 }
             }
 
@@ -393,6 +369,7 @@ Item {
 
             StyledLabel {
                 font.bold: true
+                color: Stylesheet.accentColor
                 //Layout.minimumWidth: 320 * Stylesheet.pixelScaleRatio
                 text: qsTr("Total") + (invoice.signalInvoiceChanged && invoice.json && invoice.json.document_info.currency ? " " + invoice.json.document_info.currency.toLocaleUpperCase() : "") +
                       " " + toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
@@ -1734,7 +1711,10 @@ Item {
 
                     rowHeightProvider: function(row) {
                         let height = 34;
-                        let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
+                        if (isNewRow(row)) {
+                            return height * Stylesheet.pixelScaleRatio
+                        }
+                        let linesCount = estimateWordWrapLines(invoice.json.items[row].description)
                         return height * linesCount * Stylesheet.pixelScaleRatio
                     }
 
@@ -2443,7 +2423,9 @@ Item {
                                 // We should try to use directly the line hiegth.
                                 //let linesCount = invoice.json.items[rowNr].description.split('\n').length
                                 let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
-                                let lineHeight = 30 + 16 * (linesCount - 1)
+                                // Keep this estimate in sync with rowHeightProvider's formula, so the
+                                // container height and the table's real row heights never disagree.
+                                let lineHeight = 34 * linesCount
                                 if (rowHeight(rowNr) > 0){
                                     lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number
                                 }

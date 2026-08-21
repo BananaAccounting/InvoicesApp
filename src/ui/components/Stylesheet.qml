@@ -22,6 +22,10 @@ Item {
     property double pixelScaleRatio: scaleReference.getPixelScaleRatio()
     property int defaultMargin: 10 * pixelScaleRatio
 
+    // Corner radius, shared so controls read as one consistent, modern style
+    property double cornerRadius: 6 * pixelScaleRatio
+    property double cornerRadiusSmall: 3 * pixelScaleRatio
+
     // Colors
     property double minimumContrast: 4.5
     property color baseColor: systemPalette.base
@@ -31,6 +35,24 @@ Item {
     property color linkColor: "blue"
     property color selectionColor: systemPalette.highlight
     property color selectedTextColor: Qt.platform.os === "osx" ? systemPalette.text : systemPalette.highlightedText
+
+    // Banana brand blue, used for primary actions and selected/active states.
+    // Automatically brightened in dark mode if the plain brand color wouldn't
+    // have enough contrast against the window background.
+    property color bananaBlue: "#354894"
+    property color accentColor: getContrastRatio(bananaBlue, systemPalette.base) > minimumContrast ?
+                                     bananaBlue : Qt.lighter(bananaBlue, 1.6)
+    property color accentColorHover: Qt.lighter(accentColor, 1.12)
+    property color accentColorPressed: Qt.darker(accentColor, 1.12)
+    property color accentTextColor: "white"
+
+    // Neutral tokens derived from the theme's own text color, so borders/hover
+    // states/muted text stay correct in both light and dark mode automatically.
+    property color borderColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.3)
+    property color borderColorStrong: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.45)
+    property color hoverColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.06)
+    property color pressedColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.12)
+    property color mutedTextColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.55)
 
     // Reference palette
     property SystemPalette systemPalette: SystemPalette{

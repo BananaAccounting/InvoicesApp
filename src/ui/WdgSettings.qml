@@ -2179,7 +2179,7 @@ Item {
                 appSettings.setSettings(newSettings)
                 visible = false
             } catch (err) {
-                errorMessageDialog.text = err.message()
+                errorMessageDialog.text = err.message
                 errorMessageDialog.visible = true
             }
         }

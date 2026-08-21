@@ -30,9 +30,13 @@ ComboBox {
 
     background: Rectangle {
         color: Stylesheet.baseColor
-        border.width: 1
-        border.color: "#bdbebf"
-        radius: 2.0 * Stylesheet.pixelScaleRatio
+        border.width: control.activeFocus ? 2 : 1
+        border.color: control.activeFocus ? Stylesheet.accentColor : Stylesheet.borderColor
+        radius: Stylesheet.cornerRadiusSmall
+
+        Behavior on border.color {
+            ColorAnimation { duration: 120 }
+        }
     }
 
     popup: Popup {
@@ -52,8 +56,8 @@ ComboBox {
 
         background: Rectangle {
             color: Stylesheet.baseColor
-            border.color: "#354793"
-            radius: 2 * Stylesheet.pixelScaleRatio
+            border.color: Stylesheet.accentColor
+            radius: Stylesheet.cornerRadiusSmall
         }
     }
 
