@@ -1,7 +1,7 @@
 .DS_Store
 *.bak
 build-*
-src/ch.banana.application.invoice.default.sbaa
+src/ch.banana.application.invoice.default.sbaaxxxxx
 src/CMakeLists.txt.user
 src/.vs
 src/out/build
