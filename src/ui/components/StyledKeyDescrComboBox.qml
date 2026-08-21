@@ -78,10 +78,14 @@ StyledComboBox {
         id: filteredModel
     }
 
+    hoverEnabled: true
+
     background: Rectangle {
         color: Stylesheet.baseColor
+        // The border (never covered by the inner text field) carries both the hover and
+        // the focus cue: thin accent outline on hover, thicker on focus.
         border.width: control.activeFocus ? 2 : 1
-        border.color: control.activeFocus ? Stylesheet.accentColor : Stylesheet.borderColor
+        border.color: control.activeFocus || control.hovered ? Stylesheet.accentColor : Stylesheet.borderColor
         radius: Stylesheet.cornerRadiusSmall
 
         Behavior on border.color {
@@ -176,10 +180,18 @@ StyledComboBox {
     }
 
     delegate: ItemDelegate {
+        id: itemDelegate
         text: listItemTextIncludesKey ? key + "\t" + descr : descr
         width: control.popup.listView.width
         font.bold: currentKeyIndex === index
         highlighted: currentHighlightIndex === index
+        hoverEnabled: true
+
+        background: Rectangle {
+            color: itemDelegate.highlighted ? Stylesheet.accentColor :
+                       itemDelegate.hovered ? Stylesheet.hoverColor : "transparent"
+        }
+
         MouseArea {
             anchors.fill: parent
             onClicked: {

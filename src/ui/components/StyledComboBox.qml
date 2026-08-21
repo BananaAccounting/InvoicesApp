@@ -22,6 +22,8 @@ ComboBox {
     indicator.width: 20 * Stylesheet.pixelScaleRatio
     indicator.height: 20 * Stylesheet.pixelScaleRatio
 
+    hoverEnabled: true
+
     // Popup minimun widht (popup can be larger than the control
     property int popupMinWidth: 0
 
@@ -30,12 +32,29 @@ ComboBox {
 
     background: Rectangle {
         color: Stylesheet.baseColor
+        // The border (never covered by inner content) carries both the hover and the
+        // focus cue: thin accent outline on hover, thicker on focus.
         border.width: control.activeFocus ? 2 : 1
-        border.color: control.activeFocus ? Stylesheet.accentColor : Stylesheet.borderColor
+        border.color: control.activeFocus || control.hovered ? Stylesheet.accentColor : Stylesheet.borderColor
         radius: Stylesheet.cornerRadiusSmall
 
         Behavior on border.color {
             ColorAnimation { duration: 120 }
+        }
+    }
+
+    delegate: ItemDelegate {
+        id: itemDelegate
+        width: control.width
+        text: control.textRole ?
+                  (Array.isArray(control.model) ? modelData[control.textRole] : model[control.textRole]) :
+                  modelData
+        highlighted: control.highlightedIndex === index
+        hoverEnabled: true
+
+        background: Rectangle {
+            color: itemDelegate.highlighted ? Stylesheet.accentColor :
+                       itemDelegate.hovered ? Stylesheet.hoverColor : "transparent"
         }
     }
 

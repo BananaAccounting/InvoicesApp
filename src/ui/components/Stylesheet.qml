@@ -50,7 +50,7 @@ Item {
     // states/muted text stay correct in both light and dark mode automatically.
     property color borderColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.3)
     property color borderColorStrong: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.45)
-    property color hoverColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.06)
+    property color hoverColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.1)
     property color pressedColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.12)
     property color mutedTextColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.55)
 
