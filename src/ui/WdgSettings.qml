@@ -29,6 +29,7 @@ Item {
 
     // Style properties
     property int stylePropertyWidth: 220 * Stylesheet.pixelScaleRatio
+    property int styleLabelWidth: 260 * Stylesheet.pixelScaleRatio
     property int styleButtonMinWidth: 140 * Stylesheet.pixelScaleRatio
     property int styleSectionSeparatorHeight: 4 * Stylesheet.defaultMargin
     property int styleColumnSpacing: 2.5 * Stylesheet.defaultMargin
@@ -86,7 +87,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Invoice title")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -109,7 +111,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Estimate title")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
                     StyledTextField {
                         property string trId: "new_estimate_title"
@@ -131,7 +134,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("VAT mode")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledKeyDescrComboBox {
@@ -164,7 +168,8 @@ Item {
                  RowLayout {
                      StyledLabel{
                          text: qsTr("Default VAT code")
-                         Layout.fillWidth: true
+                         Layout.preferredWidth: styleLabelWidth
+                         wrapMode: Text.WordWrap
                      }
 
                      StyledKeyDescrComboBox {
@@ -197,7 +202,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Currency")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -218,7 +224,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Decimals")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -246,7 +253,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Total rounding")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -270,7 +278,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Invoice payment term (days)")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -290,7 +299,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Estimate validity (days)")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -328,7 +338,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 1"), "show_invoice_custom_field_1")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -353,7 +364,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 2"), "show_invoice_custom_field_2")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -378,7 +390,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 3"), "show_invoice_custom_field_3")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -402,7 +415,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 4"), "show_invoice_custom_field_4")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -426,7 +440,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 5"), "show_invoice_custom_field_5")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -450,7 +465,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 6"), "show_invoice_custom_field_6")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -474,7 +490,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 7"), "show_invoice_custom_field_7")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -498,7 +515,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 8"), "show_invoice_custom_field_8")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -558,7 +576,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Title")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -602,7 +621,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Visible")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSwitch {
@@ -673,7 +693,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Fields not empty")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -718,7 +739,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Decimals")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -741,7 +763,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Total rounding")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -764,7 +787,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Language")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -787,8 +811,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Currency")
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -811,7 +835,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("VAT mode")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -855,7 +880,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Invoice number")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -878,7 +904,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Invoice date")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -901,7 +928,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Due date")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -924,7 +952,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Order number")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -947,7 +976,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Order date")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -970,7 +1000,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Invoice title")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -993,7 +1024,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Begin text")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1016,7 +1048,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("End text")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1039,7 +1072,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Internal notes")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1062,7 +1096,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Invoice summary")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1106,7 +1141,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 1")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1129,7 +1165,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 2")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1152,7 +1189,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 3")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1175,7 +1213,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 4")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1198,7 +1237,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 5")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1221,7 +1261,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 6")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1244,7 +1285,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 7")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1267,7 +1309,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Custom field 8")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1298,7 +1341,6 @@ Item {
                     StyledLabel{
                         text: qsTr("Address")
                         font.bold: true
-                        Layout.fillWidth: true
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -1312,7 +1354,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Customer selector")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1335,7 +1378,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Business name")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1358,7 +1402,8 @@ Item {
 
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit"), "show_invoice_address_business_unit")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1381,7 +1426,8 @@ Item {
 
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit 2"), "show_invoice_address_business_unit_2")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1404,7 +1450,8 @@ Item {
 
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit 3"), "show_invoice_address_business_unit_3")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1427,7 +1474,8 @@ Item {
 
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit 4"), "show_invoice_address_business_unit_4")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1450,7 +1498,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Prefix")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1473,7 +1522,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("First and last name")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1496,7 +1546,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Address street")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1519,7 +1570,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Building number")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1542,7 +1594,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Address extra")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1565,7 +1618,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Post box")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1588,7 +1642,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Country and locality")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1611,7 +1666,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Email")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1634,7 +1690,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Phone")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1657,7 +1714,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("VAT number")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1680,7 +1738,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Fiscal number")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1715,7 +1774,6 @@ Item {
                     StyledLabel{
                         text: qsTr("Items")
                         font.bold: true
-                        Layout.fillWidth: true
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -1729,7 +1787,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Height of visible content in rows (0 = all rows)")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
@@ -1801,7 +1860,6 @@ Item {
                     StyledLabel{
                         text: qsTr("Item columns")
                         font.bold: true
-                        Layout.fillWidth: true
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -1815,7 +1873,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Row")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1838,7 +1897,8 @@ Item {
 
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Type"), "show_invoice_item_column_type")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1861,7 +1921,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Number")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1884,7 +1945,8 @@ Item {
 
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Item date"), "show_invoice_item_column_date")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1907,7 +1969,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Quantity")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1930,7 +1993,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Unit")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1953,7 +2017,8 @@ Item {
 
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Discount"), "show_invoice_item_column_discount")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -1984,7 +2049,6 @@ Item {
                     StyledLabel{
                         text: qsTr("Totals")
                         font.bold: true
-                        Layout.fillWidth: true
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -1998,7 +2062,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Discount")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -2021,7 +2086,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Rounding")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -2044,7 +2110,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Deposit")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -2067,7 +2134,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Summary")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledSettingsSwitch {
@@ -2116,7 +2184,8 @@ Item {
 
                     StyledLabel{
                         text: qsTr("Edit current settings")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledButton {
@@ -2134,7 +2203,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Restore default settings")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledButton {
@@ -2147,7 +2217,8 @@ Item {
                 RowLayout {
                     StyledLabel{
                         text: qsTr("Clear settings")
-                        Layout.fillWidth: true
+                        Layout.preferredWidth: styleLabelWidth
+                        wrapMode: Text.WordWrap
                     }
 
                     StyledButton {
