@@ -26,12 +26,15 @@ Item {
     // Never request a size bigger than the screen: on small displays (tablet,
     // laptop with a low-resolution screen) a fixed 1000x600 dialog can end up
     // taller/wider than the available space, pushing the button bar (Save,
-    // Close...) off-screen and out of reach. Screen.width/height fall back to
-    // 0 if not yet resolved (e.g. before the item is placed in a window), in
-    // which case we keep the original fixed size.
-    width: Screen.width > 0 ? Math.min(1000 * Stylesheet.pixelScaleRatio, Screen.width * 0.95)
+    // Close...) off-screen and out of reach. On screens smaller than 1000x600
+    // this fills the screen completely (no side margins), which reads as
+    // "fullscreen" on phones/small tablets; on desktop the screen is always
+    // bigger than 1000x600, so this has no effect there. Screen.width/height
+    // fall back to 0 if not yet resolved (e.g. before the item is placed in a
+    // window), in which case we keep the original fixed size.
+    width: Screen.width > 0 ? Math.min(1000 * Stylesheet.pixelScaleRatio, Screen.width)
                              : 1000 * Stylesheet.pixelScaleRatio
-    height: Screen.height > 0 ? Math.min(600 * Stylesheet.pixelScaleRatio, Screen.height * 0.85)
+    height: Screen.height > 0 ? Math.min(600 * Stylesheet.pixelScaleRatio, Screen.height)
                               : 600 * Stylesheet.pixelScaleRatio
 
     focus: true
