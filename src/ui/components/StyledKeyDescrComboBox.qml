@@ -80,10 +80,20 @@ StyledComboBox {
 
     hoverEnabled: true
 
+    // Don't rely on the active Qt Quick Controls style's default padding: it differs
+    // per platform (on mobile it is much larger), which left part of the background
+    // uncovered next to the text field, showing up as an empty clickable strip.
+    // The right side keeps room for the dropdown arrow, so the field never covers it.
+    leftPadding: 0
+    topPadding: 0
+    bottomPadding: 0
+    rightPadding: indicator.width
+
     background: Rectangle {
         color: Stylesheet.baseColor
-        // The border (never covered by the inner text field) carries both the hover and
-        // the focus cue: thin accent outline on hover, thicker on focus.
+        // This is the only visible box: it wraps the text field AND the dropdown
+        // arrow, and carries the hover/focus cue (thin accent outline on hover,
+        // thicker on focus).
         border.width: control.activeFocus ? 2 : 1
         border.color: control.activeFocus || control.hovered ? Stylesheet.accentColor : Stylesheet.borderColor
         radius: Stylesheet.cornerRadiusSmall
@@ -95,6 +105,9 @@ StyledComboBox {
 
     contentItem: StyledTextField {
         id: textField
+        // Fully transparent, not just borderless: StyledTextField's own background is
+        // an opaque rectangle that would cover the border drawn above.
+        background: Item {}
         readOnly: !control.editable
         text: control.displayText
 
