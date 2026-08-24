@@ -26,15 +26,22 @@ Item {
     // Never request a size bigger than the screen: on small displays (tablet,
     // laptop with a low-resolution screen) a fixed 1000x600 dialog can end up
     // taller/wider than the available space, pushing the button bar (Save,
-    // Close...) off-screen and out of reach. On screens smaller than 1000x600
-    // this fills the screen completely (no side margins), which reads as
-    // "fullscreen" on phones/small tablets; on desktop the screen is always
-    // bigger than 1000x600, so this has no effect there. Screen.width/height
-    // fall back to 0 if not yet resolved (e.g. before the item is placed in a
-    // window), in which case we keep the original fixed size.
-    width: Screen.width > 0 ? Math.min(1000 * Stylesheet.pixelScaleRatio, Screen.width)
+    // Close...) off-screen and out of reach. If the screen is too small on
+    // EITHER axis (e.g. a phone in portrait: narrow but tall) we treat it as
+    // a small/mobile screen and go fullscreen on both axes together, instead
+    // of shrinking width and height independently - otherwise a phone would
+    // end up full-width but not full-height (or vice versa in landscape).
+    // On desktop the screen is always bigger than 1000x600 on both axes, so
+    // this has no effect there. Screen.width/height fall back to 0 if not yet
+    // resolved (e.g. before the item is placed in a window), in which case we
+    // keep the original fixed size.
+    readonly property bool isSmallScreen: Screen.width > 0 && Screen.height > 0 &&
+                                           (Screen.width < 1000 * Stylesheet.pixelScaleRatio ||
+                                            Screen.height < 600 * Stylesheet.pixelScaleRatio)
+
+    width: Screen.width > 0 ? (isSmallScreen ? Screen.width : 1000 * Stylesheet.pixelScaleRatio)
                              : 1000 * Stylesheet.pixelScaleRatio
-    height: Screen.height > 0 ? Math.min(600 * Stylesheet.pixelScaleRatio, Screen.height)
+    height: Screen.height > 0 ? (isSmallScreen ? Screen.height : 600 * Stylesheet.pixelScaleRatio)
                               : 600 * Stylesheet.pixelScaleRatio
 
     focus: true
@@ -319,6 +326,15 @@ Item {
             }
         }
 
+    }
+
+    Rectangle {
+        // Button bar background, mirrors the tab bar background above
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: buttonBar.top
+        anchors.bottom: parent.bottom
+        color: Stylesheet.buttonColor
     }
 
     RowLayout {  // Invoice's button's bar

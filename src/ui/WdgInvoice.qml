@@ -2999,6 +2999,7 @@ Item {
                             Layout.columnSpan: 2
                             Layout.alignment: Qt.AlignRight
 
+                            color: Stylesheet.textColor
                             text: invoice.json ? getAccountingDetails() : ""
                             visible: text.length > 0
 

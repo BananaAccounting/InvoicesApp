@@ -192,6 +192,14 @@ StyledComboBox {
                        itemDelegate.hovered ? Stylesheet.hoverColor : "transparent"
         }
 
+        contentItem: Text {
+            text: itemDelegate.text
+            font: itemDelegate.font
+            color: itemDelegate.highlighted ? Stylesheet.accentTextColor : Stylesheet.textColor
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+        }
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
