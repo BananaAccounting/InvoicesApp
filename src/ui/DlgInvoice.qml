@@ -329,10 +329,13 @@ Item {
     }
 
     Rectangle {
-        // Button bar background, mirrors the tab bar background above
+        // Button bar background, mirrors the tab bar background above.
+        // Extends a bit above the buttons themselves, so they don't sit flush
+        // against the top edge of the colored area.
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: buttonBar.top
+        anchors.topMargin: -Stylesheet.defaultMargin
         anchors.bottom: parent.bottom
         color: Stylesheet.buttonColor
     }
