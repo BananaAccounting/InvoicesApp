@@ -32,8 +32,11 @@ TextField {
 
    background: Rectangle {
       color: Stylesheet.baseColor
-      border.color: textField.activeFocus || selected ? Stylesheet.accentColor : borderless ? Stylesheet.baseColor : Stylesheet.borderColor
-      border.width: textField.activeFocus || selected ? 2 : 1
+      // Highlight real focus only. "selected" is bound to the items table's current
+      // cell, which by design stays set after the focus moved elsewhere - keeping it
+      // highlighted made a cell look like it was still being edited.
+      border.color: textField.activeFocus ? Stylesheet.accentColor : borderless ? Stylesheet.baseColor : Stylesheet.borderColor
+      border.width: textField.activeFocus ? 2 : 1
       radius: Stylesheet.cornerRadiusSmall
 
       Behavior on border.color {

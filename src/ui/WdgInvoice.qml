@@ -1445,6 +1445,9 @@ Item {
                     syncView: invoiceItemsTable
                     reuseItems: false
                     visible: true
+                    // Unlike the items table this view had no clipping, so any header cell
+                    // laid out past its right edge stayed painted instead of being cut off.
+                    clip: true
 
                     Layout.fillWidth: true
                     Layout.topMargin: Stylesheet.defaultMargin
@@ -1586,6 +1589,11 @@ Item {
                     Connections {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
+                            // Toggling a column in the Settings tab changes what
+                            // columnWidthProvider() returns, but the view is not notified: without
+                            // this the table kept the previous columns until something else
+                            // happened to relayout it.
+                            invoiceItemsTable.updateColDescrWidth()
                         }
                     }
 
@@ -2387,7 +2395,10 @@ Item {
                             for (var i = 0; i < texts.length; i++) {
                                 if (texts[i].length > 1 ) {
                                     let elementWidth = fontMetrics.advanceWidth(texts[i]);
-                                    let elementLines = elementWidth / invoiceItemsTable.columnWidth(4)
+                                    // Divide by the clamped value: columnWidth(4) returns -1 while
+                                    // the column is not laid out yet, which would give a negative
+                                    // line count and end up as a zero/negative row height.
+                                    let elementLines = elementWidth / columnWidth
                                     numberOfLines += Math.ceil(elementLines)
                                 } else {
                                     numberOfLines ++;
@@ -2529,16 +2540,72 @@ Item {
                         return null
                     }
 
+                    Timer {
+                        // updateColDescrWidth() is called from onWidthChanged, i.e. while the
+                        // view is already recomputing its geometry. Calling forceLayout() from
+                        // there is a re-entrant layout (undefined behaviour per Qt docs) and can
+                        // leave delegates positioned with stale coordinates. Going through a
+                        // 0-interval timer runs the update after the current pass has finished,
+                        // and coalesces the many width changes of a resize into a single relayout.
+                        id: updateColDescrWidthTimer
+                        interval: 0
+                        repeat: false
+                        onTriggered: invoiceItemsTable.applyColDescrWidth()
+                    }
+
                     function updateColDescrWidth() {
-                        invoiceItemsTable.forceLayout()
+                        updateColDescrWidthTimer.restart()
+                    }
+
+                    function applyColDescrWidth() {
                         let colDescriptionIndex = 4
-                        let availableWidth = parent.width - contentWidth + columnWidthProvider(colDescriptionIndex)
-                        // "contentwidth" is total width needed to display all the content of TableView without cutting it off.
-                        // Is automatically calculated based on the content of the columns.
-                        let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio, availableWidth)
                         let headerColDescription = invoiceItemsModel.headers[colDescriptionIndex]
+                        if (!headerColDescription || width <= 0)
+                            return
+                        if (columnWidthProvider(colDescriptionIndex) <= 0)
+                            return // Description hidden in this view: nothing to size
+
+                        // Measure the other columns through columnWidthProvider(), NOT through
+                        // contentWidth. contentWidth describes the layout currently on screen,
+                        // while columnWidthProvider() already reflects the current view: the two
+                        // disagree right after switching view (the visible columns changed but the
+                        // view has not relaid out yet) and before the first layout. Mixing them
+                        // could blow Description up until the following columns no longer fitted,
+                        // and the bad value was then persisted in the settings. Deriving the width
+                        // from the provider alone also makes this computation stateless: the
+                        // previous Description width never feeds back into the new one.
+                        let otherColumnsWidth = 0
+                        let visibleColumns = 0
+                        for (let col = 0; col < invoiceItemsModel.headers.length; ++col) {
+                            let colWidth = columnWidthProvider(col)
+                            if (colWidth > 0) {
+                                ++visibleColumns
+                                if (col !== colDescriptionIndex)
+                                    otherColumnsWidth += colWidth
+                            }
+                        }
+
+                        let spacing = columnSpacing * Math.max(0, visibleColumns - 1)
+                        let newColDescriptionWidth = Math.max(200 * Stylesheet.pixelScaleRatio,
+                                                              width - otherColumnsWidth - spacing)
                         let columnWidthId = 'width_' + headerColDescription.id
-                        saveInvoiceItemColumnWidth(columnWidthId, availableWidth)
+                        saveInvoiceItemColumnWidth(columnWidthId, newColDescriptionWidth)
+                        // Relayout AFTER storing the new width: otherwise the view keeps the
+                        // previous layout while columnWidthProvider() already reports the new one.
+                        invoiceItemsTable.forceLayout()
+
+                        // Keep the whole table inside the dialog: if the fresh layout still
+                        // overflows (hidden columns may consume spacing too, depending on the Qt
+                        // version) take the overflow off Description. Runs at most once - the
+                        // corrected width is strictly smaller, so it cannot loop.
+                        if (contentWidth > width) {
+                            let corrected = Math.max(200 * Stylesheet.pixelScaleRatio,
+                                                     newColDescriptionWidth - (contentWidth - width))
+                            if (corrected < newColDescriptionWidth) {
+                                saveInvoiceItemColumnWidth(columnWidthId, corrected)
+                                invoiceItemsTable.forceLayout()
+                            }
+                        }
                     }
                 }
 
