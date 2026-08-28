@@ -2008,6 +2008,17 @@ Item {
                                     /** Abbiamo aggiunto il nuovo controllo sull'esistenza della riga del modello perchè è apparso un warning nuovo
                                         che prima non cera, inizialmente non viene trovato l'oggetto: invoice.json.items[model.row]. Sembra che il controllo non cambi il comportamento corretto del programma, ma è
                                         da testare*/
+                                    /* React to edits typed by the user only. This handler also runs
+                                       when `text` is re-evaluated from its `model.display` binding,
+                                       which happens for every visible row whenever calculateInvoice()
+                                       replaces invoice.json and updateViewItems() refreshes the model
+                                       (e.g. right after picking a type from the combo box). Writing
+                                       back then pushed text into rows the user never touched.
+                                       StyledTextArea guards its own onTextChanged the same way, but
+                                       declaring this handler here replaces that one. */
+                                    if (!focus)
+                                        return
+
                                     if (invoice.json.items[model.row]){
                                         let oldLinesCount = invoiceItemsTable.estimateWordWrapLines(invoice.json.items[model.row].description);
                                         let newLinesCount = invoiceItemsTable.estimateWordWrapLines(text);
