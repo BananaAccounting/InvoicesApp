@@ -30,7 +30,9 @@ Item {
     property double minimumContrast: 4.5
     property color baseColor: systemPalette.base
     property color buttonColor: systemPalette.button
-    property color notificationBarColor: isDarkModus() ? "#0C0C0C" : "#DEEEF7" // HEX: #DEEEF7 RGB: 222, 238, 247
+    // Unused since the version notification bar was removed from DlgInvoice. Status
+    // banners now use accentSurfaceColor below. Kept commented in case it is needed again.
+    // property color notificationBarColor: isDarkModus() ? "#0C0C0C" : "#DEEEF7" // HEX: #DEEEF7 RGB: 222, 238, 247
     property color textColor: systemPalette.text
     property color linkColor: "blue"
     property color selectionColor: systemPalette.highlight
@@ -53,6 +55,11 @@ Item {
     property color hoverColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.1)
     property color pressedColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.12)
     property color mutedTextColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.55)
+
+    // Tinted surface for status banners. Derived from the accent rather than from the
+    // text colour, so it stays clearly distinct from buttonColor (the tab bar) instead
+    // of blending into it, and follows the theme on its own.
+    property color accentSurfaceColor: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.14)
 
     // Reference palette
     property SystemPalette systemPalette: SystemPalette{

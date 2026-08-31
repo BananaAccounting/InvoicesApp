@@ -302,6 +302,41 @@ Item {
         // Hack for qt6, to resolve overlapping items after dialog load
         visible: appSettings.loaded
 
+        Rectangle { // Read only banner
+            // Until now a locked document looked exactly like an editable one: the only
+            // hint was the "[Read only]" suffix in the window title, which is easy to miss.
+            Layout.fillWidth: true
+            visible: invoice.isReadOnly
+            implicitHeight: readOnlyLabel.implicitHeight + Stylesheet.defaultMargin
+            color: Stylesheet.accentSurfaceColor
+            radius: Stylesheet.cornerRadiusSmall
+            border.width: 1
+            border.color: Stylesheet.accentColor
+
+            Rectangle {
+                // Accent stripe, same language as the notification pop up
+                id: readOnlyStripe
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.margins: 1
+                width: 4 * Stylesheet.pixelScaleRatio
+                radius: Stylesheet.cornerRadiusSmall
+                color: Stylesheet.accentColor
+            }
+
+            StyledLabel {
+                id: readOnlyLabel
+                anchors.verticalCenter: parent.verticalCenter
+                // Anchored to the stripe, so the gap stays right if either changes width
+                anchors.left: readOnlyStripe.right
+                anchors.right: parent.right
+                anchors.leftMargin: Stylesheet.defaultMargin
+                anchors.rightMargin: Stylesheet.defaultMargin
+                text: qsTr("This document is read only and cannot be modified.")
+            }
+        }
+
         RowLayout { // Views bar
             spacing: 6 * Stylesheet.pixelScaleRatio
 
@@ -1463,8 +1498,12 @@ Item {
                         DelegateChoice {
                             Item {
                                 Rectangle {
+                                    // Own background, so the header reads as a header instead of
+                                    // blending into the rows: the data rows now carry bold text
+                                    // for header/total lines, which left the column titles as the
+                                    // weakest text of the table.
                                     anchors.fill: parent
-                                    color: Stylesheet.baseColor
+                                    color: Stylesheet.buttonColor
                                 }
 
                                 StyledLabel {
@@ -1476,6 +1515,7 @@ Item {
                                     clip: true
                                     text: invoiceItemsModel.headers[model.column].title
                                     horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    font.bold: true
                                 }
 
                                 Rectangle {
@@ -1483,15 +1523,27 @@ Item {
                                     y: 0
                                     width: 5 * Stylesheet.pixelScaleRatio
                                     height: parent.height
-                                    color: Stylesheet.baseColor
+                                    // Must match the cell background above, otherwise these gaps
+                                    // between columns stay the colour of the table body and show
+                                    // up as stripes across the header.
+                                    color: Stylesheet.buttonColor
 
                                     Rectangle {
                                         anchors.centerIn: parent
                                         width: 1
                                         height: parent.height
-                                        color: "#bdbebf"
+                                        color: Stylesheet.borderColor
                                     }
 
+                                }
+
+                                Rectangle {
+                                    // Separates the header from the first item row
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    height: 1
+                                    color: Stylesheet.borderColor
                                 }
                             }
                         }
@@ -1965,6 +2017,17 @@ Item {
                                 text: model.display
                                 readOnly: invoice.isReadOnly
 
+                                // Mirror how these rows come out on the printed document:
+                                // header rows are printed bold (description only), total rows
+                                // bold (description and amount), note rows in normal text.
+                                // Keeping the editor and the print consistent is the point -
+                                // hence no styling of its own for notes. The
+                                // signalInvoiceChanged dependency is what re-evaluates this
+                                // when the row type is changed from the Type combo box.
+                                font.bold: invoice.signalInvoiceChanged &&
+                                           (invoiceItemsTable.isHeaderRow(model.row) ||
+                                            invoiceItemsTable.isTotalRow(model.row))
+
                                 Keys.onTabPressed: function (event) {
                                     // Steal tab key
                                     if (focus) {
@@ -2230,6 +2293,9 @@ Item {
                                 readOnly: true
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: toLocaleItemTotalFormat(model.display, model.row)
+                                // Subtotal rows carry the figure that matters on that line
+                                font.bold: invoice.signalInvoiceChanged &&
+                                           invoiceItemsTable.isTotalRow(model.row)
 
                                 onFocusChanged: {
                                     if (focus) {
@@ -2481,6 +2547,16 @@ Item {
                             if (item_type === "total" || item_type === "total1" || item_type === "total2") {
                                 return true
                             }
+                        }
+                        return false
+                    }
+
+                    /* Header rows are printed bold (description only), like isTotalRow above.
+                       Callers must depend on invoice.signalInvoiceChanged to re-evaluate, as
+                       this reads invoice.json directly and is not bindable on its own. */
+                    function isHeaderRow(row) {
+                        if (row >= 0 && invoice && invoice.json && invoice.json.items && row < invoice.json.items.length) {
+                            return invoice.json.items[row].item_type === "header"
                         }
                         return false
                     }
@@ -3009,13 +3085,28 @@ Item {
                             }
                         }
 
+                        Rectangle {
+                            // Separates the grand total from the intermediate figures above
+                            // (subtotal, VAT, rounding, discount, deposit), which until now all
+                            // looked exactly alike.
+                            Layout.columnSpan: 2
+                            Layout.fillWidth: true
+                            Layout.topMargin: 4 * Stylesheet.pixelScaleRatio
+                            height: 1
+                            color: Stylesheet.borderColor
+                        }
+
                         RowLayout {
                             StyledTextField {
                                 readOnly: true
                                 borderless: true
                                 text: qsTr("Total")
+                                font.bold: true
+                                color: Stylesheet.accentColor
                             }
                             StyledLabel{
+                                font.bold: true
+                                color: Stylesheet.accentColor
                                 text: invoice.signalInvoiceChanged && invoice.json && invoice.json.document_info.currency ?
                                           invoice.json.document_info.currency.toLocaleUpperCase() : ""
                             }
@@ -3029,6 +3120,10 @@ Item {
                             Layout.alignment: Qt.AlignRight
                             Layout.minimumWidth: 120 * Stylesheet.pixelScaleRatio
                             text: toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
+                            // The figure the whole document is about: same emphasis as the
+                            // total already shown in the Views bar at the top.
+                            font.bold: true
+                            color: Stylesheet.accentColor
                         }
 
                         StyledLabel{
