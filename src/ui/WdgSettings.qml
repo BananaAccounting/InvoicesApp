@@ -35,6 +35,25 @@ Item {
     property int styleColumnSpacing: 2.5 * Stylesheet.defaultMargin
     property int styleRowSpacing: 0.5 * Stylesheet.defaultMargin
 
+    /* True when a label and its control no longer fit side by side, the same idea as the
+       Invoice tab's own compact layout. The threshold is not a guessed number: it is what
+       one of these rows actually measures - the label column, the control next to it, the
+       gap between them and the margins - so it stays right if any of those constants is
+       ever retuned.
+
+       Measured on the scroll area's own width rather than on Screen: the screen is only a
+       guess at the room the rows will get, and devices report it in different units.
+
+       Everything ends up in one column. A row of a label plus one control simply stacks.
+       A per view row keeps its three switches side by side on a line of their own, under
+       a label that now spans the full width: the three columns are the three views, so a
+       switch pushed onto the next line would silently come to stand for a different view
+       than the title above it. Three columns instead of four is what stacks the label
+       while leaving that correspondence intact. */
+    readonly property bool compactLayout: scrollView.availableWidth > 0 &&
+                                          scrollView.availableWidth < styleLabelWidth + stylePropertyWidth +
+                                                                      styleColumnSpacing + 2 * Stylesheet.defaultMargin
+
     property string programLanguage: Banana.application.locale.substring(0, 2)
     property string documentLanguage: invoice.json && invoice.json.document_info.locale && invoice.signalInvoiceChanged?
                                          invoice.json.document_info.locale.substring(0, 2) :
@@ -63,8 +82,17 @@ Item {
         anchors.margins: Stylesheet.defaultMargin
         //anchors.topMargin: styleSectionSeparatorHeight / 2
 
+        // Pin the content to the width of the viewport. Left unset, a ScrollView takes the
+        // content width from the implicit width of its child, and a ColumnLayout's implicit
+        // width is that of its widest child - a label's full text on a single line. It would
+        // then decide the content is far wider than the screen, offer horizontal scrolling,
+        // and hand the content that oversized width: every fillWidth below would faithfully
+        // fill 700 points on a 400 point screen. Height is left alone, so the page still
+        // scrolls vertically as far as its content needs.
+        contentWidth: availableWidth - ScrollBar.vertical.width
+
         ColumnLayout {
-            width: scrollView.availableWidth
+            width: scrollView.contentWidth
             height: scrollView.availableHeight
 
             ColumnLayout {
@@ -82,16 +110,21 @@ Item {
                     text: qsTr("Changes to the following settings are applied to the current document and to future documents. If you only wish to change the current document use the Invoice tab.")
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     Layout.topMargin: styleSectionSeparatorHeight / 2
 
                     StyledLabel{
                         text: qsTr("Invoice title")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "new_invoice_title"
                         implicitWidth: stylePropertyWidth
                         text: appSettings.signalTranslationsChanged ?
@@ -108,13 +141,18 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Estimate title")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "new_estimate_title"
                         implicitWidth: stylePropertyWidth
                         text: appSettings.signalTranslationsChanged  ?
@@ -131,14 +169,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("VAT mode")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledKeyDescrComboBox {
+                        Layout.fillWidth: root.compactLayout
                         id: settings_vat_mode
                         implicitWidth: stylePropertyWidth
 
@@ -165,14 +208,19 @@ Item {
                      }
                  }
 
-                 RowLayout {
+                 GridLayout {
+                     columns: root.compactLayout ? 1 : 2
+                     Layout.fillWidth: root.compactLayout
                      StyledLabel{
                          text: qsTr("Default VAT code")
                          Layout.preferredWidth: styleLabelWidth
+                         Layout.fillWidth: root.compactLayout
+                         Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                          wrapMode: Text.WordWrap
                      }
 
                      StyledKeyDescrComboBox {
+                         Layout.fillWidth: root.compactLayout
                          id: settings_default_vat_code
                          implicitWidth: stylePropertyWidth
 
@@ -199,14 +247,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Currency")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         implicitWidth: stylePropertyWidth
                         text: appSettings.data.new_documents.currency
                         onEditingFinished: {
@@ -221,14 +274,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Decimals")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         implicitWidth: stylePropertyWidth
                         text: appSettings.data.new_documents.decimals_amounts.toString()
                         validator: IntValidator{bottom: 0; top: 24;}
@@ -250,14 +308,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Total rounding")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         implicitWidth: stylePropertyWidth
                         text: Banana.Converter.toLocaleNumberFormat(appSettings.data.new_documents.rounding_total)
                         validator: DoubleValidator{bottom: 0.00; top: 1.00; decimals: 24;}
@@ -275,14 +338,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Invoice payment term (days)")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         implicitWidth: stylePropertyWidth
                         text: appSettings.data.new_documents.payment_term_days
                         validator: IntValidator{bottom: 0; top: 3650;}
@@ -296,14 +364,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Estimate validity (days)")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         implicitWidth: stylePropertyWidth
                         text: appSettings.data.new_documents.estimate_validity_days
                         validator: IntValidator{bottom: 0; top: 3650;}
@@ -335,14 +408,19 @@ Item {
                     font.bold: true
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 1"), "show_invoice_custom_field_1")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_1"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -361,14 +439,19 @@ Item {
 
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 2"), "show_invoice_custom_field_2")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_2"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -387,14 +470,19 @@ Item {
 
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 3"), "show_invoice_custom_field_3")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_3"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -412,14 +500,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 4"), "show_invoice_custom_field_4")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_4"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -437,14 +530,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 5"), "show_invoice_custom_field_5")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_5"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -462,14 +560,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 6"), "show_invoice_custom_field_6")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_6"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -487,14 +590,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 7"), "show_invoice_custom_field_7")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_7"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -512,14 +620,19 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Custom field 8"), "show_invoice_custom_field_8")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        Layout.fillWidth: root.compactLayout
                         property string trId: "invoice_custom_field_8"
                         Layout.alignment: Qt.AlignRight
                         implicitWidth: stylePropertyWidth
@@ -546,7 +659,11 @@ Item {
                 color: Stylesheet.buttonColor
             }
             ColumnLayout {
-                width: scrollView.availableWidth
+                // Without this the section is not stretched by the column above it: it sizes
+                // itself to its own content, so nothing inside is ever told how much room it
+                // actually has and the fields keep their full width off the edge of a phone.
+                // A plain "width" here did not do it - a layout owns the size of its children.
+                Layout.fillWidth: true
                 height: scrollView.availableHeight
 
                 StyledLabel{
@@ -555,12 +672,14 @@ Item {
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight / 2
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Views")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -577,10 +696,18 @@ Item {
                     StyledLabel{
                         text: qsTr("Title")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
                     StyledTextField {
+                        // Three of these share one row and stay on it even when narrow: each
+                        // column is a view, so a field pushed onto the next line would edit a
+                        // different view than the title above it says.
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 60 * Stylesheet.pixelScaleRatio : 0
                         property string viewId: appSettings.view_id_base
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.getSettingsViewTitle(viewId)
@@ -594,6 +721,11 @@ Item {
                     }
 
                     StyledTextField {
+                        // Three of these share one row and stay on it even when narrow: each
+                        // column is a view, so a field pushed onto the next line would edit a
+                        // different view than the title above it says.
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 60 * Stylesheet.pixelScaleRatio : 0
                         property string viewId: appSettings.view_id_short
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.getSettingsViewTitle(viewId)
@@ -607,6 +739,11 @@ Item {
                     }
 
                     StyledTextField {
+                        // Three of these share one row and stay on it even when narrow: each
+                        // column is a view, so a field pushed onto the next line would edit a
+                        // different view than the title above it says.
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 60 * Stylesheet.pixelScaleRatio : 0
                         property string viewId: appSettings.view_id_long
                         Layout.alignment: Qt.AlignHCenter
                         text: appSettings.getSettingsViewTitle(viewId)
@@ -622,6 +759,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Visible")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -658,7 +798,11 @@ Item {
             }
 
             ColumnLayout {
-                width: scrollView.availableWidth
+                // Without this the section is not stretched by the column above it: it sizes
+                // itself to its own content, so nothing inside is ever told how much room it
+                // actually has and the fields keep their full width off the edge of a phone.
+                // A plain "width" here did not do it - a layout owns the size of its children.
+                Layout.fillWidth: true
                 height: scrollView.availableHeight
 
                 StyledLabel{
@@ -668,16 +812,22 @@ Item {
                 }
 
                 StyledLabel{
+                    // Wraps, and fills the width so that it has something to wrap against:
+                    // without both, this one sentence is the widest thing on the page.
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
                     text: qsTr("In this section you can select which fields are displayed.")
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("General")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -694,6 +844,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Fields not empty")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -718,12 +871,14 @@ Item {
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Parameters")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -740,6 +895,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Decimals")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -764,6 +922,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Total rounding")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -788,6 +949,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Language")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -812,6 +976,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Currency")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -836,6 +1003,9 @@ Item {
                     StyledLabel{
                         text: qsTr("VAT mode")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -859,12 +1029,14 @@ Item {
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Details")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -881,6 +1053,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Invoice number")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -905,6 +1080,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Invoice date")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -929,6 +1107,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Due date")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -953,6 +1134,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Order number")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -977,6 +1161,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Order date")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1001,6 +1188,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Invoice title")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1025,6 +1215,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Begin text")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1049,6 +1242,9 @@ Item {
                     StyledLabel{
                         text: qsTr("End text")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1073,6 +1269,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Internal notes")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1097,6 +1296,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Invoice summary")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1120,12 +1322,14 @@ Item {
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Custom fields")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -1142,6 +1346,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 1")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1166,6 +1373,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 2")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1190,6 +1400,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 3")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1214,6 +1427,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 4")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1238,6 +1454,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 5")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1262,6 +1481,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 6")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1286,6 +1508,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 7")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1310,6 +1535,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Custom field 8")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1333,12 +1561,14 @@ Item {
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Address")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -1355,6 +1585,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Customer selector")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1379,6 +1612,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Business name")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1403,6 +1639,9 @@ Item {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit"), "show_invoice_address_business_unit")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1427,6 +1666,9 @@ Item {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit 2"), "show_invoice_address_business_unit_2")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1451,6 +1693,9 @@ Item {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit 3"), "show_invoice_address_business_unit_3")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1475,6 +1720,9 @@ Item {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Business unit 4"), "show_invoice_address_business_unit_4")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1499,6 +1747,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Prefix")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1523,6 +1774,9 @@ Item {
                     StyledLabel{
                         text: qsTr("First and last name")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1547,6 +1801,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Address street")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1571,6 +1828,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Building number")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1595,6 +1855,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Address extra")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1619,6 +1882,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Post box")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1643,6 +1909,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Country and locality")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1667,6 +1936,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Email")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1691,6 +1963,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Phone")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1715,6 +1990,9 @@ Item {
                     StyledLabel{
                         text: qsTr("VAT number")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1739,6 +2017,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Fiscal number")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1765,13 +2046,15 @@ Item {
                 // We commentend also the code block related into WdgInvoice->getTableHeight()
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
                     visible: false;
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Items")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -1788,6 +2071,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Height of visible content in rows (0 = all rows)")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1852,12 +2138,14 @@ Item {
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Item columns")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -1874,6 +2162,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Row")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1898,6 +2189,9 @@ Item {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Type"), "show_invoice_item_column_type")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1922,6 +2216,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Number")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1946,6 +2243,9 @@ Item {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Item date"), "show_invoice_item_column_date")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1970,6 +2270,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Quantity")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -1994,6 +2297,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Unit")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2018,6 +2324,9 @@ Item {
                     StyledLabel{
                         text: addLicenseRequirementText(qsTr("Discount"), "show_invoice_item_column_discount")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2041,12 +2350,14 @@ Item {
                 }
 
                 GridLayout {
-                    columns: 4
-                    columnSpacing: styleColumnSpacing
+                    columns: root.compactLayout ? 3 : 4
+                    Layout.fillWidth: root.compactLayout
+                    columnSpacing: root.compactLayout ? Stylesheet.defaultMargin : styleColumnSpacing
                     rowSpacing: styleRowSpacing
                     Layout.topMargin: styleSectionSeparatorHeight
 
                     StyledLabel{
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Totals")
                         font.bold: true
                         Layout.bottomMargin: styleRowSpacing
@@ -2063,6 +2374,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Discount")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2087,6 +2401,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Rounding")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2111,6 +2428,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Deposit")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2135,6 +2455,9 @@ Item {
                     StyledLabel{
                         text: qsTr("Summary")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.columnSpan: root.compactLayout ? 3 : 1
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2167,7 +2490,11 @@ Item {
             }
 
             ColumnLayout {
-                width: scrollView.availableWidth
+                // Without this the section is not stretched by the column above it: it sizes
+                // itself to its own content, so nothing inside is ever told how much room it
+                // actually has and the fields keep their full width off the edge of a phone.
+                // A plain "width" here did not do it - a layout owns the size of its children.
+                Layout.fillWidth: true
                 height: scrollView.availableHeight
 
                 StyledLabel{
@@ -2179,12 +2506,16 @@ Item {
                     Layout.fillHeight: true
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     visible: appSettings.isInternalVersion()
 
                     StyledLabel{
                         text: qsTr("Edit current settings")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2200,10 +2531,14 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Restore default settings")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 
@@ -2214,10 +2549,14 @@ Item {
                     }
                 }
 
-                RowLayout {
+                GridLayout {
+                    columns: root.compactLayout ? 1 : 2
+                    Layout.fillWidth: root.compactLayout
                     StyledLabel{
                         text: qsTr("Clear settings")
                         Layout.preferredWidth: styleLabelWidth
+                        Layout.fillWidth: root.compactLayout
+                        Layout.minimumWidth: root.compactLayout ? 100 * Stylesheet.pixelScaleRatio : 0
                         wrapMode: Text.WordWrap
                     }
 

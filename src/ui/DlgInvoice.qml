@@ -44,6 +44,21 @@ Item {
     height: Screen.height > 0 ? (isSmallScreen ? Screen.height : 600 * Stylesheet.pixelScaleRatio)
                               : 600 * Stylesheet.pixelScaleRatio
 
+    // True when the buttons have to be laid out two per row instead of one long line.
+    // Unlike the form above them, these are anchored to the bottom of the dialog, outside
+    // the scrolling area: a button that runs past the right edge is unreachable, since no
+    // amount of scrolling brings it back. On a phone that means being unable to close the
+    // dialog at all - an estimate shows six buttons ("Create invoice" on top of the usual
+    // five) and loses Close entirely.
+    //
+    // Deliberately the same condition that stacks the form into one column, rather than a
+    // second threshold of its own: a row of buttons cannot measure whether it fits without
+    // the column count depending on the width it is trying to decide, so any private
+    // threshold would be a guess at how wide six translated labels are - and a guess that
+    // is too low is unusable, not just ugly. Wherever the form is too narrow for two
+    // columns, six buttons on one row are not plausible either.
+    readonly property bool compactButtonBar: wdgInvoice.compactLayout
+
     focus: true
 
     // Placehoder for setTitle function, it is set by c++
@@ -340,13 +355,22 @@ Item {
         color: Stylesheet.buttonColor
     }
 
-    RowLayout {  // Invoice's button's bar
+    GridLayout {  // Invoice's button's bar
         id: buttonBar
 
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Stylesheet.defaultMargin
+
+        // One row while everything fits, three per row when it does not: six buttons then
+        // take two rows rather than three, which matters because this bar eats into the
+        // form on a screen that has little height to spare. A fixed column count rather
+        // than free wrapping, so the rows come out even instead of leaving a single button
+        // stranded at the bottom.
+        columns: window.compactButtonBar ? 3 : 7
+        columnSpacing: Stylesheet.defaultMargin
+        rowSpacing: Stylesheet.defaultMargin
 
         //                StyledButton {
         //                    text: qsTr("Export...")
@@ -359,15 +383,30 @@ Item {
         //                }
 
         StyledButton {
+            Layout.fillWidth: window.compactButtonBar
+            // Allowed to shrink below its label. Without this a cell too narrow for a long
+            // translation (German is half again as long as Italian here) would not give
+            // way, and the grid would push the last column off the edge again - the very
+            // failure this bar was rearranged to prevent. The label elides instead.
+            Layout.minimumWidth: 0
             text: qsTr("Help")
             onClicked: showHelp()
         }
 
         Item {
+            // Splits Help from the actions on a single row. On two rows it would eat one
+            // of the cells, so it steps aside and the buttons share the width evenly.
+            visible: !window.compactButtonBar
             Layout.fillWidth: true
         }
 
         StyledButton {
+            Layout.fillWidth: window.compactButtonBar
+            // Allowed to shrink below its label. Without this a cell too narrow for a long
+            // translation (German is half again as long as Italian here) would not give
+            // way, and the grid would push the last column off the edge again - the very
+            // failure this bar was rearranged to prevent. The label elides instead.
+            Layout.minimumWidth: 0
             text: qsTr("Print")
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes
@@ -377,6 +416,12 @@ Item {
         }
 
         StyledButton {
+            Layout.fillWidth: window.compactButtonBar
+            // Allowed to shrink below its label. Without this a cell too narrow for a long
+            // translation (German is half again as long as Italian here) would not give
+            // way, and the grid would push the last column off the edge again - the very
+            // failure this bar was rearranged to prevent. The label elides instead.
+            Layout.minimumWidth: 0
             text: qsTr("Create invoice")
             visible: invoice.isEstimate() && !invoice.isNewDocument
             onClicked: {
@@ -388,6 +433,12 @@ Item {
 
         StyledButton {
             id: copyButton
+            Layout.fillWidth: window.compactButtonBar
+            // Allowed to shrink below its label. Without this a cell too narrow for a long
+            // translation (German is half again as long as Italian here) would not give
+            // way, and the grid would push the last column off the edge again - the very
+            // failure this bar was rearranged to prevent. The label elides instead.
+            Layout.minimumWidth: 0
             text: qsTr("Copy")
             visible: !invoice.isNewDocument
             onClicked: {
@@ -398,6 +449,12 @@ Item {
         }
 
         StyledButton {
+            Layout.fillWidth: window.compactButtonBar
+            // Allowed to shrink below its label. Without this a cell too narrow for a long
+            // translation (German is half again as long as Italian here) would not give
+            // way, and the grid would push the last column off the edge again - the very
+            // failure this bar was rearranged to prevent. The label elides instead.
+            Layout.minimumWidth: 0
             text: qsTr("Save")
             primary: true
             visible: !invoice.isReadOnly
@@ -414,6 +471,12 @@ Item {
         }
 
         StyledButton {
+            Layout.fillWidth: window.compactButtonBar
+            // Allowed to shrink below its label. Without this a cell too narrow for a long
+            // translation (German is half again as long as Italian here) would not give
+            // way, and the grid would push the last column off the edge again - the very
+            // failure this bar was rearranged to prevent. The label elides instead.
+            Layout.minimumWidth: 0
             text: invoice.isModified && !invoice.isReadOnly ? qsTr("Cancel") : qsTr("Close")
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes

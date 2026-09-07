@@ -14,6 +14,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
 /**
  * The StyledKeyDescrComboBox use a model with the members 'key', 'value' and 'search'.
@@ -192,9 +193,26 @@ StyledComboBox {
         }
     }
 
+    // Width of the key column in the drop-down list. Wide enough for a four digit
+    // account number, so the descriptions of most entries still line up, but no wider:
+    // the key used to be separated from the description by a tab, and a tab in a Text
+    // jumps to the next 80 pixel stop, which threw away most of a phone's screen width
+    // for a one digit key and then elided the description that no longer fitted.
+    TextMetrics {
+        id: keyColumnMetrics
+        font: control.font
+        text: "0000"
+    }
+
     delegate: ItemDelegate {
         id: itemDelegate
-        text: listItemTextIncludesKey ? key + "\t" + descr : descr
+
+        // Captured from the model roles once, so the nested texts below don't have to
+        // resolve them through the delegate's context.
+        readonly property string itemKey: key
+        readonly property string itemDescr: descr
+
+        text: listItemTextIncludesKey ? key + " " + descr : descr
         width: control.popup.listView.width
         font.bold: currentKeyIndex === index
         highlighted: currentHighlightIndex === index
@@ -205,12 +223,29 @@ StyledComboBox {
                        itemDelegate.hovered ? Stylesheet.hoverColor : "transparent"
         }
 
-        contentItem: Text {
-            text: itemDelegate.text
-            font: itemDelegate.font
-            color: itemDelegate.highlighted ? Stylesheet.accentTextColor : Stylesheet.textColor
-            verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
+        contentItem: RowLayout {
+            spacing: 6 * Stylesheet.pixelScaleRatio
+
+            Text {
+                id: keyLabel
+                visible: listItemTextIncludesKey
+                text: itemDelegate.itemKey
+                font: itemDelegate.font
+                color: itemDelegate.highlighted ? Stylesheet.accentTextColor : Stylesheet.textColor
+                verticalAlignment: Text.AlignVCenter
+                // Long keys keep their own width rather than being cut: it is the
+                // description that gives way when there isn't room for everything.
+                Layout.preferredWidth: Math.max(implicitWidth, keyColumnMetrics.width)
+            }
+
+            Text {
+                text: itemDelegate.itemDescr
+                font: itemDelegate.font
+                color: itemDelegate.highlighted ? Stylesheet.accentTextColor : Stylesheet.textColor
+                verticalAlignment: Text.AlignVCenter
+                elide: Text.ElideRight
+                Layout.fillWidth: true
+            }
         }
 
         MouseArea {

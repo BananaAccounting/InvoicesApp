@@ -55,6 +55,11 @@ Item {
     property color hoverColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.1)
     property color pressedColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.12)
     property color mutedTextColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.55)
+    // Fainter than borderColor on purpose. It divides sections of a form, which is
+    // structure rather than content, and it must not be mistaken for the rule above a
+    // total - that one means "these figures add up to the number below" and has to stay
+    // the stronger of the two. Here the separating is done by the space around the line.
+    property color separatorColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.18)
 
     // Tinted surface for status banners. Derived from the accent rather than from the
     // text colour, so it stays clearly distinct from buttonColor (the tab bar) instead

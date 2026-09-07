@@ -44,6 +44,10 @@ Button {
       font.bold: button.showAsPrimary
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
+      // Only ever takes effect where a button is deliberately allowed to shrink below its
+      // label (Layout.minimumWidth: 0). Everywhere else the button is at least as wide as
+      // its text, so there is nothing to elide.
+      elide: Text.ElideRight
       color: !button.enabled ? Stylesheet.mutedTextColor :
                  button.showAsPrimary ? Stylesheet.accentTextColor : Stylesheet.textColor
    }
