@@ -478,6 +478,21 @@ Item {
             Layout.topMargin: Stylesheet.defaultMargin
             contentHeight: columnLayout.height
 
+            // The page never scrolls sideways. Left unset, a ScrollView works out its content
+            // width from the implicit width of its child, so any single element that wants
+            // more room than the screen turns the whole form into something that has to be
+            // dragged left and right to be read. Pinned to the viewport, that cannot happen.
+            //
+            // Horizontal scrolling still exists where it belongs: the items table has eleven
+            // columns that genuinely cannot fit, and it clips and scrolls inside itself,
+            // within whatever width it is given here.
+            //
+            // The trade: an element that still insisted on being wider would now be cut off
+            // rather than reachable by scrolling. That was a real risk while the buttons below
+            // the table were demanding a width of their own; now that they take the width they
+            // are given, nothing here is known to need more than the screen.
+            contentWidth: availableWidth - ScrollBar.vertical.width
+
             ColumnLayout { // everything that is within the Scroll
 
                 id: columnLayout
@@ -2902,11 +2917,24 @@ Item {
                 }
 
                 GridLayout { // Items button bar
-                    // Seven columns, always: the four buttons stay on one line even on a
-                    // phone, because there they carry a symbol instead of a word and no
-                    // longer need the width of a label. That is worth a row of height on a
-                    // screen where the form below already competes for it. The two spacers
-                    // hide themselves when narrow, so only the buttons remain.
+                    // One row, on any screen - but a row that takes the width it is given
+                    // instead of demanding one.
+                    //
+                    // Four buttons on one line was fine while they were bare symbols. Once two
+                    // of them carried a word again the row asked for more than a small phone is
+                    // wide - and it asks in scaled units, which grow with the system font while
+                    // the screen does not. A row that can neither wrap nor shrink does not give
+                    // way: it simply demands that width, and being the widest thing in the
+                    // column it became the width of the whole form. That is what made the
+                    // dialog scroll sideways and the totals look as though they hung past the
+                    // right edge - they were not wide, everything else was being held wider
+                    // than the screen.
+                    //
+                    // The fix is not a smaller size, which would be another number to be wrong
+                    // about: the two buttons that carry words share out whatever room is left
+                    // once the arrows have theirs, so the row measures the screen rather than
+                    // the other way round. Where the words no longer fit they are elided, which
+                    // is the worst that can now happen here.
                     Layout.fillWidth: true
                     columns: 7
                     columnSpacing: Stylesheet.defaultMargin
@@ -2917,6 +2945,7 @@ Item {
                         // A symbol instead of the word when narrow, so the four fit one row.
                         // Wide enough to stay a comfortable touch target all the same, and
                         // still announced by name to assistive technology.
+                        Layout.fillWidth: window.compactLayout
                         Layout.minimumWidth: window.compactLayout ? 44 * Stylesheet.pixelScaleRatio : 0
                         text: window.compactLayout ? "+ " + qsTr("Add") : qsTr("Add")
                         Accessible.name: qsTr("Add")
@@ -2938,6 +2967,7 @@ Item {
                         // A symbol instead of the word when narrow, so the four fit one row.
                         // Wide enough to stay a comfortable touch target all the same, and
                         // still announced by name to assistive technology.
+                        Layout.fillWidth: window.compactLayout
                         Layout.minimumWidth: window.compactLayout ? 44 * Stylesheet.pixelScaleRatio : 0
                         text: window.compactLayout ? "− " + qsTr("Remove") : qsTr("Remove")
                         Accessible.name: qsTr("Remove")
@@ -3043,15 +3073,23 @@ Item {
                         columns: 2
                         columnSpacing: (window.compactLayout ? 1 : 3) * Stylesheet.defaultMargin
 
-                        Layout.fillWidth: true
-                        Layout.alignment:  Qt.AlignRight
+                        // In a single column the block is sized to its own two columns and
+                        // sits on the left. Filling the width was what created the gap: a
+                        // grid stretched wider than its content shares the surplus out among
+                        // its columns, so the labels and the figures drifted apart until each
+                        // was against an opposite edge of the screen. Sized to its content
+                        // there is no surplus to share, and the figures sit where they belong,
+                        // still lined up with one another down the column.
+                        Layout.fillWidth: !window.compactLayout
+                        Layout.alignment: window.compactLayout ? Qt.AlignLeft : Qt.AlignRight
                         Layout.rightMargin: 0
 
                         StyledTextField {
-                            // The label column takes all the spare width in a single column
-                            // layout, which pushes the amounts against the right edge and
-                            // leaves the labels flush left, like every other field.
-                            Layout.fillWidth: window.compactLayout
+                            // No fillWidth here, unlike the rest of the form: the label column
+                            // used to swallow all the spare width, which drove the amounts
+                            // against the right edge of the screen and left a band of nothing
+                            // between a label and the figure it belongs to. Sized to its text
+                            // instead, so the two columns stay next to each other.
                             readOnly: true
                             borderless: true
                             text: isVatModeVatNone ? qsTr("Subtotal") : isVatModeVatInclusive ? qsTr("Subtotal") : qsTr("Total Net")
@@ -3072,7 +3110,6 @@ Item {
                         }
 
                         RowLayout {
-                            Layout.fillWidth: window.compactLayout
                             visible: invoice_totals_discount.visible
 
                             StyledTextField {
@@ -3220,7 +3257,6 @@ Item {
                         }
 
                         StyledTextField {
-                            Layout.fillWidth: window.compactLayout
                             readOnly: true
                             borderless: true
                             visible: vattotal_amount.visible
@@ -3239,7 +3275,6 @@ Item {
                         }
 
                         StyledTextField {
-                            Layout.fillWidth: window.compactLayout
                             text: qsTr("Rounding")
                             readOnly: true
                             borderless: true
@@ -3258,7 +3293,6 @@ Item {
                         }
 
                         RowLayout {
-                            Layout.fillWidth: window.compactLayout
                             visible: invoice_totals_deposit.visible
 
                             StyledTextField {
@@ -3356,7 +3390,6 @@ Item {
                         }
 
                         RowLayout {
-                            Layout.fillWidth: window.compactLayout
 
                             StyledTextField {
                                 readOnly: true
@@ -3391,6 +3424,15 @@ Item {
                             Layout.topMargin: Stylesheet.defaultMargin
                             Layout.columnSpan: 2
                             Layout.leftMargin: 4 * Stylesheet.pixelScaleRatio
+                            // A whole sentence across both columns. Now that the block is
+                            // sized to its content, without a ceiling this line alone would
+                            // decide how wide the block is. A maximum is the right tool here:
+                            // it caps the width the item may ask for, which neither wrapMode
+                            // nor fillWidth does - the first only says what to do once the
+                            // width is settled, the second only claims space that is spare.
+                            wrapMode: Text.WordWrap
+                            Layout.maximumWidth: window.compactLayout ? columnLayout.width
+                                                                      : Number.POSITIVE_INFINITY
                             visible: isInvoiceFieldVisible("show_invoice_summary", text) && !isVatModeVatNone
 
                             text: invoice.json && invoice.json.billing_info.total_vat_rates ? getVatDetails() : ""
@@ -3432,6 +3474,10 @@ Item {
 
                             Layout.columnSpan: 2
                             Layout.alignment: Qt.AlignRight
+                            // Capped for the same reason as the VAT summary above.
+                            wrapMode: Text.WordWrap
+                            Layout.maximumWidth: window.compactLayout ? columnLayout.width
+                                                                      : Number.POSITIVE_INFINITY
 
                             color: Stylesheet.textColor
                             text: invoice.json ? getAccountingDetails() : ""
