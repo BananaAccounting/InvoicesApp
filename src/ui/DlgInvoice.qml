@@ -44,19 +44,22 @@ Item {
     height: Screen.height > 0 ? (isSmallScreen ? Screen.height : 600 * Stylesheet.pixelScaleRatio)
                               : 600 * Stylesheet.pixelScaleRatio
 
-    // True when the buttons have to be laid out two per row instead of one long line.
-    // Unlike the form above them, these are anchored to the bottom of the dialog, outside
-    // the scrolling area: a button that runs past the right edge is unreachable, since no
-    // amount of scrolling brings it back. On a phone that means being unable to close the
-    // dialog at all - an estimate shows six buttons ("Create invoice" on top of the usual
-    // five) and loses Close entirely.
+    // True when the bar keeps only Save and Close, and moves Help, Print, Create invoice
+    // and Copy into the overflow menu.
+    //
+    // Six buttons do not fit one row on a phone, and this bar is anchored to the bottom of
+    // the dialog, outside the scrolling area: a button pushed past the right edge is
+    // unreachable, since no amount of scrolling brings it back. Wrapping them onto further
+    // rows solved that but spent height the form cannot spare, so the commands that are
+    // used occasionally step aside instead. Save and Close never do - on a device with no
+    // keyboard, Close is the only way off this dialog.
     //
     // Deliberately the same condition that stacks the form into one column, rather than a
-    // second threshold of its own: a row of buttons cannot measure whether it fits without
-    // the column count depending on the width it is trying to decide, so any private
-    // threshold would be a guess at how wide six translated labels are - and a guess that
-    // is too low is unusable, not just ugly. Wherever the form is too narrow for two
-    // columns, six buttons on one row are not plausible either.
+    // second threshold of its own: a bar cannot measure whether it fits without the answer
+    // depending on the width it is trying to decide, so any private threshold would be a
+    // guess at how wide six translated labels are - and a guess that is too low is
+    // unusable, not just ugly. Wherever the form is too narrow for two columns, six
+    // buttons on one row are not plausible either.
     readonly property bool compactButtonBar: wdgInvoice.compactLayout
 
     focus: true
@@ -363,14 +366,25 @@ Item {
         anchors.right: parent.right
         anchors.margins: Stylesheet.defaultMargin
 
-        // One row while everything fits, three per row when it does not: six buttons then
-        // take two rows rather than three, which matters because this bar eats into the
-        // form on a screen that has little height to spare. A fixed column count rather
-        // than free wrapping, so the rows come out even instead of leaving a single button
-        // stranded at the bottom.
-        columns: window.compactButtonBar ? 3 : 7
+        // Seven columns, always: one row in both layouts. Narrow, the four less used
+        // commands leave the bar for the overflow menu, so only three controls remain and
+        // there is nothing left to wrap. This bar is anchored over the form and every row
+        // it takes is a row the form loses on a screen that has none to spare.
+        columns: 7
         columnSpacing: Stylesheet.defaultMargin
         rowSpacing: Stylesheet.defaultMargin
+
+        StyledButton {
+            // Opens the commands that do not fit a phone's bar. Only Save and Close stay
+            // out here: Close in particular is the only way off this dialog on a device
+            // with no keyboard, so it never goes behind a second tap.
+            id: overflowButton
+            visible: window.compactButtonBar
+            text: "⋮"
+            Layout.minimumWidth: 44 * Stylesheet.pixelScaleRatio
+            Accessible.name: qsTr("More commands")
+            onClicked: overflowMenu.popup(overflowButton, 0, -overflowMenu.height)
+        }
 
         //                StyledButton {
         //                    text: qsTr("Export...")
@@ -383,31 +397,30 @@ Item {
         //                }
 
         StyledButton {
-            Layout.fillWidth: window.compactButtonBar
             // Allowed to shrink below its label. Without this a cell too narrow for a long
             // translation (German is half again as long as Italian here) would not give
             // way, and the grid would push the last column off the edge again - the very
             // failure this bar was rearranged to prevent. The label elides instead.
             Layout.minimumWidth: 0
             text: qsTr("Help")
+            visible: !window.compactButtonBar
             onClicked: showHelp()
         }
 
         Item {
-            // Splits Help from the actions on a single row. On two rows it would eat one
-            // of the cells, so it steps aside and the buttons share the width evenly.
-            visible: !window.compactButtonBar
+            // Pushes Save and Close to the right, away from Help - or, on a narrow screen,
+            // away from the overflow button.
             Layout.fillWidth: true
         }
 
         StyledButton {
-            Layout.fillWidth: window.compactButtonBar
             // Allowed to shrink below its label. Without this a cell too narrow for a long
             // translation (German is half again as long as Italian here) would not give
             // way, and the grid would push the last column off the edge again - the very
             // failure this bar was rearranged to prevent. The label elides instead.
             Layout.minimumWidth: 0
             text: qsTr("Print")
+            visible: !window.compactButtonBar
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes
                 focus = true
@@ -416,14 +429,13 @@ Item {
         }
 
         StyledButton {
-            Layout.fillWidth: window.compactButtonBar
             // Allowed to shrink below its label. Without this a cell too narrow for a long
             // translation (German is half again as long as Italian here) would not give
             // way, and the grid would push the last column off the edge again - the very
             // failure this bar was rearranged to prevent. The label elides instead.
             Layout.minimumWidth: 0
             text: qsTr("Create invoice")
-            visible: invoice.isEstimate() && !invoice.isNewDocument
+            visible: !window.compactButtonBar && invoice.isEstimate() && !invoice.isNewDocument
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes
                 focus = true
@@ -433,14 +445,13 @@ Item {
 
         StyledButton {
             id: copyButton
-            Layout.fillWidth: window.compactButtonBar
             // Allowed to shrink below its label. Without this a cell too narrow for a long
             // translation (German is half again as long as Italian here) would not give
             // way, and the grid would push the last column off the edge again - the very
             // failure this bar was rearranged to prevent. The label elides instead.
             Layout.minimumWidth: 0
             text: qsTr("Copy")
-            visible: !invoice.isNewDocument
+            visible: !window.compactButtonBar && !invoice.isNewDocument
             onClicked: {
                 // Acquire focus, if a text field is in edit mode it will commit changes
                 focus = true
@@ -449,7 +460,6 @@ Item {
         }
 
         StyledButton {
-            Layout.fillWidth: window.compactButtonBar
             // Allowed to shrink below its label. Without this a cell too narrow for a long
             // translation (German is half again as long as Italian here) would not give
             // way, and the grid would push the last column off the edge again - the very
@@ -471,7 +481,6 @@ Item {
         }
 
         StyledButton {
-            Layout.fillWidth: window.compactButtonBar
             // Allowed to shrink below its label. Without this a cell too narrow for a long
             // translation (German is half again as long as Italian here) would not give
             // way, and the grid would push the last column off the edge again - the very
@@ -490,6 +499,49 @@ Item {
         }
     }
 
+
+    Menu {
+        // The commands that leave the bottom bar on a narrow screen. Each mirrors the
+        // button of the same name; the button stays the definition of what the command
+        // does, this is only a second way to reach it.
+        //
+        // Opening the menu takes the active focus, which commits whatever field was being
+        // edited - the same reason the buttons take the focus before acting.
+        id: overflowMenu
+
+        // Only the selection colour is changed, through the palette. Restyling the entries
+        // themselves - replacing their content and background with our own - stopped the
+        // menu opening at all, so the stock entries are left exactly as they were and the
+        // one colour that looked out of place is recoloured from the outside.
+        palette.highlight: Stylesheet.accentColor
+        palette.highlightedText: Stylesheet.accentTextColor
+
+        MenuItem {
+            text: qsTr("Help")
+            onTriggered: showHelp()
+        }
+
+        MenuItem {
+            text: qsTr("Print")
+            onTriggered: wdgInvoice.printInvoice()
+        }
+
+        MenuItem {
+            // An invisible menu item still reserves its row, so it has to give up its
+            // height as well to disappear.
+            text: qsTr("Create invoice")
+            visible: invoice.isEstimate() && !invoice.isNewDocument
+            height: visible ? implicitHeight : 0
+            onTriggered: wdgInvoice.createInvoiceFromEstimate()
+        }
+
+        MenuItem {
+            text: qsTr("Copy")
+            visible: !invoice.isNewDocument
+            height: visible ? implicitHeight : 0
+            onTriggered: wdgInvoice.duplicateInvoice()
+        }
+    }
 
     SimpleMessageDialog { // Error message dialog
         id: errorMessageDialog

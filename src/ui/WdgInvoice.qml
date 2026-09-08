@@ -58,9 +58,21 @@ Item {
                              " " + invoice.json.document_info.currency.toLocaleUpperCase() : "") +
         " " + toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
 
-    property string currentView: appSettings.data.interface.invoice.current_view ?
-                                     appSettings.data.interface.invoice.current_view :
-                                     appSettings.view_id_base
+    /* The view the user picked, and the one the form actually shows.
+
+       They differ on a narrow screen, where the form is always shown in full. Choosing a
+       view is a way of hiding fields so the rest fit side by side; stacked in one column
+       there is nothing to gain by hiding them, and the selector itself cost a row at the
+       top of a screen that has none to spare.
+
+       Keeping the choice in its own property means a phone never overwrites it: the
+       setting on disk still holds what was chosen on the desktop, and a wide window shows
+       that view again untouched. */
+    property string selectedView: appSettings.data.interface.invoice.current_view ?
+                                      appSettings.data.interface.invoice.current_view :
+                                      appSettings.view_id_base
+
+    readonly property string currentView: compactLayout ? appSettings.view_id_full : selectedView
 
     onCurrentViewChanged: {
         invoiceItemsTable.updateColDescrWidth()
@@ -362,8 +374,10 @@ Item {
         RowLayout { // Views bar
             spacing: 6 * Stylesheet.pixelScaleRatio
 
-            // Hack for qt6, to resolve overlapping items after dialog load
-            visible: appSettings.loaded
+            // Hack for qt6, to resolve overlapping items after dialog load.
+            // Hidden entirely on a narrow screen: there the form is always shown in full,
+            // so the selector would offer a choice that has no effect - see currentView.
+            visible: appSettings.loaded && !window.compactLayout
 
             // See onUpdateLayoutButtonClicked
             // StyledButton {
@@ -392,7 +406,7 @@ Item {
                     visible: appSettings.isViewVisible(viewId)
                     selected: currentView === viewId
                     onClicked: {
-                        currentView = viewId
+                        selectedView = viewId
                         appSettings.data.interface.invoice.current_view = viewId
                     }
                 }
@@ -403,7 +417,7 @@ Item {
                     visible: appSettings.isViewVisible(viewId)
                     selected: currentView === viewId
                     onClicked: {
-                        currentView = viewId
+                        selectedView = viewId
                         appSettings.data.interface.invoice.current_view = viewId
                     }
                 }
@@ -414,7 +428,7 @@ Item {
                     visible: appSettings.isViewVisible(viewId)
                     selected: currentView === viewId
                     onClicked: {
-                        currentView = viewId
+                        selectedView = viewId
                         appSettings.data.interface.invoice.current_view = viewId
                     }
                 }
@@ -424,7 +438,7 @@ Item {
                     text: appSettings.getDefaultViewTitle(viewId)
                     selected: currentView === viewId
                     onClicked: {
-                        currentView = viewId
+                        selectedView = viewId
                         appSettings.data.interface.invoice.current_view = viewId
                     }
                 }
@@ -495,6 +509,21 @@ Item {
                         Layout.alignment:  Qt.AlignBottom
                         Layout.fillWidth: true
 
+                        StyledSectionHeader {
+                            // The four section headings exist only in the single column
+                            // layout. Side by side the form is short enough to take in at a
+                            // glance and the columns already group it; stacked it is several
+                            // screens tall, and collapsing what is not being edited is the
+                            // only way to reach the items table without a long scroll.
+                            // No column span is needed: the grid is one column wide exactly
+                            // when these are visible, and a hidden item takes up no cell.
+                            id: sectionInfo
+                            visible: window.compactLayout
+                            expanded: true
+                            title: qsTr("Info")
+                            Layout.fillWidth: true
+                        }
+
                         StyledLabel{
                             text: qsTr("Invoice No")
                             Layout.minimumWidth: 100 * Stylesheet.pixelScaleRatio
@@ -503,7 +532,7 @@ Item {
 
                         StyledTextField {
                             id: invoice_number
-                            visible: focus || isInvoiceFieldVisible("show_invoice_number", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_number", text)) && (!window.compactLayout || sectionInfo.expanded)
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
                             readOnly: invoice.isReadOnly
@@ -526,7 +555,7 @@ Item {
                             id: invoice_language
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
-                            visible: isInvoiceFieldVisible("show_invoice_language")
+                            visible: (isInvoiceFieldVisible("show_invoice_language")) && (!window.compactLayout || sectionInfo.expanded)
                             enabled: !invoice.isReadOnly
 
                             editable: true
@@ -557,7 +586,7 @@ Item {
 
                         StyledKeyDescrComboBox {
                             id: invoice_currency
-                            visible: isInvoiceFieldVisible("show_invoice_currency")
+                            visible: (isInvoiceFieldVisible("show_invoice_currency")) && (!window.compactLayout || sectionInfo.expanded)
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
                             editable: true
@@ -595,7 +624,7 @@ Item {
                             id: invoice_vat_mode
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
-                            visible: isInvoiceFieldVisible("show_invoice_vat_mode")
+                            visible: (isInvoiceFieldVisible("show_invoice_vat_mode")) && (!window.compactLayout || sectionInfo.expanded)
                             enabled: !invoice.isReadOnly
 
                             editable: false
@@ -629,7 +658,7 @@ Item {
                             id: invoice_date
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
-                            visible: focus || isInvoiceFieldVisible("show_invoice_date", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_date", text)) && (!window.compactLayout || sectionInfo.expanded)
                             property int updateText: 1 // Binding for updating the text
 
                             readOnly: invoice.isReadOnly
@@ -681,7 +710,7 @@ Item {
                             id: invoice_due_date
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
-                            visible: focus || isInvoiceFieldVisible("show_invoice_due_date", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_due_date", text)) && (!window.compactLayout || sectionInfo.expanded)
                             readOnly: invoice.isReadOnly
 
                             text: getDate()
@@ -728,7 +757,7 @@ Item {
 
                         StyledTextField {
                             id: invoice_order_no
-                            visible: focus || isInvoiceFieldVisible("show_invoice_order_number", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_order_number", text)) && (!window.compactLayout || sectionInfo.expanded)
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
                             readOnly: invoice.isReadOnly
@@ -749,7 +778,7 @@ Item {
 
                         StyledTextField {
                             id: invoice_order_date
-                            visible: focus || isInvoiceFieldVisible("show_invoice_order_date", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_order_date", text)) && (!window.compactLayout || sectionInfo.expanded)
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
                             readOnly: invoice.isReadOnly
@@ -781,7 +810,7 @@ Item {
 
                         StyledTextField {
                             id: invoice_decimal_amounts
-                            visible: focus || isInvoiceFieldVisible("show_invoice_decimals")
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_decimals")) && (!window.compactLayout || sectionInfo.expanded)
                             text: invoice.json && invoice.json.document_info.decimals_amounts ? invoice.json.document_info.decimals_amounts : ""
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: window.compactLayout
@@ -804,7 +833,7 @@ Item {
 
                         StyledTextField {
                             id: invoice_rounding_total
-                            visible: focus || isInvoiceFieldVisible("show_invoice_rounding_totals")
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_rounding_totals")) && (!window.compactLayout || sectionInfo.expanded)
                             text: invoice.json && invoice.json.document_info.rounding_total ?
                                       Banana.Converter.toLocaleNumberFormat(invoice.json.document_info.rounding_total) : ""
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
@@ -821,12 +850,22 @@ Item {
                             }
                         }
 
+                        StyledSectionHeader {
+                            id: sectionExtra
+                            visible: window.compactLayout
+                            title: qsTr("Additional info")
+                            Layout.fillWidth: true
+                        }
+
                         StyledLabel{
                             // Spacer between groups of fields. "height" is ignored inside a
                             // layout - the layout owns the size - so the intended gap was never
                             // applied; Layout.preferredHeight is what actually reserves it.
                             // The span must follow the column count too: 2 in a one-column grid
                             // is more columns than the grid has.
+                            // Only a gap for the side by side layout: stacked, the heading
+                            // above already separates the groups.
+                            visible: !window.compactLayout
                             Layout.columnSpan: window.compactLayout ? 1 : 2
                             Layout.preferredHeight: Stylesheet.defaultMargin
                         }
@@ -839,14 +878,14 @@ Item {
                             // is more columns than the grid has.
                             Layout.columnSpan: window.compactLayout ? 1 : 2
                             Layout.preferredHeight: Stylesheet.defaultMargin
-                            visible: invoice_custom_field_1.visible |
+                            visible: !window.compactLayout && (invoice_custom_field_1.visible |
                                      invoice_custom_field_2.visible |
                                      invoice_custom_field_3.visible |
                                      invoice_custom_field_4.visible |
                                      invoice_custom_field_5.visible |
                                      invoice_custom_field_6.visible |
                                      invoice_custom_field_7.visible |
-                                     invoice_custom_field_8.visible
+                                     invoice_custom_field_8.visible)
                         }
 
                         StyledLabel{
@@ -863,7 +902,7 @@ Item {
                             property string customFieldId: "custom_field_1"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_1", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_1", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_1")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -893,7 +932,7 @@ Item {
                             property string customFieldId: "custom_field_2"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_2", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_2", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_2")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -923,7 +962,7 @@ Item {
                             property string customFieldId: "custom_field_3"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_3", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_3", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_3")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -953,7 +992,7 @@ Item {
                             property string customFieldId: "custom_field_4"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_4", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_4", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_4")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -983,7 +1022,7 @@ Item {
                             property string customFieldId: "custom_field_5"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_5", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_5", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_5")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -1013,7 +1052,7 @@ Item {
                             property string customFieldId: "custom_field_6"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_6", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_6", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_6")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -1043,7 +1082,7 @@ Item {
                             property string customFieldId: "custom_field_7"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_7", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_7", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_7")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -1073,7 +1112,7 @@ Item {
                             property string customFieldId: "custom_field_8"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_custom_field_8", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_8", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_8")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
                             onEditingFinished: {
@@ -1097,30 +1136,26 @@ Item {
                             // is more columns than the grid has.
                             Layout.columnSpan: window.compactLayout ? 1 : 2
                             Layout.preferredHeight: Stylesheet.defaultMargin
-                            visible: invoice_custom_field_1.visible |
+                            // Only a gap for the side by side layout: stacked, the heading
+                            // below already separates the groups.
+                            visible: !window.compactLayout && (invoice_custom_field_1.visible |
                                      invoice_custom_field_2.visible |
                                      invoice_custom_field_3.visible |
                                      invoice_custom_field_4.visible |
                                      invoice_custom_field_5.visible |
                                      invoice_custom_field_6.visible |
                                      invoice_custom_field_7.visible |
-                                     invoice_custom_field_8.visible
+                                     invoice_custom_field_8.visible)
                         }
 
-                        Rectangle {
-                            // Marks the end of a section when the form is stacked into a
-                            // single column. Side by side the columns already keep these
-                            // blocks apart and a rule drawn across them would only add
-                            // noise, so the separators exist in the narrow layout only.
-                            // No column span is needed: the grids are one column wide
-                            // exactly when this is visible, and a hidden item takes up no
-                            // cell at all.
+                        StyledSectionHeader {
+                            // Replaces the plain rule that used to divide these two groups:
+                            // the heading already marks the boundary, and a rule as well
+                            // would draw two lines where one is meant.
+                            id: sectionTexts
                             visible: window.compactLayout
+                            title: qsTr("Texts")
                             Layout.fillWidth: true
-                            Layout.topMargin: 2 * Stylesheet.defaultMargin
-                            Layout.bottomMargin: 2 * Stylesheet.defaultMargin
-                            Layout.preferredHeight: 1
-                            color: Stylesheet.separatorColor
                         }
 
                         StyledLabel{
@@ -1134,7 +1169,7 @@ Item {
                             id: invoice_description
                             readOnly: invoice.isReadOnly
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_title", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_title", text)) && (!window.compactLayout || sectionTexts.expanded)
                             text: invoice.json && invoice.json.document_info.description ? invoice.json.document_info.description : ""
                             onEditingFinished: {
                                 if (modified) {
@@ -1153,7 +1188,7 @@ Item {
                         StyledTextArea {
                             id: ivoice_begin_text
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_begin_text", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_begin_text", text)) && (!window.compactLayout || sectionTexts.expanded)
                             readOnly: invoice.isReadOnly
                             text: invoice.json && invoice.json.document_info && invoice.json.document_info.text_begin
                                   ? invoice.json.document_info.text_begin  : ""
@@ -1178,7 +1213,7 @@ Item {
                         StyledTextArea {
                             id: ivoice_notes
                             Layout.fillWidth: true
-                            visible: focus || isInvoiceFieldVisible("show_invoice_end_text", text)
+                            visible: (focus || isInvoiceFieldVisible("show_invoice_end_text", text)) && (!window.compactLayout || sectionTexts.expanded)
                             readOnly: invoice.isReadOnly
                             text: invoice.json && invoice.json.note && invoice.json.note[0] &&
                                   invoice.json.note[0].description ? invoice.json.note[0].description : ""
@@ -1205,17 +1240,20 @@ Item {
                         Layout.preferredWidth: 100 * Stylesheet.pixelScaleRatio
                     }
 
-                    Rectangle { // Section separator, see the one above the Object field
+                    StyledSectionHeader {
+                        // Sits outside the address block it controls, so that collapsing
+                        // the block does not take its own heading away with it.
+                        id: sectionAddress
                         visible: window.compactLayout
+                        title: qsTr("Address")
                         Layout.fillWidth: true
-                        Layout.topMargin: 2 * Stylesheet.defaultMargin
-                        Layout.bottomMargin: 2 * Stylesheet.defaultMargin
-                        Layout.preferredHeight: 1
-                        color: Stylesheet.separatorColor
                     }
 
                     ColumnLayout { // Address
                         // In a single vertical column
+                        // Collapsed as a whole by its heading above, which is why that
+                        // heading is a sibling and not a child of this block.
+                        visible: !window.compactLayout || sectionAddress.expanded
                         Layout.alignment: Qt.AlignTop
                         // Same reason as the Top part grid above: without this the block
                         // keeps the width of its widest field (320) even when less space
@@ -1609,15 +1647,23 @@ Item {
                         }
 
                     }
-                }
 
-                Rectangle { // Section separator, see the one above the Object field
-                    visible: window.compactLayout
-                    Layout.fillWidth: true
-                    Layout.topMargin: 2 * Stylesheet.defaultMargin
-                    Layout.bottomMargin: 2 * Stylesheet.defaultMargin
-                    Layout.preferredHeight: 1
-                    color: Stylesheet.separatorColor
+                    Rectangle { // Separates the form from the items table
+                        // Declared inside this grid rather than beside it, so that the gap
+                        // above the line is the grid's own row spacing - the same gap that
+                        // separates two section headings. Outside, it was governed by the
+                        // enclosing column's spacing instead, which is twice as wide: the
+                        // line sat visibly lower under "Address" than the rule of a heading
+                        // sits under the section before it.
+                        //
+                        // Below it the spacing adds up as before, since this is now the last
+                        // row of the grid and the column's spacing follows it either way.
+                        visible: window.compactLayout
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: Stylesheet.defaultMargin
+                        Layout.preferredHeight: 1
+                        color: Stylesheet.separatorColor
+                    }
                 }
 
                 // There is a warning on the HorizontalHeaderView row, but apparently nothing appens.
@@ -2619,15 +2665,21 @@ Item {
                         // in case columnWidth = -1 assign number of lines
                         let numberOfLines = texts.length;
                         let columnWidth = invoiceItemsTable.columnWidth(4);
-                        columnWidth = Math.max(columnWidth, 10);
+                        if (columnWidth <= 0) {
+                            // columnWidth() only knows the columns the view has actually laid
+                            // out. It returns -1 while the table is still being built, and also
+                            // whenever the description column is scrolled out of sight - which
+                            // happens routinely once the dialog is narrow. Substituting a small
+                            // fixed width there made every line of text count as several, and
+                            // the rows grew to many times their proper height. The provider
+                            // knows the width the column is meant to have, on screen or not.
+                            columnWidth = invoiceItemsTable.columnWidthProvider(4)
+                        }
                         if (columnWidth > 0 ){
                             numberOfLines = 0;
                             for (var i = 0; i < texts.length; i++) {
                                 if (texts[i].length > 1 ) {
                                     let elementWidth = fontMetrics.advanceWidth(texts[i]);
-                                    // Divide by the clamped value: columnWidth(4) returns -1 while
-                                    // the column is not laid out yet, which would give a negative
-                                    // line count and end up as a zero/negative row height.
                                     let elementLines = elementWidth / columnWidth
                                     numberOfLines += Math.ceil(elementLines)
                                 } else {
@@ -2850,24 +2902,24 @@ Item {
                 }
 
                 GridLayout { // Items button bar
-                    // A GridLayout, not a RowLayout: a row layout cannot wrap, so it
-                    // always demanded the sum of its buttons - which in some languages is
-                    // wider than a phone screen, and that minimum was imposed on the whole
-                    // column. Here the buttons stay on a single row while there is room,
-                    // and fall into a tidy 2x2 block when there is not. The column count
-                    // is fixed rather than driven by the available space (as a Flow would
-                    // do), so the narrow arrangement is always two and two, never three
-                    // and a lone one.
+                    // Seven columns, always: the four buttons stay on one line even on a
+                    // phone, because there they carry a symbol instead of a word and no
+                    // longer need the width of a label. That is worth a row of height on a
+                    // screen where the form below already competes for it. The two spacers
+                    // hide themselves when narrow, so only the buttons remain.
                     Layout.fillWidth: true
-                    columns: window.compactLayout ? 2 : 7
+                    columns: 7
                     columnSpacing: Stylesheet.defaultMargin
                     rowSpacing: Stylesheet.defaultMargin
                     visible: !invoice.isReadOnly
 
                     StyledButton {
-                        // Half the width each when stacked two by two, natural size otherwise.
-                        Layout.fillWidth: window.compactLayout
-                        text: qsTr("Add")
+                        // A symbol instead of the word when narrow, so the four fit one row.
+                        // Wide enough to stay a comfortable touch target all the same, and
+                        // still announced by name to assistive technology.
+                        Layout.minimumWidth: window.compactLayout ? 44 * Stylesheet.pixelScaleRatio : 0
+                        text: window.compactLayout ? "+ " + qsTr("Add") : qsTr("Add")
+                        Accessible.name: qsTr("Add")
                         enabled: !invoice.isReadOnly
                         onClicked: {
                             var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
@@ -2883,8 +2935,12 @@ Item {
                     }
 
                     StyledButton { // Remove item button
-                        Layout.fillWidth: window.compactLayout
-                        text: qsTr("Remove")
+                        // A symbol instead of the word when narrow, so the four fit one row.
+                        // Wide enough to stay a comfortable touch target all the same, and
+                        // still announced by name to assistive technology.
+                        Layout.minimumWidth: window.compactLayout ? 44 * Stylesheet.pixelScaleRatio : 0
+                        text: window.compactLayout ? "− " + qsTr("Remove") : qsTr("Remove")
+                        Accessible.name: qsTr("Remove")
                         enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0
                         onClicked: {
                             var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
@@ -2906,8 +2962,12 @@ Item {
                     }
 
                     StyledButton { // Move up button
-                        Layout.fillWidth: window.compactLayout
-                        text: qsTr("Move up")
+                        // A symbol instead of the word when narrow, so the four fit one row.
+                        // Wide enough to stay a comfortable touch target all the same, and
+                        // still announced by name to assistive technology.
+                        Layout.minimumWidth: window.compactLayout ? 44 * Stylesheet.pixelScaleRatio : 0
+                        text: window.compactLayout ? "↑" : qsTr("Move up")
+                        Accessible.name: qsTr("Move up")
                         enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow > 0
                         onClicked: {
                             var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
@@ -2929,8 +2989,12 @@ Item {
                     }
 
                     StyledButton { // Move down button
-                        Layout.fillWidth: window.compactLayout
-                        text: qsTr("Move Down")
+                        // A symbol instead of the word when narrow, so the four fit one row.
+                        // Wide enough to stay a comfortable touch target all the same, and
+                        // still announced by name to assistive technology.
+                        Layout.minimumWidth: window.compactLayout ? 44 * Stylesheet.pixelScaleRatio : 0
+                        text: window.compactLayout ? "↓" : qsTr("Move Down")
+                        Accessible.name: qsTr("Move Down")
                         enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 &&
                                  ((invoiceItemsTable.currentRow + 2) < invoiceItemsTable.rows)
                         onClicked: {
