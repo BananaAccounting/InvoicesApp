@@ -24,10 +24,23 @@ The MessageDialog is crashing application compiled and run with webassembly.
 Dialog {
     property alias text: label.text;
 
-    x: (parent.width - width) / 2
-    y: 0
-    width: 400 * Stylesheet.pixelScaleRatio
-    height: 200 * Stylesheet.pixelScaleRatio
+    /** Where the dialog sits when it is not centred - just under the tab bar, say. */
+    property real topY: 0
+
+    /** Centre it in its parent instead. Used on a narrow screen, where the top of the
+        window is where the notch is, and a dialog pinned there is partly unreadable. */
+    property bool centered: false
+
+    x: Math.max(Stylesheet.defaultMargin, (parent.width - width) / 2)
+    y: centered ? Math.max(Stylesheet.defaultMargin, (parent.height - height) / 2) : topY
+
+    // Never wider or taller than the window it is shown in. The fixed 400 x 200 was larger
+    // than a phone screen, and centring something wider than its parent puts its left edge
+    // at a negative position - the dialog then hangs off both sides at once.
+    width: Math.min(400 * Stylesheet.pixelScaleRatio,
+                    parent.width - 2 * Stylesheet.defaultMargin)
+    height: Math.min(200 * Stylesheet.pixelScaleRatio,
+                     parent.height - 2 * Stylesheet.defaultMargin)
 
     background: Rectangle {
       // implicitWidth: contentItem.Width

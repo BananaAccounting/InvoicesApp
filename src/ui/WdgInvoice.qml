@@ -48,8 +48,16 @@ Item {
        have to fit into, whatever the device.
 
        The threshold is what the side by side form needs: label 100 + field 300 + spacer
-       100 + address 320, plus margins, is about 850. */
-    readonly property bool compactLayout: columnLayout.width > 0 && columnLayout.width < 850
+       100 + address 320, plus margins, is about 850.
+
+       Scaled, and it has to be. Those four numbers are every one of them multiplied by
+       pixelScaleRatio where they are actually used, so the width the form needs grows with
+       the system font while a bare 850 does not. On a display where the ratio is 1.32 the
+       form wanted 1108 points and this test still said 850, so a window of 975 was judged
+       wide enough for a layout that could not fit in it - too wide to stack, too narrow to
+       show. It went unseen because the ratio is 1 on the desktop the dialog was built on. */
+    readonly property bool compactLayout: columnLayout.width > 0 &&
+                                          columnLayout.width < 850 * Stylesheet.pixelScaleRatio
 
     /* Shown either next to the view selector or, when compact, on its own row below it:
        defined once so the two placements cannot drift apart. */
@@ -506,11 +514,14 @@ Item {
                     // goes below the invoice data rather than off the right edge.
                     columns: window.compactLayout ? 1 : 3
 
-                    // Without this the grid takes the width of its content instead of the
-                    // width available, so the fields below cannot be shrunk to fit: their
-                    // fillWidth has nothing to shrink against. Only when compact, to leave
-                    // the side-by-side layout exactly as it is.
-                    Layout.fillWidth: window.compactLayout
+                    // Without this the grid takes the width of its content instead of the width
+                    // available, so the fields below have nothing to fill or shrink against.
+                    //
+                    // Unconditional, and it has to be: a layout inside a layout already fills by
+                    // default, so writing "compactLayout" here did not add the behaviour when
+                    // narrow - it took it away when wide. That is what stopped the address block
+                    // reaching the right margin and the text fields growing with the window.
+                    Layout.fillWidth: true
 
                     GridLayout {// Invoice info
                         // in 2 columns from Invoice No up to the invoice_end_text
@@ -916,7 +927,10 @@ Item {
                             id: invoice_custom_field_1
                             property string customFieldId: "custom_field_1"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_1", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_1")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -946,7 +960,10 @@ Item {
                             id: invoice_custom_field_2
                             property string customFieldId: "custom_field_2"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_2", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_2")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -976,7 +993,10 @@ Item {
                             id: invoice_custom_field_3
                             property string customFieldId: "custom_field_3"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_3", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_3")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -1006,7 +1026,10 @@ Item {
                             id: invoice_custom_field_4
                             property string customFieldId: "custom_field_4"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_4", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_4")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -1036,7 +1059,10 @@ Item {
                             id: invoice_custom_field_5
                             property string customFieldId: "custom_field_5"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_5", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_5")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -1066,7 +1092,10 @@ Item {
                             id: invoice_custom_field_6
                             property string customFieldId: "custom_field_6"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_6", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_6")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -1096,7 +1125,10 @@ Item {
                             id: invoice_custom_field_7
                             property string customFieldId: "custom_field_7"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_7", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_7")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -1126,7 +1158,10 @@ Item {
                             id: invoice_custom_field_8
                             property string customFieldId: "custom_field_8"
                             Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
-                            Layout.fillWidth: true
+                            // Like the fields above it: a fixed width, growing only where the form is
+                            // stacked and everything has to fit the screen. It filled on the desktop too
+                            // before, which made the custom fields the only ones stretching with the window.
+                            Layout.fillWidth: window.compactLayout
                             visible: (focus || isInvoiceFieldVisible("show_invoice_custom_field_8", text)) && (!window.compactLayout || sectionExtra.expanded)
                             readOnly: invoice.isReadOnly || !appSettings.meetInvoiceFieldLicenceRequirement("show_invoice_custom_field_8")
                             text: invoiceCustomFieldGet(invoice.json, customFieldId)
@@ -1274,7 +1309,7 @@ Item {
                         // keeps the width of its widest field (320) even when less space
                         // is available, and the right edge - the combo box arrow - ends
                         // up outside the screen.
-                        Layout.fillWidth: window.compactLayout
+                        Layout.fillWidth: true
 
                         StyledLabel{
                             text: qsTr("Customer")
@@ -1446,7 +1481,7 @@ Item {
                             // Must be able to shrink with the form: without this the row keeps
                             // the sum of its fields, which scales with pixelScaleRatio and
                             // overflows a narrow screen.
-                            Layout.fillWidth: window.compactLayout
+                            Layout.fillWidth: true
                             StyledTextField {
                                 id: address_first_name
                                 Layout.fillWidth: window.compactLayout
@@ -1542,7 +1577,7 @@ Item {
                             // Must be able to shrink with the form: without this the row keeps
                             // the sum of its fields, which scales with pixelScaleRatio and
                             // overflows a narrow screen.
-                            Layout.fillWidth: window.compactLayout
+                            Layout.fillWidth: true
                             StyledTextField {
                                 id: address_country_code
                                 Layout.preferredWidth: 50 * Stylesheet.pixelScaleRatio
@@ -1837,9 +1872,43 @@ Item {
 
                     Layout.fillWidth: true
                     contentHeight: getTableHeigth()
-                    Layout.minimumHeight: contentHeight
+                    // Room under the rows for the horizontal bar, so it does not sit on top
+                    // of the last one. The view is exactly as tall as its content, so the
+                    // strip has to be asked for.
+                    Layout.minimumHeight: contentHeight + horizontalBarHeight
                     rowSpacing: 2
                     columnSpacing: 5 * Stylesheet.pixelScaleRatio
+
+                    /* A bar of its own to drag the table sideways with.
+
+                       The table already scrolls horizontally, but the only way to do it was to
+                       drag from inside the table - and on a touch screen a drag that starts on
+                       a cell puts that cell into edit and raises the keyboard. Scrolling meant
+                       fighting the fields.
+
+                       Always shown when the screen is narrow, which also makes it visible that
+                       the table continues past the right edge rather than ending there. Its
+                       whole height is the touch target, not just the visible handle. */
+                    // The strip is reserved only when a bar will actually occupy it: always on a
+                    // narrow screen, and on a wide one only while the columns are wider than the
+                    // room they have. A permanent gap under the table would otherwise sit there
+                    // empty on the desktop, where the bar is usually not needed at all.
+                    readonly property int horizontalBarHeight: (window.compactLayout
+                                                               || contentWidth > width)
+                                                              ? 14 * Stylesheet.pixelScaleRatio : 0
+
+                    ScrollBar.horizontal: ScrollBar {
+                        // Always there when narrow, since the table is wider than the screen
+                        // whatever the document contains. On a wide screen only when the columns
+                        // really do not fit - a dialog left narrow, or every column switched on.
+                        policy: window.compactLayout ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
+                        // Thickness through implicitHeight, never height: an attached scroll bar
+                        // is placed by Qt from its implicit size, and assigning height outright
+                        // takes away what it anchors to - it then sits at the top of the table,
+                        // over the first row, instead of below the last. Same value as the strip
+                        // reserved above, so the two cannot drift apart.
+                        implicitHeight: invoiceItemsTable.horizontalBarHeight
+                    }
 
                     flickableDirection: Flickable.AutoFlickIfNeeded
                     pointerNavigationEnabled: !invoice.isReadOnly
@@ -1970,6 +2039,13 @@ Item {
                                 }
                             }
 
+                            // Room for the menu affordance beside the row number, only where
+                            // that menu exists. Placed after the visibility checks above, so a
+                            // column switched off still reports zero.
+                            if (column === 0 && window.compactLayout && !invoice.isReadOnly) {
+                                return 46 * Stylesheet.pixelScaleRatio
+                            }
+
                             if (settingIdColumnWidth in viewAppearance) {
                                 let width = viewAppearance[settingIdColumnWidth]
                                 if (width > 10) {
@@ -1982,12 +2058,20 @@ Item {
                     }
 
                     rowHeightProvider: function(row) {
-                        let height = 34;
-                        if (isNewRow(row)) {
-                            return height * Stylesheet.pixelScaleRatio
-                        }
-                        let linesCount = estimateWordWrapLines(invoice.json.items[row].description)
-                        return height * linesCount * Stylesheet.pixelScaleRatio
+                        /* A negative value makes TableView size the row from its cells: the
+                           tallest implicit height in the row. The description cell's implicit
+                           height is its text plus its padding, so the row grows by exactly one
+                           line for each line of text.
+
+                           The original dialog behaved like this by accident: this function read
+                           an undefined variable ("rowNr") and threw on every call, and Qt handles
+                           a result that is not a number the same way. Fixing the variable put its
+                           formula into effect - 34 points per line of text, about twice the
+                           height of a line - and every line break added an empty band to the cell.
+
+                           TableView does not notice when a cell's implicit height changes, so the
+                           description cell asks for the relayout itself: see updateRowHeights(). */
+                        return -1
                     }
 
                     delegate: DelegateChooser {
@@ -1996,8 +2080,14 @@ Item {
                             // Column row number
                             column: 0
                             StyledTextField {
+                                id: rowNumberCell
                                 required property bool current
                                 selected: current
+
+                                // Captured from the model, so the mouse area below does not have
+                                // to resolve them through its own context.
+                                readonly property int cellRow: model.row
+                                readonly property int cellColumn: model.column
 
                                 readOnly: true
                                 borderless: true
@@ -2012,6 +2102,36 @@ Item {
                                     }
                                 }
 
+                                /* The row's own menu, on a narrow screen where the bar of buttons
+                                   below the table is gone.
+
+                                   It lives in the row number cell because that cell already
+                                   exists and is read only: nothing here competes with editing,
+                                   and no column had to be added - which matters, because the
+                                   eleven column indices below are hard coded and would all have
+                                   shifted. */
+                                StyledLabel {
+                                    visible: window.compactLayout && !invoice.isReadOnly
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "⋮"
+                                    color: Stylesheet.mutedTextColor
+                                }
+
+                                MouseArea {
+                                    // Only narrow: on the desktop this cell keeps its plain
+                                    // behaviour and the commands stay in the buttons.
+                                    enabled: window.compactLayout && !invoice.isReadOnly
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        let index = invoiceItemsModel.index(rowNumberCell.cellRow,
+                                                                            rowNumberCell.cellColumn)
+                                        invoiceItemsTable.selectionModel.setCurrentIndex(
+                                                    index, ItemSelectionModel.SelectCurrent)
+                                        itemRowMenu.targetRow = rowNumberCell.cellRow
+                                        itemRowMenu.popup(rowNumberCell, 0, rowNumberCell.height)
+                                    }
+                                }
                             }
                         }
 
@@ -2296,16 +2416,19 @@ Item {
                                         return
 
                                     if (invoice.json.items[model.row]){
-                                        let oldLinesCount = invoiceItemsTable.estimateWordWrapLines(invoice.json.items[model.row].description);
-                                        let newLinesCount = invoiceItemsTable.estimateWordWrapLines(text);
                                         if (model.row >= 0 && model.row < invoice.json.items.length) {
                                             invoice.json.items[model.row].description = text;
                                         }
-                                        if (oldLinesCount !== newLinesCount) {
-                                            invoiceItemsTable.forceLayout()
-                                            invoiceItemsTable.signalUpdateRowHeights++
-                                        }
                                     }
+                                }
+
+                                onImplicitHeightChanged: {
+                                    // The height the text needs has changed: a line break, the text
+                                    // wrapping on its own, a bold font, a new column width. This used
+                                    // to be triggered from onTextChanged by a line count estimated from
+                                    // the text width, which ignores the padding and the breaks between
+                                    // words: a text wrapping by itself went unnoticed for a few keys.
+                                    invoiceItemsTable.updateRowHeights()
                                 }
                             }
                         }
@@ -2731,9 +2854,7 @@ Item {
                                 // We should try to use directly the line hiegth.
                                 //let linesCount = invoice.json.items[rowNr].description.split('\n').length
                                 let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
-                                // Keep this estimate in sync with rowHeightProvider's formula, so the
-                                // container height and the table's real row heights never disagree.
-                                let lineHeight = 34 * linesCount
+                                let lineHeight = 30 + 16 * (linesCount - 1)
                                 if (rowHeight(rowNr) > 0){
                                     lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number
                                 }
@@ -2752,6 +2873,68 @@ Item {
                             maxVisibleItems = appSettings.data.interface.invoice.views[currentView].appearance['invoce_max_visible_items_without_scrolling'];
                         }
                         return maxVisibleItems
+                    }
+
+                    /* The four commands the items table offers.
+
+                       They live here rather than inside the buttons that used to be the only
+                       way to reach them: on a narrow screen the same commands are offered by a
+                       menu on the row itself, and a command reachable from two places must not
+                       be written twice. Each body is what its button did, moved unchanged. */
+
+                    function addItemRow(rowIndex) {
+                        // "rowIndex.count" is undefined on a number, so the condition reads as
+                        // "append when no row is current, otherwise insert below it". Left as it
+                        // was found: this is the behaviour the button has always had, and tidying
+                        // it here would change it silently.
+                        if (rowIndex < 0 || (rowIndex + 1 < rowIndex.count)) {
+                            invoice.json.items.push(emptyInvoiceItem())
+                        } else {
+                            invoice.json.items.splice(rowIndex + 1, 0, emptyInvoiceItem())
+                        }
+                        invoice.setIsModified(true)
+                        updateViewItems()
+                        invoiceItemsTable.signalUpdateTableHeight++
+                    }
+
+                    function removeItemRow(rowIndex) {
+                        if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount) {
+                            invoice.json.items.splice(rowIndex, 1)
+                        }
+                        invoice.setIsModified(true)
+                        calculateInvoice()
+                        updateView()
+                        //signalUpdateTableHeight++ not necessary cz updateView
+                    }
+
+                    function moveItemRowUp(itemRow, itemCol) {
+                        if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
+                            var itemCopy = invoice.json.items[itemRow]
+                            if (!itemCopy)
+                                itemCopy = emptyInvoiceItem()
+                            invoice.json.items[itemRow] = invoice.json.items[itemRow-1]
+                            invoice.json.items[itemRow - 1] = itemCopy
+                            calculateInvoice()
+                            updateViewItems()
+                            invoiceItemsTable.focus = true
+
+                            let index = invoiceItemsModel.index(itemRow - 1, itemCol)
+                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                        }
+                    }
+
+                    function moveItemRowDown(itemRow, itemCol) {
+                        if (itemRow >= 0 && itemRow < invoiceItemsModel.rowCount - 1) {
+                            var itemCopy = invoice.json.items[itemRow]
+                            invoice.json.items[itemRow] = invoice.json.items[itemRow+1]
+                            invoice.json.items[itemRow + 1] = itemCopy
+                            calculateInvoice()
+                            updateViewItems()
+                            invoiceItemsTable.focus = true
+
+                            let index = invoiceItemsModel.index(itemRow + 1, itemCol)
+                            invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                        }
                     }
 
                     function isNewRow(row) {
@@ -2914,6 +3097,73 @@ Item {
                             }
                         }
                     }
+
+                    Timer {
+                        // Relayout for the row heights, deferred like updateColDescrWidthTimer
+                        // above. The request comes from a description cell that is still handling
+                        // a key press, and forceLayout() lays the table out on the spot: the cell
+                        // was resized, and its whole text laid out again, in the middle of its own
+                        // update - the likely reason why the text sometimes went invisible. The
+                        // zero interval runs the relayout right after instead, and merges into one
+                        // the requests of all the cells created together when the table is built.
+                        id: updateRowHeightsTimer
+                        interval: 0
+                        repeat: false
+                        onTriggered: {
+                            invoiceItemsTable.forceLayout()
+                            invoiceItemsTable.signalUpdateRowHeights++
+                        }
+                    }
+
+                    function updateRowHeights() {
+                        updateRowHeightsTimer.restart()
+                    }
+                }
+
+                Menu {
+                    /* The commands for one row of the items table, offered on a narrow screen
+                       from the row number cell. Each entry calls the same function its button
+                       calls, so there is one implementation of every command.
+
+                       Which entries appear depends on the row: the trailing "*" row does not
+                       exist yet, so there is nothing there to remove or move. */
+                    id: itemRowMenu
+
+                    property int targetRow: -1
+                    readonly property bool onNewRow: targetRow < 0
+                                                     || invoiceItemsTable.isNewRow(targetRow)
+
+                    palette.highlight: Stylesheet.accentColor
+                    palette.highlightedText: Stylesheet.accentTextColor
+
+                    MenuItem {
+                        text: qsTr("Add")
+                        onTriggered: invoiceItemsTable.addItemRow(itemRowMenu.targetRow)
+                    }
+
+                    MenuItem {
+                        // An invisible menu entry still reserves its row, so it gives up its
+                        // height as well to disappear.
+                        text: qsTr("Remove")
+                        visible: !itemRowMenu.onNewRow
+                        height: visible ? implicitHeight : 0
+                        onTriggered: invoiceItemsTable.removeItemRow(itemRowMenu.targetRow)
+                    }
+
+                    MenuItem {
+                        text: qsTr("Move up")
+                        visible: !itemRowMenu.onNewRow && itemRowMenu.targetRow > 0
+                        height: visible ? implicitHeight : 0
+                        onTriggered: invoiceItemsTable.moveItemRowUp(itemRowMenu.targetRow, 0)
+                    }
+
+                    MenuItem {
+                        text: qsTr("Move Down")
+                        visible: !itemRowMenu.onNewRow
+                                 && itemRowMenu.targetRow + 2 < invoiceItemsTable.rows
+                        height: visible ? implicitHeight : 0
+                        onTriggered: invoiceItemsTable.moveItemRowDown(itemRowMenu.targetRow, 0)
+                    }
                 }
 
                 GridLayout { // Items button bar
@@ -2939,7 +3189,9 @@ Item {
                     columns: 7
                     columnSpacing: Stylesheet.defaultMargin
                     rowSpacing: Stylesheet.defaultMargin
-                    visible: !invoice.isReadOnly
+                    // Gone on a narrow screen: there the same four commands are reached from
+                    // the menu on each row, and this bar was costing a row of height.
+                    visible: !invoice.isReadOnly && !window.compactLayout
 
                     StyledButton {
                         // A symbol instead of the word when narrow, so the four fit one row.
@@ -2950,17 +3202,8 @@ Item {
                         text: window.compactLayout ? "+ " + qsTr("Add") : qsTr("Add")
                         Accessible.name: qsTr("Add")
                         enabled: !invoice.isReadOnly
-                        onClicked: {
-                            var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
-                            if (rowIndex < 0 || (rowIndex + 1 < rowIndex.count)) {
-                                invoice.json.items.push(emptyInvoiceItem())
-                            } else {
-                                invoice.json.items.splice(rowIndex + 1, 0, emptyInvoiceItem())
-                            }
-                            invoice.setIsModified(true)
-                            updateViewItems()
-                            invoiceItemsTable.signalUpdateTableHeight++
-                        }
+                        onClicked: invoiceItemsTable.addItemRow(
+                                       invoiceItemsTable.selectionModel.currentIndex.row)
                     }
 
                     StyledButton { // Remove item button
@@ -2972,16 +3215,8 @@ Item {
                         text: window.compactLayout ? "− " + qsTr("Remove") : qsTr("Remove")
                         Accessible.name: qsTr("Remove")
                         enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0
-                        onClicked: {
-                            var rowIndex = invoiceItemsTable.selectionModel.currentIndex.row
-                            if (rowIndex >= 0 && rowIndex < invoiceItemsModel.rowCount) {
-                                invoice.json.items.splice(rowIndex, 1)
-                            }
-                            invoice.setIsModified(true)
-                            calculateInvoice()
-                            updateView()
-                            //signalUpdateTableHeight++ not necessary cz updateView
-                        }
+                        onClicked: invoiceItemsTable.removeItemRow(
+                                       invoiceItemsTable.selectionModel.currentIndex.row)
                     }
 
                     Item {
@@ -2999,23 +3234,9 @@ Item {
                         text: window.compactLayout ? "↑" : qsTr("Move up")
                         Accessible.name: qsTr("Move up")
                         enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow > 0
-                        onClicked: {
-                            var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
-                            var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
-                            if (itemRow > 0 && itemRow < invoiceItemsModel.rowCount) {
-                                var itemCopy = invoice.json.items[itemRow]
-                                if (!itemCopy)
-                                    itemCopy = emptyInvoiceItem()
-                                invoice.json.items[itemRow] = invoice.json.items[itemRow-1]
-                                invoice.json.items[itemRow - 1] = itemCopy
-                                calculateInvoice()
-                                updateViewItems()
-                                invoiceItemsTable.focus = true
-
-                                let index = invoiceItemsModel.index(itemRow - 1, itemCol)
-                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                             }
-                        }
+                        onClicked: invoiceItemsTable.moveItemRowUp(
+                                       invoiceItemsTable.selectionModel.currentIndex.row,
+                                       invoiceItemsTable.selectionModel.currentIndex.column)
                     }
 
                     StyledButton { // Move down button
@@ -3027,21 +3248,9 @@ Item {
                         Accessible.name: qsTr("Move Down")
                         enabled: !invoice.isReadOnly && invoiceItemsTable.currentRow >= 0 &&
                                  ((invoiceItemsTable.currentRow + 2) < invoiceItemsTable.rows)
-                        onClicked: {
-                            var itemRow = invoiceItemsTable.selectionModel.currentIndex.row
-                            var itemCol = invoiceItemsTable.selectionModel.currentIndex.column
-                            if (itemRow >= 0 && itemRow < invoiceItemsModel.rowCount - 1) {
-                                var itemCopy = invoice.json.items[itemRow]
-                                invoice.json.items[itemRow] = invoice.json.items[itemRow+1]
-                                invoice.json.items[itemRow + 1] = itemCopy
-                                calculateInvoice()
-                                updateViewItems()
-                                invoiceItemsTable.focus = true
-
-                                let index = invoiceItemsModel.index(itemRow + 1, itemCol)
-                                invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
-                            }
-                        }
+                        onClicked: invoiceItemsTable.moveItemRowDown(
+                                       invoiceItemsTable.selectionModel.currentIndex.row,
+                                       invoiceItemsTable.selectionModel.currentIndex.column)
                     }
 
                     Label {

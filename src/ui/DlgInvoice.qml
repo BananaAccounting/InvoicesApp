@@ -35,9 +35,20 @@ Item {
     // this has no effect there. Screen.width/height fall back to 0 if not yet
     // resolved (e.g. before the item is placed in a window), in which case we
     // keep the original fixed size.
-    readonly property bool isSmallScreen: Screen.width > 0 && Screen.height > 0 &&
+    //
+    // On iOS and Android the dialog is always fullscreen, whatever the size of the screen.
+    // There is no window manager there, so a dialog smaller than the screen is not a window
+    // but a smaller area with a border of nothing around it. The size test alone got this
+    // right only by coincidence: it compares the screen with 1000 x pixelScaleRatio, and a
+    // 13" iPad in landscape (1366 wide) sat just above that line once the ratio came down to
+    // 1.32 - so it opened as a fixed 1320 x 792 window. Asking the platform instead gives
+    // the answer that was actually meant, and does not move whenever the scale factor does.
+    // Desktop systems report "osx", "windows" or "linux" and fall through to the size test
+    // unchanged.
+    readonly property bool isSmallScreen: Qt.platform.os === "ios" || Qt.platform.os === "android" ||
+                                          (Screen.width > 0 && Screen.height > 0 &&
                                            (Screen.width < 1000 * Stylesheet.pixelScaleRatio ||
-                                            Screen.height < 600 * Stylesheet.pixelScaleRatio)
+                                            Screen.height < 600 * Stylesheet.pixelScaleRatio))
 
     width: Screen.width > 0 ? (isSmallScreen ? Screen.width : 1000 * Stylesheet.pixelScaleRatio)
                              : 1000 * Stylesheet.pixelScaleRatio
@@ -546,13 +557,17 @@ Item {
     SimpleMessageDialog { // Error message dialog
         id: errorMessageDialog
         visible: false
-        y: tabStackLayout.y
+        // Under the tab bar on a wide window, centred on a narrow one where the top of the
+        // screen belongs to the notch.
+        topY: tabStackLayout.y
+        centered: wdgInvoice.compactLayout
     }
 
     SimpleMessageDialog { // Error message dialog
         id: jsonErrorMessageDialog
         visible: false
-        y: tabStackLayout.y
+        topY: tabStackLayout.y
+        centered: wdgInvoice.compactLayout
         standardButtons: Dialog.Ok
         onAccepted: {
             tabBar.currentIndex = tabButtonSource.TabBar.index
@@ -561,8 +576,13 @@ Item {
 
     SimpleMessageDialog { // Confirm discard edit dialog
         id: cancelConfirmDialog
-        width: 300 * Stylesheet.pixelScaleRatio
-        height: 120 * Stylesheet.pixelScaleRatio
+        centered: wdgInvoice.compactLayout
+        // Capped like the component's own default: this one asks for less room, but not
+        // more than the window has.
+        width: Math.min(300 * Stylesheet.pixelScaleRatio,
+                        parent.width - 2 * Stylesheet.defaultMargin)
+        height: Math.min(120 * Stylesheet.pixelScaleRatio,
+                         parent.height - 2 * Stylesheet.defaultMargin)
         text: qsTr("Discard changes?")
         standardButtons: Dialog.Discard | Dialog.Cancel
         visible: false;

@@ -18,8 +18,33 @@ import QtQuick
 import QtQuick.Controls
 
 Item {
-    // Text and margin sizes
-    property double pixelScaleRatio: scaleReference.getPixelScaleRatio()
+    /* Scale factor applied to nearly every pixel length in the dialog.
+
+       On the desktop it is measured from the height of a plain TextField, as it always has
+       been. That field is 24 high on macOS, where the nominal sizes were chosen, so the ratio
+       is exactly 1 there.
+
+       On iOS and Android it is derived from the system font instead. The height of a
+       TextField is decided by the active Qt Quick Controls style, and Material, which Android
+       uses, draws a text field far taller than the other styles do: the ratio inflated there,
+       and with it every margin, height and minimum width in the dialog. The font does not
+       change with the control style.
+
+       The font based ratio is not used on the desktop as well, because it cannot come out at
+       exactly 1 there: on macOS the text is 15.296875 high, against the 15.3 reference, and
+       lengths stored in int properties are truncated, not rounded - defaultMargin became 9
+       instead of 10. On Windows and Linux it would differ from the ratio the desktop dialog
+       has always been drawn with.
+
+       referenceTextHeight is the text height on the display the nominal sizes were chosen on
+       (macOS, default system font). Both ratios are shown by the diagnostics dialog, opened
+       with Ctrl+Alt+9. */
+    readonly property double referenceTextHeight: 15.3
+    readonly property double styleDependentRatio: scaleReference.height / 24
+    readonly property double fontBasedRatio: Math.max(referenceMetrics.height, 1) / referenceTextHeight
+    property double pixelScaleRatio: Qt.platform.os === "ios" || Qt.platform.os === "android" ?
+                                         fontBasedRatio : styleDependentRatio
+
     property int defaultMargin: 10 * pixelScaleRatio
 
     // Corner radius, shared so controls read as one consistent, modern style
@@ -132,15 +157,18 @@ Item {
     }
 
     /**
-     * This TextField is used to calculate the scale factor
-     * for pixel lenghts on hdpi displays.
-     * The hight reference for a TextField is 24.
+     * Metrics of the system font, the basis of the scale factor on iOS and Android.
+     */
+    FontMetrics {
+        id: referenceMetrics
+    }
+
+    /**
+     * A plain TextField, the basis of the scale factor on the desktop.
+     * Its height reference is 24.
      */
     TextField {
         id: scaleReference
-        function getPixelScaleRatio() {
-            return height / 24;
-        }
     }
 }
 

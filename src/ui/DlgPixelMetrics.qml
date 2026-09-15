@@ -31,7 +31,13 @@ SimpleMessageDialog {
         text += "Device pixel ratio: " + Screen.devicePixelRatio + "\n"
         text += "TextField height: " + pixelMetricsTextField.height + "\n"
         text += "Font xHeight: " + pixelMetricsFont.xHeight + "\n"
+        // The scale factor in use, and the two ways of measuring it side by side: the style
+        // dependent one is used on the desktop, the font based one on iOS and Android.
+        text += "Font height: " + pixelMetricsFont.height + "\n"
         text += "Pixel scale ratio: " + Stylesheet.pixelScaleRatio + "\n"
+        text += "  (style dependent: " + Stylesheet.styleDependentRatio + ")\n"
+        text += "  (font based: " + Stylesheet.fontBasedRatio + ")\n"
+        text += "  (reference text height: " + Stylesheet.referenceTextHeight + ")\n"
         return text
     }
 
