@@ -222,6 +222,20 @@ Item {
     // Per semplicità applichiamo questo spazio a tutti i sistemi operativi
     property int tabBarTopMargin: 12 * Stylesheet.pixelScaleRatio
 
+    // Room the system keeps for itself on a phone or tablet: the notch or Dynamic Island and
+    // the status bar at the top, the home indicator or gesture bar at the bottom, and the
+    // side the notch moves to in landscape. The dialog is full screen there and the window
+    // extends under those areas, so the tabs sat under the clock and the battery and were
+    // hard to tap. The content of the bars and the pages moves inside these margins, while
+    // the backgrounds still reach the edges of the screen. Zero on the desktop.
+    //
+    // Read from the root, which is positioned by the host and not by these margins: an item
+    // positioned from its own SafeArea would be a binding loop. SafeArea needs Qt 6.9.
+    readonly property real safeAreaTop: SafeArea.margins.top
+    readonly property real safeAreaBottom: SafeArea.margins.bottom
+    readonly property real safeAreaLeft: SafeArea.margins.left
+    readonly property real safeAreaRight: SafeArea.margins.right
+
     Rectangle {
         // Window background
         anchors.fill: parent
@@ -242,8 +256,8 @@ Item {
 
         anchors.left: parent.left
         anchors.top: parent.top
-        anchors.leftMargin: -1 // Don't draw left button border
-        anchors.topMargin: tabBarTopMargin
+        anchors.leftMargin: safeAreaLeft - 1 // Don't draw left button border
+        anchors.topMargin: tabBarTopMargin + safeAreaTop
 
         StyledTabButton {
             text: qsTr("Invoice")
@@ -282,6 +296,8 @@ Item {
         anchors.right: parent.right
         anchors.top: tabBar.bottom
         anchors.bottom: buttonBar.top
+        anchors.leftMargin: safeAreaLeft
+        anchors.rightMargin: safeAreaRight
 
         currentIndex: tabBar.currentIndex
 
@@ -376,6 +392,9 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.margins: Stylesheet.defaultMargin
+        anchors.bottomMargin: Stylesheet.defaultMargin + safeAreaBottom
+        anchors.leftMargin: Stylesheet.defaultMargin + safeAreaLeft
+        anchors.rightMargin: Stylesheet.defaultMargin + safeAreaRight
 
         // Seven columns, always: one row in both layouts. Narrow, the four less used
         // commands leave the bar for the overflow menu, so only three controls remain and
