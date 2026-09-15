@@ -2166,8 +2166,8 @@ Item {
                                 }
 
                                 onCurrentKeySet: function(key, isExistingKey) {
-                                    if (invoiceItemsTable.isNewRow(row)) {
-                                        invoiceItemsTable.appendNewRow()
+                                    if (!invoiceItemsTable.ensureItemForRow(row, key !== "")) {
+                                        return
                                     }
                                     if (isExistingKey) {
                                         invoice.json.items[row].item_type = key
@@ -2234,8 +2234,8 @@ Item {
 
                                 onCurrentKeySet: function(key, isExistingKey) {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
-                                    if (invoiceItemsTable.isNewRow(row)) {
-                                        invoiceItemsTable.appendNewRow()
+                                    if (!invoiceItemsTable.ensureItemForRow(row, key !== "")) {
+                                        return
                                     }
 
                                     if (isExistingKey) {
@@ -2295,8 +2295,10 @@ Item {
 
                                 onEditingFinished: {
                                     if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
+                                        if (!invoiceItemsTable.ensureItemForRow(row, text.trim() !== "")) {
+                                            modified = false
+                                            focus = false
+                                            return
                                         }
 
                                         let date = text
@@ -2315,7 +2317,7 @@ Item {
                                         }
                                         invoice.json.items[model.row].date = date
                                         let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', date)
+                                        setItemsModelDisplay(index, date)
 
                                         setDocumentModified()
                                         modified = false
@@ -2376,13 +2378,15 @@ Item {
 
                                 onEditingFinished: {
                                     if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
+                                        if (!invoiceItemsTable.ensureItemForRow(row, text.trim() !== "")) {
+                                            modified = false
+                                            focus = false
+                                            return
                                         }
 
                                         invoice.json.items[model.row].description = text
                                         let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', text)
+                                        setItemsModelDisplay(index, text)
 
                                         setDocumentModified()
                                         modified = false
@@ -2452,13 +2456,15 @@ Item {
 
                                 onEditingFinished: {
                                     if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
+                                        if (!invoiceItemsTable.ensureItemForRow(row, text.trim() !== "")) {
+                                            modified = false
+                                            focus = false
+                                            return
                                         }
                                         let quantity = text ? Banana.Converter.toInternalNumberFormat(text) : ""
                                         invoice.json.items[model.row].quantity = quantity
                                         let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', text)
+                                        setItemsModelDisplay(index, text)
                                         setDocumentModified()
                                         calculateInvoice()
                                         modified = false
@@ -2489,13 +2495,15 @@ Item {
 
                                 onEditingFinished: {
                                     if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
+                                        if (!invoiceItemsTable.ensureItemForRow(row, text.trim() !== "")) {
+                                            modified = false
+                                            focus = false
+                                            return
                                         }
 
                                         invoice.json.items[model.row].mesure_unit = text
                                         let index = invoiceItemsModel.index(model.row, model.column)
-                                        invoiceItemsModel.setData(index, 'display', text)
+                                        setItemsModelDisplay(index, text)
 
                                         setDocumentModified()
                                         modified = false
@@ -2526,8 +2534,10 @@ Item {
 
                                 onEditingFinished: {
                                     if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
+                                        if (!invoiceItemsTable.ensureItemForRow(row, text.trim() !== "")) {
+                                            modified = false
+                                            focus = false
+                                            return
                                         }
 
                                         let item = invoice.json.items[row];
@@ -2588,8 +2598,10 @@ Item {
 
                                 onEditingFinished: {
                                     if (modified) {
-                                        if (invoiceItemsTable.isNewRow(row)) {
-                                            invoiceItemsTable.appendNewRow()
+                                        if (!invoiceItemsTable.ensureItemForRow(row, text.trim() !== "")) {
+                                            modified = false
+                                            focus = false
+                                            return
                                         }
 
                                         let discount = parseDiscountFormat(text)
@@ -2661,11 +2673,11 @@ Item {
 
                                 onCurrentKeySet: function(key, isExistingKey) {
                                     // NB.: can't use model.row bz the widget has his hown model property, use simply row instead
-                                    if (invoiceItemsTable.isNewRow(row)) {
-                                        invoiceItemsTable.appendNewRow()
+                                    let vatItem = invoice_item_vat.getCurrentItem()
+                                    if (!invoiceItemsTable.ensureItemForRow(row, vatItem ? true : false)) {
+                                        return
                                     }
 
-                                    let vatItem = invoice_item_vat.getCurrentItem()
                                     if (vatItem) {
                                         invoice.json.items[row].unit_price.vat_code = vatItem.key
                                         invoice.json.items[row].unit_price.vat_rate = vatItem.rate
@@ -2787,11 +2799,30 @@ Item {
                         invoice.json.items.push(newItem)
                         // Set row nr in model
                         let index = invoiceItemsModel.index(invoiceItemsModel.rowCount - 1, 0)
-                        invoiceItemsModel.setData(index, 'display', invoiceItemsModel.rowCount)
+                        setItemsModelDisplay(index, invoiceItemsModel.rowCount)
                         // Add new row in model
                         let newRowItem = invoiceItemToModelItem(newItem, '*');
                         invoiceItemsModel.appendRow(newRowItem)
                         signalUpdateTableHeight++
+                    }
+
+                    /* Called by a cell of the items table before it writes into its row.
+
+                       The trailing "*" row has no item behind it: it becomes one here, and a new "*"
+                       row is added below it - but only when the cell was left with a value. Leaving a
+                       cell reads as an edit even when nothing was typed: StyledTextField sets
+                       "modified" on every editingFinished, and the combo boxes report an empty key
+                       when they lose focus. So a click into the "*" row and out again used to add an
+                       empty row every time.
+
+                       Returns false when there is still no item to write into: the caller must stop. */
+                    function ensureItemForRow(row, hasValue) {
+                        if (!isNewRow(row))
+                            return true
+                        if (!hasValue)
+                            return false
+                        appendNewRow()
+                        return true
                     }
 
                     FontMetrics {
@@ -2848,7 +2879,11 @@ Item {
                         }*/
                         else {
                             // Compute current height
-                            let height = 34;
+                            // The trailing "*" row has no item, so it is not part of the loop below.
+                            // It had a fixed 34 here: a description typed into it grew the row but not
+                            // the table, and the lines past those 34 points were cut off by its edge.
+                            let newRowHeight = rowHeight(invoice.json.items.length)
+                            let height = Math.max(34, newRowHeight);
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
                                 // This function does not correctly calculate the heigth when there is a word wrap.
                                 // We should try to use directly the line hiegth.
@@ -4133,6 +4168,23 @@ Item {
     function updateViewVatMode() {
         isVatModeVatNone = isWithoutVat();
         isVatModeVatInclusive = !arePricesVatExclusive()
+    }
+
+    /* Writes the value shown by one cell of the items table model.
+
+       TableModel.setData() takes its arguments in a different order depending on the Qt
+       version: (index, role, value) on Qt 6.8, (index, value, role) on Qt 6.10 and later, where
+       TableModel was rewritten on a base shared with TreeModel. No overload is left for the old
+       order there, so the old call failed without a warning and wrote nothing: an edited cell
+       went back to its previous value whenever the table recreated its cells, and the "*" row
+       never received its number when it became an item.
+
+       The new order is tried first, and the old one if the model rejects it. On an older Qt the
+       first call either fails without writing anything or already writes the value to the
+       display role: either way the cell ends up with the value. */
+    function setItemsModelDisplay(index, value) {
+        if (!invoiceItemsModel.setData(index, value, "display"))
+            invoiceItemsModel.setData(index, "display", value)
     }
 
     function updateViewItems() {
