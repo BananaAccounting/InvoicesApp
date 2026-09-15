@@ -551,7 +551,7 @@ Item {
                         }
 
                         StyledLabel{
-                            text: qsTr("Invoice No")
+                            text: invoice.isEstimate() ? qsTr("Estimate No") : qsTr("Invoice No")
                             Layout.minimumWidth: 100 * Stylesheet.pixelScaleRatio
                             visible: invoice_number.visible
                         }
@@ -675,7 +675,7 @@ Item {
                         }
 
                         StyledLabel{
-                            text: qsTr("Invoice date")
+                            text: invoice.isEstimate() ? qsTr("Estimate date") : qsTr("Invoice date")
                             Layout.minimumWidth: 100 * Stylesheet.pixelScaleRatio
                             visible: invoice_date.visible
                         }
@@ -727,7 +727,9 @@ Item {
                         }
 
                         StyledLabel{
-                            text: qsTr("Due date")
+                            // Same field for both documents: on an estimate payment_info.due_date holds
+                            // the end of its validity, computed from the estimate validity days.
+                            text: invoice.isEstimate() ? qsTr("Validity") : qsTr("Due date")
                             Layout.minimumWidth: 100 * Stylesheet.pixelScaleRatio
                             visible: invoice_due_date.visible
                         }

@@ -260,7 +260,7 @@ Item {
         anchors.topMargin: tabBarTopMargin + safeAreaTop
 
         StyledTabButton {
-            text: qsTr("Invoice")
+            text: invoice.isEstimate() ? qsTr("Estimate") : qsTr("Invoice")
         }
 
         StyledTabButton {
