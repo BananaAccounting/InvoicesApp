@@ -520,10 +520,20 @@ Item {
         // edited - the same reason the buttons take the focus before acting.
         id: overflowMenu
 
-        // Only the selection colour is changed, through the palette. Restyling the entries
-        // themselves - replacing their content and background with our own - stopped the
-        // menu opening at all, so the stock entries are left exactly as they were and the
-        // one colour that looked out of place is recoloured from the outside.
+        // The colours are given through the palette. Restyling the entries themselves -
+        // replacing their content and background with our own - stopped the menu opening at
+        // all, so the stock entries are left exactly as they were and recoloured from outside.
+        //
+        // On the desktop the style draws the menu from its palette: the background from
+        // window or base, the entries from text or windowText, depending on the style. That
+        // palette stayed light in dark mode while the rest of the dialog, drawn from
+        // Stylesheet, followed the system - so the dialog's own colours are handed to it.
+        // The surface is a lighter shade in dark mode so the menu stands out from the
+        // dialog, and the system colours in the light theme: see Stylesheet.menuWindowColor.
+        palette.window: Stylesheet.menuWindowColor
+        palette.windowText: Stylesheet.systemPalette.windowText
+        palette.base: Stylesheet.menuBaseColor
+        palette.text: Stylesheet.textColor
         palette.highlight: Stylesheet.accentColor
         palette.highlightedText: Stylesheet.accentTextColor
 

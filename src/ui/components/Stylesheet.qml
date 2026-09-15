@@ -91,6 +91,18 @@ Item {
     // of blending into it, and follows the theme on its own.
     property color accentSurfaceColor: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.14)
 
+    // Surface of the menus. The desktop styles draw a menu from the palette role window (base
+    // for Fusion), and handing them the dialog's own colours made a menu in dark mode the same
+    // colour as the dialog under it: it did not stand out, and its border, derived from the
+    // same colour, vanished too. A dark interface lifts a popup by drawing it lighter than
+    // what lies beneath, so a little of the text colour is mixed in. Opaque, unlike the
+    // neutral tokens above, as a menu must not show what is behind it. The light theme keeps
+    // the system colours, exactly as before.
+    property color menuWindowColor: isDarkModus() ?
+                                        Qt.tint(systemPalette.window, Qt.rgba(textColor.r, textColor.g, textColor.b, 0.12)) :
+                                        systemPalette.window
+    property color menuBaseColor: isDarkModus() ? menuWindowColor : baseColor
+
     // Reference palette
     property SystemPalette systemPalette: SystemPalette{
         colorGroup: SystemPalette.Active

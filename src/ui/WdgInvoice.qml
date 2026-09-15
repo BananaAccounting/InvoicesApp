@@ -3168,6 +3168,12 @@ Item {
                     readonly property bool onNewRow: targetRow < 0
                                                      || invoiceItemsTable.isNewRow(targetRow)
 
+                    // Same colours as the menu of the bottom bar, for the same reason: see
+                    // overflowMenu in DlgInvoice.qml.
+                    palette.window: Stylesheet.menuWindowColor
+                    palette.windowText: Stylesheet.systemPalette.windowText
+                    palette.base: Stylesheet.menuBaseColor
+                    palette.text: Stylesheet.textColor
                     palette.highlight: Stylesheet.accentColor
                     palette.highlightedText: Stylesheet.accentTextColor
 

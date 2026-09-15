@@ -107,6 +107,13 @@ TextArea {
       id: baseContextMenu
       focus: false
 
+      // On the desktop the style draws the menu from its palette, which stays light in dark
+      // mode: the dialog's own colours are handed to it, as for the menus in DlgInvoice.qml.
+      palette.window: Stylesheet.menuWindowColor
+      palette.windowText: Stylesheet.systemPalette.windowText
+      palette.base: Stylesheet.menuBaseColor
+      palette.text: Stylesheet.textColor
+
       MenuItem {
          text: qsTr("Cut")
          enabled: !textArea.readOnly && textArea.selectedText.length > 0
