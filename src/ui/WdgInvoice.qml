@@ -2916,20 +2916,26 @@ Item {
                             // The trailing "*" row has no item, so it is not part of the loop below.
                             // It had a fixed 34 here: a description typed into it grew the row but not
                             // the table, and the lines past those 34 points were cut off by its edge.
+                            // Only the fixed numbers below are scaled, never the heights measured
+                            // from the rows: those already are scaled pixels, since the cells get
+                            // their height from the scaled sizes of the fields. Scaling the sum
+                            // again left every row a third taller than it is on a phone, where the
+                            // factor is about 1.3 - an empty band under the table that grew with
+                            // every row added. On the desktop the factor is 1 and it never showed.
                             let newRowHeight = rowHeight(invoice.json.items.length)
-                            let height = Math.max(34, newRowHeight);
+                            let height = Math.max(34 * Stylesheet.pixelScaleRatio, newRowHeight);
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
                                 // This function does not correctly calculate the heigth when there is a word wrap.
                                 // We should try to use directly the line hiegth.
                                 //let linesCount = invoice.json.items[rowNr].description.split('\n').length
                                 let linesCount = estimateWordWrapLines(invoice.json.items[rowNr].description)
-                                let lineHeight = 30 + 16 * (linesCount - 1)
+                                let lineHeight = (30 + 16 * (linesCount - 1)) * Stylesheet.pixelScaleRatio
                                 if (rowHeight(rowNr) > 0){
-                                    lineHeight = rowHeight(rowNr) + 2 // 2 is a casual number
+                                    lineHeight = rowHeight(rowNr) + 2 // 2 is the spacing between rows
                                 }
                                 height += lineHeight
                             }
-                            return height * Stylesheet.pixelScaleRatio
+                            return height
                         }
                     }
                     function getMaxVisibleItems() {
