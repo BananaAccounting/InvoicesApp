@@ -530,6 +530,44 @@ Item {
     }
 
 
+    /* An entry of one of this dialog's menus, drawn in the dialog's colours.
+
+       The styles draw menus their own way, and two of those ways go wrong here. The iOS
+       style paints the background of a menu and of every entry with images chosen from the
+       application's colour scheme rather than from the dialog's: on a phone in light mode
+       the menus came out dark grey with black text. The desktop styles read the palette,
+       which is handed to them below, but each reads different roles.
+
+       Drawn from Stylesheet instead, a menu looks the same everywhere. The implicit size of
+       the background matters: every Qt style gives its own background one, and without it a
+       menu ends up with no size at all and appears not to open - which is what happened the
+       first time this was tried. */
+    component StyledMenuEntry: MenuItem {
+        id: entry
+
+        palette.text: entry.down || entry.highlighted ? Stylesheet.accentTextColor : Stylesheet.textColor
+        palette.windowText: entry.palette.text
+
+        // The text is drawn here too, for the same reason as the background: the Material
+        // style, which Android uses, takes the colour of an entry from its own theme rather
+        // than from the palette, and that theme stayed light - black text on a dark menu.
+        contentItem: Text {
+            text: entry.text
+            font: entry.font
+            color: entry.down || entry.highlighted ? Stylesheet.accentTextColor :
+                       entry.enabled ? Stylesheet.textColor : Stylesheet.mutedTextColor
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+        }
+
+        background: Rectangle {
+            implicitWidth: 200 * Stylesheet.pixelScaleRatio
+            implicitHeight: 34 * Stylesheet.pixelScaleRatio
+            color: entry.down || entry.highlighted ? Stylesheet.accentColor : "transparent"
+            radius: Stylesheet.cornerRadiusSmall
+        }
+    }
+
     Menu {
         // The commands that leave the bottom bar on a narrow screen. Each mirrors the
         // button of the same name; the button stays the definition of what the command
@@ -539,16 +577,10 @@ Item {
         // edited - the same reason the buttons take the focus before acting.
         id: overflowMenu
 
-        // The colours are given through the palette. Restyling the entries themselves -
-        // replacing their content and background with our own - stopped the menu opening at
-        // all, so the stock entries are left exactly as they were and recoloured from outside.
-        //
-        // On the desktop the style draws the menu from its palette: the background from
-        // window or base, the entries from text or windowText, depending on the style. That
-        // palette stayed light in dark mode while the rest of the dialog, drawn from
-        // Stylesheet, followed the system - so the dialog's own colours are handed to it.
-        // The surface is a lighter shade in dark mode so the menu stands out from the
+        // The surface is a lighter shade in dark mode, so the menu stands out from the
         // dialog, and the system colours in the light theme: see Stylesheet.menuWindowColor.
+        // The palette is still handed to the style for the parts it draws itself, such as
+        // the scroll indicator of a menu too long for the screen.
         palette.window: Stylesheet.menuWindowColor
         palette.windowText: Stylesheet.systemPalette.windowText
         palette.base: Stylesheet.menuBaseColor
@@ -556,17 +588,25 @@ Item {
         palette.highlight: Stylesheet.accentColor
         palette.highlightedText: Stylesheet.accentTextColor
 
-        MenuItem {
+        background: Rectangle {
+            implicitWidth: 200 * Stylesheet.pixelScaleRatio
+            implicitHeight: 40 * Stylesheet.pixelScaleRatio
+            color: Stylesheet.menuWindowColor
+            border.color: Stylesheet.borderColor
+            radius: Stylesheet.cornerRadius
+        }
+
+        StyledMenuEntry {
             text: qsTr("Help")
             onTriggered: showHelp()
         }
 
-        MenuItem {
+        StyledMenuEntry {
             text: qsTr("Print")
             onTriggered: wdgInvoice.printInvoice()
         }
 
-        MenuItem {
+        StyledMenuEntry {
             // An invisible menu item still reserves its row, so it has to give up its
             // height as well to disappear.
             text: qsTr("Create invoice")
@@ -575,7 +615,7 @@ Item {
             onTriggered: wdgInvoice.createInvoiceFromEstimate()
         }
 
-        MenuItem {
+        StyledMenuEntry {
             text: qsTr("Copy")
             visible: !invoice.isNewDocument
             height: visible ? implicitHeight : 0

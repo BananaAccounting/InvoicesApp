@@ -165,6 +165,38 @@ Item {
         invoiceItemsTable.updateColDescrWidth()
     }
 
+    /* An entry of the items table's row menu, in the dialog's colours. Same component as
+       StyledMenuEntry in DlgInvoice.qml, and there for the same reason: the iOS style paints
+       menu entries with images of its own, chosen from the application's colour scheme
+       rather than from the dialog's, and on a phone in light mode they came out dark grey
+       with black text. The implicit size of the background is what every Qt style gives its
+       own background, and a menu without it ends up with no size and appears not to open. */
+    component StyledMenuEntry: MenuItem {
+        id: entry
+
+        palette.text: entry.down || entry.highlighted ? Stylesheet.accentTextColor : Stylesheet.textColor
+        palette.windowText: entry.palette.text
+
+        // The text is drawn here too, for the same reason as the background: the Material
+        // style, which Android uses, takes the colour of an entry from its own theme rather
+        // than from the palette, and that theme stayed light - black text on a dark menu.
+        contentItem: Text {
+            text: entry.text
+            font: entry.font
+            color: entry.down || entry.highlighted ? Stylesheet.accentTextColor :
+                       entry.enabled ? Stylesheet.textColor : Stylesheet.mutedTextColor
+            verticalAlignment: Text.AlignVCenter
+            elide: Text.ElideRight
+        }
+
+        background: Rectangle {
+            implicitWidth: 200 * Stylesheet.pixelScaleRatio
+            implicitHeight: 34 * Stylesheet.pixelScaleRatio
+            color: entry.down || entry.highlighted ? Stylesheet.accentColor : "transparent"
+            radius: Stylesheet.cornerRadiusSmall
+        }
+    }
+
     TableModel {
         id: invoiceItemsModel
 
@@ -3170,8 +3202,8 @@ Item {
                     readonly property bool onNewRow: targetRow < 0
                                                      || invoiceItemsTable.isNewRow(targetRow)
 
-                    // Same colours as the menu of the bottom bar, for the same reason: see
-                    // overflowMenu in DlgInvoice.qml.
+                    // Same colours and same drawing as the menu of the bottom bar, for the
+                    // same reason: see overflowMenu in DlgInvoice.qml.
                     palette.window: Stylesheet.menuWindowColor
                     palette.windowText: Stylesheet.systemPalette.windowText
                     palette.base: Stylesheet.menuBaseColor
@@ -3179,12 +3211,20 @@ Item {
                     palette.highlight: Stylesheet.accentColor
                     palette.highlightedText: Stylesheet.accentTextColor
 
-                    MenuItem {
+                    background: Rectangle {
+                        implicitWidth: 200 * Stylesheet.pixelScaleRatio
+                        implicitHeight: 40 * Stylesheet.pixelScaleRatio
+                        color: Stylesheet.menuWindowColor
+                        border.color: Stylesheet.borderColor
+                        radius: Stylesheet.cornerRadius
+                    }
+
+                    StyledMenuEntry {
                         text: qsTr("Add")
                         onTriggered: invoiceItemsTable.addItemRow(itemRowMenu.targetRow)
                     }
 
-                    MenuItem {
+                    StyledMenuEntry {
                         // An invisible menu entry still reserves its row, so it gives up its
                         // height as well to disappear.
                         text: qsTr("Remove")
@@ -3193,14 +3233,14 @@ Item {
                         onTriggered: invoiceItemsTable.removeItemRow(itemRowMenu.targetRow)
                     }
 
-                    MenuItem {
+                    StyledMenuEntry {
                         text: qsTr("Move up")
                         visible: !itemRowMenu.onNewRow && itemRowMenu.targetRow > 0
                         height: visible ? implicitHeight : 0
                         onTriggered: invoiceItemsTable.moveItemRowUp(itemRowMenu.targetRow, 0)
                     }
 
-                    MenuItem {
+                    StyledMenuEntry {
                         text: qsTr("Move Down")
                         visible: !itemRowMenu.onNewRow
                                  && itemRowMenu.targetRow + 2 < invoiceItemsTable.rows
