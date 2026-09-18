@@ -66,6 +66,9 @@ Item {
                              " " + invoice.json.document_info.currency.toLocaleUpperCase() : "") +
         " " + toLocaleNumberFormat(invoice.json ? invoice.json.billing_info.total_to_pay : "", true)
 
+    // "Invoice 123" or "Estimate 123", set by the dialog: see DlgInvoice.getDocumentName.
+    property string documentName: ""
+
     /* The view the user picked, and the one the form actually shows.
 
        They differ on a narrow screen, where the form is always shown in full. Choosing a
@@ -501,13 +504,36 @@ Item {
 
         }
 
-        StyledLabel { // Invoice total, own row on a narrow display
+        RowLayout { // Document and total, own row on a narrow display
             visible: window.compactLayout
-            // Left aligned on purpose: nothing then depends on where the right edge is
-            Layout.alignment: Qt.AlignLeft
-            font.bold: true
-            color: Stylesheet.accentColor
-            text: window.invoiceTotalText
+            Layout.fillWidth: true
+            // Ends where the form below ends, not at the edge of the dialog: the form leaves
+            // room on its right for the scroll bar and a margin, and without the same room
+            // here the total stuck out past the section rules, the table and the totals.
+            // Measured from the form itself, so it follows whatever width the bar has.
+            Layout.rightMargin: Math.max(0, scrollView.width - scrollView.leftPadding - columnLayout.width)
+            spacing: Stylesheet.spacingBase
+
+            StyledLabel {
+                // Which document is open. On the desktop the window title says it; on a
+                // phone that title is not shown, and with the Info section closed the
+                // number was nowhere in sight. A value, so at full strength; not in the
+                // accent, which stays on the total.
+                Layout.fillWidth: true
+                color: Stylesheet.textColor
+                elide: Text.ElideRight
+                text: window.documentName
+            }
+
+            StyledLabel {
+                // Never shortened: when the row is too narrow, the document name gives
+                // way instead. The row fills the width of the column, which is anchored
+                // to the dialog, so it cannot widen the column the way the views bar did.
+                Layout.minimumWidth: implicitWidth
+                font.bold: true
+                color: Stylesheet.accentColor
+                text: window.invoiceTotalText
+            }
         }
 
         ScrollView { // Invoice content
@@ -586,6 +612,10 @@ Item {
                             // when these are visible, and a hidden item takes up no cell.
                             id: sectionInfo
                             visible: window.compactLayout
+                            // The first heading of the form has no section above it to keep
+                            // its distance from: the extra gap the headings ask for only added
+                            // to the space already left above the scrolling area.
+                            Layout.topMargin: 0
                             expanded: true
                             title: qsTr("Info")
                             Layout.fillWidth: true
@@ -3368,6 +3398,17 @@ Item {
                 }
 
                 GridLayout {// Subtotals and Totals
+                    // On the right in both layouts. On a narrow display the total is also
+                    // shown at the top right, and with the block on the left the same figure
+                    // sat in two different places on the screen.
+                    //
+                    // Set here and not on the totals: in a single column this grid is no
+                    // wider than the totals themselves - a layout cannot grow past what its
+                    // children can, and the totals are sized to their content - so it is
+                    // this grid that has to be placed. On a wide dialog it fills the width
+                    // anyway, through the empty column below, and this changes nothing.
+                    Layout.alignment: Qt.AlignRight
+
                     ColumnLayout {
                         // Empty left column that holds the totals over on the right half of
                         // a wide dialog. In a single column there is no right half to speak
@@ -3382,15 +3423,15 @@ Item {
                         columns: 2
                         columnSpacing: (window.compactLayout ? 1 : 3) * Stylesheet.defaultMargin
 
-                        // In a single column the block is sized to its own two columns and
-                        // sits on the left. Filling the width was what created the gap: a
-                        // grid stretched wider than its content shares the surplus out among
-                        // its columns, so the labels and the figures drifted apart until each
-                        // was against an opposite edge of the screen. Sized to its content
-                        // there is no surplus to share, and the figures sit where they belong,
-                        // still lined up with one another down the column.
+                        // In a single column the block is sized to its own two columns. Filling
+                        // the width was what created the gap: a grid stretched wider than its
+                        // content shares the surplus out among its columns, so the labels and
+                        // the figures drifted apart until each was against an opposite edge of
+                        // the screen. Sized to its content there is no surplus to share, and
+                        // the figures sit where they belong, still lined up with one another
+                        // down the column. On the right: see the grid around it.
                         Layout.fillWidth: !window.compactLayout
-                        Layout.alignment: window.compactLayout ? Qt.AlignLeft : Qt.AlignRight
+                        Layout.alignment: Qt.AlignRight
                         Layout.rightMargin: 0
 
                         StyledTextField {

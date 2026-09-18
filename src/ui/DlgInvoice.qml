@@ -124,6 +124,19 @@ Item {
     }
 
     function getTitle() {
+        let title = getDocumentName()
+        if (invoice.isReadOnly) {
+            title += " [" + qsTr("Read only") + "]"
+        } else if (invoice.isModified) {
+            title += " *"
+        }
+        return title
+    }
+
+    // The document being edited, "Invoice 123" or "Estimate 123": the title without the
+    // read only or modified markers. Also shown at the top of the form on a narrow
+    // display, where the window title is not shown - see WdgInvoice.documentName.
+    function getDocumentName() {
         let title = qsTr("Document")
         if (invoice.json.document_info.number) {
             if (invoice.isEstimate()) {
@@ -137,11 +150,6 @@ Item {
             } else  {
                 title = qsTr("New invoice %1").arg(invoice.json.document_info.number)
             }
-        }
-        if (invoice.isReadOnly) {
-            title += " [" + qsTr("Read only") + "]"
-        } else if (invoice.isModified) {
-            title += " *"
         }
         return title
     }
@@ -305,6 +313,11 @@ Item {
             id: wdgInvoice
             invoice: invoice
             appSettings: appSettings
+            // Built here, and not in the form, so it uses the very texts of the window
+            // title, which are already translated. signalInvoiceChanged is read so the
+            // binding follows a change of number: the json itself notifies nothing.
+            documentName: invoice.signalInvoiceChanged && invoice.json && invoice.json.document_info ?
+                              getDocumentName().trim() : ""
         }
 
         WdgSettings {
