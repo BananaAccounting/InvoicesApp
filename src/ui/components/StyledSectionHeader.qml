@@ -14,6 +14,7 @@
 
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
 import "."
 
@@ -37,6 +38,19 @@ Item {
     // and the items table, so the height is worth having; below this it would start to
     // read as cramped, and would fall short of a comfortable target for a fingertip.
     implicitHeight: 34 * Stylesheet.pixelScaleRatio
+
+    /* The rule above a heading must sit the same distance below the previous section
+       wherever the heading is used. The headings of the form do not all live in the same
+       layout - Info, Additional info and Texts are rows of the invoice data grid, which
+       spaces its lines tightly, while Address is a row of the outer grid, which spaces its
+       sections widely - so the gap came out different above each of them.
+
+       What is missing to reach the spacing of a section is asked for here, so the distance
+       is the same in both places and follows the layout if its spacing ever changes. */
+    Layout.topMargin: Math.max(0, Stylesheet.spacingSection - parentSpacing)
+    readonly property int parentSpacing: !parent ? 0 :
+                                             parent.rowSpacing !== undefined ? parent.rowSpacing :
+                                                 parent.spacing !== undefined ? parent.spacing : 0
     implicitWidth: titleLabel.implicitWidth + indicatorBox.width + 3 * Stylesheet.defaultMargin
 
     Rectangle { // Rule above the heading, marking where the previous section ended
@@ -82,9 +96,12 @@ Item {
         anchors.rightMargin: Stylesheet.defaultMargin
         anchors.verticalCenter: parent.verticalCenter
         text: header.title
-        // Bold but not accent coloured: a heading organises the form, it is not the thing
-        // the document is about. The accent stays on the total.
-        font.bold: true
+        // A heading is read at full strength, unlike the labels below it, and in the
+        // heading font: a tenth larger and semi bold. Not accent coloured, though - a
+        // heading organises the form, it is not the thing the document is about. The
+        // accent stays on the total.
+        color: Stylesheet.textColor
+        font: Stylesheet.sectionTitleFont
         elide: Text.ElideRight
     }
 

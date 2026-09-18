@@ -47,6 +47,33 @@ Item {
 
     property int defaultMargin: 10 * pixelScaleRatio
 
+    /* Spacing scale. Nearly everything used the same ten points, so a field stood as far from
+       the next field as a section stood from the next section, and nothing read as grouped.
+       Four points inside a group of fields, eight between the parts of one line, sixteen
+       between sections - so the eye sees the groups before it reads the labels. */
+    readonly property int spacingTight: 4 * pixelScaleRatio
+    readonly property int spacingBase: 8 * pixelScaleRatio
+    readonly property int spacingSection: 16 * pixelScaleRatio
+
+    /* The colour of a label that names a field. A label is read once, to find the field; the
+       value is what is read afterwards, every time. Keeping both at full strength made every
+       form a wall of equal text. Taken from the theme's own text colour, so it follows the
+       system in both modes: see mutedTextColor below. */
+    readonly property color labelColor: mutedTextColor
+
+    /* Headings: the dialog's font, a tenth larger and semi bold. Derived from the font the
+       dialog is drawn with rather than from a fixed size, so it follows the system font like
+       everything else. A font carries its size either in points or in pixels, never both, and
+       which one it is depends on the platform: the unset one reads as -1, so each case is
+       handled. */
+    readonly property font sectionTitleFont: referenceMetrics.font.pointSize > 0 ?
+                                                 Qt.font({ family: referenceMetrics.font.family,
+                                                           weight: Font.DemiBold,
+                                                           pointSize: referenceMetrics.font.pointSize * 1.1 }) :
+                                                 Qt.font({ family: referenceMetrics.font.family,
+                                                           weight: Font.DemiBold,
+                                                           pixelSize: Math.round(referenceMetrics.font.pixelSize * 1.1) })
+
     // Corner radius, shared so controls read as one consistent, modern style
     property double cornerRadius: 6 * pixelScaleRatio
     property double cornerRadiusSmall: 3 * pixelScaleRatio

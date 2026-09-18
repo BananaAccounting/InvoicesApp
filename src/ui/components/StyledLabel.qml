@@ -19,5 +19,8 @@ import QtQuick.Controls
  * when the operating system switch from normal mode to dark mode.
  */
 Label {
-    color: Stylesheet.textColor
+    // The colour of a label naming a field: quieter than the value beside it, see
+    // Stylesheet.labelColor. Where a label carries a heading or a figure instead, the
+    // colour is set on the spot - the read only banner, the totals, the table headings.
+    color: Stylesheet.labelColor
 }

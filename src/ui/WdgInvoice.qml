@@ -371,7 +371,8 @@ Item {
 
         anchors.fill: parent
         anchors.margins: Stylesheet.defaultMargin
-        spacing: Stylesheet.defaultMargin
+        // Between sections, not between fields: see Stylesheet.spacingSection.
+        spacing: Stylesheet.spacingSection
 
         // Hack for qt6, to resolve overlapping items after dialog load
         visible: appSettings.loaded
@@ -407,6 +408,8 @@ Item {
                 anchors.right: parent.right
                 anchors.leftMargin: Stylesheet.defaultMargin
                 anchors.rightMargin: Stylesheet.defaultMargin
+                // A notice, not a label naming a field: full strength.
+                color: Stylesheet.textColor
                 text: qsTr("This document is read only and cannot be modified.")
             }
         }
@@ -545,6 +548,8 @@ Item {
                     // On a narrow display everything stacks instead, so the address block
                     // goes below the invoice data rather than off the right edge.
                     columns: window.compactLayout ? 1 : 3
+                    columnSpacing: Stylesheet.spacingSection
+                    rowSpacing: Stylesheet.spacingSection
 
                     // Without this the grid takes the width of its content instead of the width
                     // available, so the fields below have nothing to fill or shrink against.
@@ -563,6 +568,10 @@ Item {
 
                         id: invoice_info
                         columns: window.compactLayout ? 1 : 2
+                        // Tight between the lines of one group, wider between a label and
+                        // its field: see Stylesheet.spacingTight and spacingBase.
+                        rowSpacing: Stylesheet.spacingTight
+                        columnSpacing: Stylesheet.spacingBase
 
                         Layout.alignment:  Qt.AlignBottom
                         Layout.fillWidth: true
@@ -1796,6 +1805,8 @@ Item {
                                     clip: true
                                     text: invoiceItemsModel.headers[model.column].title
                                     horizontalAlignment: invoiceItemsModel.headers[model.column].align
+                                    // A heading, not a label naming a field: full strength.
+                                    color: Stylesheet.textColor
                                     font.bold: true
                                 }
 
@@ -3733,6 +3744,9 @@ Item {
                                                                       : Number.POSITIVE_INFINITY
                             visible: isInvoiceFieldVisible("show_invoice_summary", text) && !isVatModeVatNone
 
+                            // Figures, not the name of a field: read at full strength, like
+                            // the accounting details below it.
+                            color: Stylesheet.textColor
                             text: invoice.json && invoice.json.billing_info.total_vat_rates ? getVatDetails() : ""
 
                             function getVatDetails() {

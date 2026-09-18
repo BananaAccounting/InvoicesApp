@@ -100,7 +100,8 @@ Item {
 
                 StyledLabel{
                     text: qsTr("New documents")
-                    font.bold: true
+                    color: Stylesheet.textColor
+                    font: Stylesheet.sectionTitleFont
                 }
 
                 StyledLabel {
@@ -405,7 +406,8 @@ Item {
 
                 StyledLabel{
                     text: qsTr("Invoice custom fields")
-                    font.bold: true
+                    color: Stylesheet.textColor
+                    font: Stylesheet.sectionTitleFont
                 }
 
                 GridLayout {
@@ -668,7 +670,8 @@ Item {
 
                 StyledLabel{
                     text: qsTr("Interface")
-                    font.bold: true
+                    color: Stylesheet.textColor
+                    font: Stylesheet.sectionTitleFont
                 }
 
                 GridLayout {
@@ -681,7 +684,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Views")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -807,7 +811,8 @@ Item {
 
                 StyledLabel{
                     text: qsTr("Invoice fields")
-                    font.bold: true
+                    color: Stylesheet.textColor
+                    font: Stylesheet.sectionTitleFont
                     Layout.bottomMargin: styleRowSpacing
                 }
 
@@ -829,7 +834,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("General")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -880,7 +886,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Parameters")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -1038,7 +1045,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Details")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -1331,7 +1339,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Custom fields")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -1570,7 +1579,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Address")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -2056,7 +2066,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Items")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -2147,7 +2158,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Item columns")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -2359,7 +2371,8 @@ Item {
                     StyledLabel{
                         Layout.columnSpan: root.compactLayout ? 3 : 1
                         text: qsTr("Totals")
-                        font.bold: true
+                        color: Stylesheet.textColor
+                        font: Stylesheet.sectionTitleFont
                         Layout.bottomMargin: styleRowSpacing
                     }
 
@@ -2499,7 +2512,8 @@ Item {
 
                 StyledLabel{
                     text: qsTr("Tools")
-                    font.bold: true
+                    color: Stylesheet.textColor
+                    font: Stylesheet.sectionTitleFont
                 }
 
                 Item {
