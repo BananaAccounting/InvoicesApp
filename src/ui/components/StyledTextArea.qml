@@ -27,6 +27,23 @@ TextArea {
    wrapMode: TextEdit.Wrap
 
    background: Rectangle {
+      /* Android draws the dialog with the Material style, which works out the space above
+         the text from the height the background asks for: (implicitBackgroundHeight -
+         height of the placeholder) / 2. Its own background asks for the height of a text
+         field; a plain Rectangle asks for nothing at all, so the division came out
+         negative and the text was drawn above the box, with the cursor outside it. The
+         box was left shorter than its own text as well, since the height of the field is
+         its content plus those paddings.
+
+         The height of a control is asked for instead, the one used for a section heading
+         or a menu entry. Material's own 56 would have been the other candidate, but it
+         would make every description in the items table that tall.
+
+         Nothing is asked for on the other platforms: their styles pad by fixed amounts
+         and never read this, and a height here would only make an empty field taller
+         than it is today. */
+      implicitHeight: Qt.platform.os === "android" ? 34 * Stylesheet.pixelScaleRatio : 0
+
       color: Stylesheet.baseColor
       // Highlight real focus only - see StyledTextField: "selected" is bound to the
       // items table's current cell, which stays set after the focus moved away.
