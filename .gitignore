@@ -6,3 +6,5 @@ src/CMakeLists.txt.user
 src/.vs
 src/out/build
 src/build
+src/.qtcreator
+src/.vscode
