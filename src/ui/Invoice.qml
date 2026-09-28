@@ -95,7 +95,7 @@ QtObject {
                         invoice.tabPos.tableName,
                         invoice.tabPos.rowNr,
                         changedRowFields);
-            docChangeRowModifyAdded = true;
+            docChangeRowAddAdded = true;
         } else {
             // new invoice / estimate
             if (docChangeRowAddAdded)
