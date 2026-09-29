@@ -238,11 +238,19 @@ Item {
     // the backgrounds still reach the edges of the screen. Zero on the desktop.
     //
     // Read from the root, which is positioned by the host and not by these margins: an item
-    // positioned from its own SafeArea would be a binding loop. SafeArea needs Qt 6.9.
-    readonly property real safeAreaTop: SafeArea.margins.top
-    readonly property real safeAreaBottom: SafeArea.margins.bottom
-    readonly property real safeAreaLeft: SafeArea.margins.left
-    readonly property real safeAreaRight: SafeArea.margins.right
+    // positioned from its own SafeArea would be a binding loop.
+    //
+    // SafeArea arrived in Qt 6.9, and Banana Plus still carries 6.8.6. There the name is
+    // unknown: each of these four lines raised a ReferenceError when it was evaluated, which
+    // left the margin at zero - the right answer for that build, reached by way of an error
+    // in the log every time the dialog opened. Asked for only where it exists instead, so the
+    // zero is stated rather than fallen into. typeof is the one way to ask about a name that
+    // may not exist: anything else raises the error all over again.
+    readonly property bool hasSafeArea: typeof SafeArea !== "undefined"
+    readonly property real safeAreaTop: hasSafeArea ? SafeArea.margins.top : 0
+    readonly property real safeAreaBottom: hasSafeArea ? SafeArea.margins.bottom : 0
+    readonly property real safeAreaLeft: hasSafeArea ? SafeArea.margins.left : 0
+    readonly property real safeAreaRight: hasSafeArea ? SafeArea.margins.right : 0
 
     Rectangle {
         // Window background
