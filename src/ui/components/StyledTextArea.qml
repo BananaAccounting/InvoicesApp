@@ -26,35 +26,19 @@ TextArea {
    selectedTextColor: Stylesheet.selectedTextColor
    wrapMode: TextEdit.Wrap
 
-   /* Material keeps a strip free above the box for a floating placeholder to sit in, but
-      only inside a view that clips - which the items table is, being a flickable that cuts
-      its rows off at its edges:
-
-          topInset: clip || (parent?.parent as Flickable && parent?.parent.clip)
-                        ? placeholder.largestHeight / 2 : 0
-
-      The background starts below that strip and ends at the same place as before, so in the
-      table the description box began lower than the fields beside it and was shorter than
-      its row. These fields carry no placeholder, so there is nothing to keep room for.
-      Zero on the other platforms too, which is what their styles use anyway. */
+   /* Material keeps a strip free above the box for a floating placeholder, but only inside a
+      view that clips - which the items table is. The box then began lower than the fields
+      beside it and was shorter than its row. These fields carry no placeholder. Zero on the
+      other platforms too, which is what their styles use anyway. */
    topInset: 0
 
    background: Rectangle {
-      /* Android draws the dialog with the Material style, which works out the space above
-         the text from the height the background asks for: (implicitBackgroundHeight -
-         height of the placeholder) / 2. Its own background asks for the height of a text
-         field; a plain Rectangle asks for nothing at all, so the division came out
-         negative and the text was drawn above the box, with the cursor outside it. The
-         box was left shorter than its own text as well, since the height of the field is
-         its content plus those paddings.
-
-         The height of a control is asked for instead, the one used for a section heading
-         or a menu entry. Material's own 56 would have been the other candidate, but it
-         would make every description in the items table that tall.
-
-         Nothing is asked for on the other platforms: their styles pad by fixed amounts
-         and never read this, and a height here would only make an empty field taller
-         than it is today. */
+      /* Material works out the space above the text from the height the background asks for:
+         (implicitBackgroundHeight - height of the placeholder) / 2. A plain Rectangle asks for
+         nothing, so that came out negative and the text was drawn outside the box. The height
+         of a control is asked for instead; Material's own 56 would make every description in
+         the items table that tall. Nothing on the other platforms: they pad by fixed amounts
+         and a height here would only make an empty field taller than it is today. */
       implicitHeight: Qt.platform.os === "android" ? 34 * Stylesheet.pixelScaleRatio : 0
 
       color: Stylesheet.baseColor

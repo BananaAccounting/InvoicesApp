@@ -36,26 +36,9 @@ Item {
     required property AppSettings appSettings
     required property Invoice invoice
 
-    /* True when there is not enough room to show the form fields side by side. The form
-       then stacks label above field in a single column, so it no longer has to be
-       scrolled horizontally. The items table is left alone: eleven columns cannot become
-       one, and it keeps scrolling horizontally on its own.
-
-       Measured on the width actually available inside the scroll area, NOT on
-       Screen.width: the screen is only an estimate of the room the form will get, and it
-       is reported differently across devices (points or physical pixels), which made a
-       screen-based threshold unreliable. columnLayout.width is the real number the fields
-       have to fit into, whatever the device.
-
-       The threshold is what the side by side form needs: label 100 + field 300 + spacer
-       100 + address 320, plus margins, is about 850.
-
-       Scaled, and it has to be. Those four numbers are every one of them multiplied by
-       pixelScaleRatio where they are actually used, so the width the form needs grows with
-       the system font while a bare 850 does not. On a display where the ratio is 1.32 the
-       form wanted 1108 points and this test still said 850, so a window of 975 was judged
-       wide enough for a layout that could not fit in it - too wide to stack, too narrow to
-       show. It went unseen because the ratio is 1 on the desktop the dialog was built on. */
+    /* True when the fields cannot fit side by side and stack into one column. Measured on
+       the room available, not on Screen.width, whose unit differs across devices. Scaled,
+       like the widths it stands for: label 100 + field 300 + spacer 100 + address 320. */
     readonly property bool compactLayout: columnLayout.width > 0 &&
                                           columnLayout.width < 850 * Stylesheet.pixelScaleRatio
 
@@ -69,16 +52,8 @@ Item {
     // "Invoice 123" or "Estimate 123", set by the dialog: see DlgInvoice.getDocumentName.
     property string documentName: ""
 
-    /* The view the user picked, and the one the form actually shows.
-
-       They differ on a narrow screen, where the form is always shown in full. Choosing a
-       view is a way of hiding fields so the rest fit side by side; stacked in one column
-       there is nothing to gain by hiding them, and the selector itself cost a row at the
-       top of a screen that has none to spare.
-
-       Keeping the choice in its own property means a phone never overwrites it: the
-       setting on disk still holds what was chosen on the desktop, and a wide window shows
-       that view again untouched. */
+    /* The view picked, and the one shown: a narrow screen always shows the form in full.
+       Kept apart so a phone does not overwrite the choice saved on the desktop. */
     property string selectedView: appSettings.data.interface.invoice.current_view ?
                                       appSettings.data.interface.invoice.current_view :
                                       appSettings.view_id_base
@@ -168,12 +143,9 @@ Item {
         invoiceItemsTable.updateColDescrWidth()
     }
 
-    /* An entry of the items table's row menu, in the dialog's colours. Same component as
-       StyledMenuEntry in DlgInvoice.qml, and there for the same reason: the iOS style paints
-       menu entries with images of its own, chosen from the application's colour scheme
-       rather than from the dialog's, and on a phone in light mode they came out dark grey
-       with black text. The implicit size of the background is what every Qt style gives its
-       own background, and a menu without it ends up with no size and appears not to open. */
+    /* An entry of the row menu, drawn like StyledMenuEntry in DlgInvoice.qml and for the
+       same reason: see there. The background needs an implicit size, or the menu
+       appears not to open. */
     component StyledMenuEntry: MenuItem {
         id: entry
 
@@ -438,11 +410,9 @@ Item {
             }
 
             Flow {
-                // The pills wrap onto a second line instead of running off the right edge:
-                // on a phone the four view names together are wider than the screen, and a
-                // RowLayout would just have pushed the last one out of sight. Filling the
-                // width also keeps the total below pinned to the right on a wide dialog,
-                // which is what the plain spacer used to do.
+                // Wraps onto a second line: on a phone the four view names together are
+                // wider than the screen, and a RowLayout would push the last one out of
+                // sight. Filling the width also keeps the total pinned right when wide.
                 Layout.fillWidth: true
                 spacing: 6 * Stylesheet.pixelScaleRatio
 
@@ -491,10 +461,9 @@ Item {
             }
 
             StyledLabel {
-                // Alongside the view selector when there is room for both. When there is
-                // not, this row cannot shrink below the sum of its children and widens the
-                // whole column instead - which is what pushed the fields below out of the
-                // visible area - so the total moves to its own row underneath.
+                // Alongside the selector while both fit. This row cannot shrink below the
+                // sum of its children, so instead of widening the whole form on a narrow
+                // screen, the total moves to the row below.
                 visible: !window.compactLayout
                 font.bold: true
                 color: Stylesheet.accentColor
@@ -507,18 +476,16 @@ Item {
         RowLayout { // Document and total, own row on a narrow display
             visible: window.compactLayout
             Layout.fillWidth: true
-            // Ends where the form below ends, not at the edge of the dialog: the form leaves
-            // room on its right for the scroll bar and a margin, and without the same room
-            // here the total stuck out past the section rules, the table and the totals.
-            // Measured from the form itself, so it follows whatever width the bar has.
+            // Ends where the form below ends: it leaves room for the scroll bar, and the
+            // total stuck out past the section rules and the table. Measured, so it follows
+            // whatever width the bar has.
             Layout.rightMargin: Math.max(0, scrollView.width - scrollView.leftPadding - columnLayout.width)
             spacing: Stylesheet.spacingBase
 
             StyledLabel {
-                // Which document is open. On the desktop the window title says it; on a
-                // phone that title is not shown, and with the Info section closed the
-                // number was nowhere in sight. A value, so at full strength; not in the
-                // accent, which stays on the total.
+                // Which document is open: the window title says it on the desktop, but
+                // not on a phone, where a closed Info section left it nowhere in sight.
+                // A value, so full strength; the accent stays on the total.
                 Layout.fillWidth: true
                 color: Stylesheet.textColor
                 elide: Text.ElideRight
@@ -547,19 +514,9 @@ Item {
             Layout.topMargin: Stylesheet.defaultMargin
             contentHeight: columnLayout.height
 
-            // The page never scrolls sideways. Left unset, a ScrollView works out its content
-            // width from the implicit width of its child, so any single element that wants
-            // more room than the screen turns the whole form into something that has to be
-            // dragged left and right to be read. Pinned to the viewport, that cannot happen.
-            //
-            // Horizontal scrolling still exists where it belongs: the items table has eleven
-            // columns that genuinely cannot fit, and it clips and scrolls inside itself,
-            // within whatever width it is given here.
-            //
-            // The trade: an element that still insisted on being wider would now be cut off
-            // rather than reachable by scrolling. That was a real risk while the buttons below
-            // the table were demanding a width of their own; now that they take the width they
-            // are given, nothing here is known to need more than the screen.
+            // The page never scrolls sideways: left unset, a ScrollView takes its content
+            // width from its child, and one element wider than the screen drags the whole
+            // form. The trade: such an element is cut off instead. The table scrolls itself.
             contentWidth: availableWidth - ScrollBar.vertical.width
 
             ColumnLayout { // everything that is within the Scroll
@@ -577,13 +534,9 @@ Item {
                     columnSpacing: Stylesheet.spacingSection
                     rowSpacing: Stylesheet.spacingSection
 
-                    // Without this the grid takes the width of its content instead of the width
-                    // available, so the fields below have nothing to fill or shrink against.
-                    //
-                    // Unconditional, and it has to be: a layout inside a layout already fills by
-                    // default, so writing "compactLayout" here did not add the behaviour when
-                    // narrow - it took it away when wide. That is what stopped the address block
-                    // reaching the right margin and the text fields growing with the window.
+                    // Without this the grid takes the width of its content and the fields have
+                    // nothing to fill against. Unconditional: a layout inside a layout already
+                    // fills, so a compactLayout test here would only take that away when wide.
                     Layout.fillWidth: true
 
                     GridLayout {// Invoice info
@@ -603,13 +556,9 @@ Item {
                         Layout.fillWidth: true
 
                         StyledSectionHeader {
-                            // The four section headings exist only in the single column
-                            // layout. Side by side the form is short enough to take in at a
-                            // glance and the columns already group it; stacked it is several
-                            // screens tall, and collapsing what is not being edited is the
-                            // only way to reach the items table without a long scroll.
-                            // No column span is needed: the grid is one column wide exactly
-                            // when these are visible, and a hidden item takes up no cell.
+                            // The four headings exist only in the single column layout, where
+                            // the table is otherwise a long scroll away. No column span: the
+                            // grid is one column wide exactly when they are visible.
                             id: sectionInfo
                             visible: window.compactLayout
                             // The first heading of the form has no section above it to keep
@@ -891,11 +840,9 @@ Item {
                         }
 
                         StyledLabel{
-                            // Spacer between groups of fields. "height" is ignored inside a
-                            // layout - the layout owns the size - so the intended gap was never
-                            // applied; Layout.preferredHeight is what actually reserves it.
-                            // The span must follow the column count too: 2 in a one-column grid
-                            // is more columns than the grid has.
+                            // Spacer between groups of fields: "height" is ignored inside a
+                            // layout, Layout.preferredHeight is what reserves the gap, and the
+                            // span has to follow the column count.
                             Layout.columnSpan: window.compactLayout ? 1 : 2
                             Layout.preferredHeight: Stylesheet.defaultMargin
                             visible: invoice_decimal_amounts.visible || invoice_rounding_total.visible
@@ -957,24 +904,15 @@ Item {
                         }
 
                         StyledLabel{
-                            // Spacer between groups of fields. "height" is ignored inside a
-                            // layout - the layout owns the size - so the intended gap was never
-                            // applied; Layout.preferredHeight is what actually reserves it.
-                            // The span must follow the column count too: 2 in a one-column grid
-                            // is more columns than the grid has.
-                            // Only a gap for the side by side layout: stacked, the heading
-                            // above already separates the groups.
+                            // Spacer between groups of fields - see the first one above.
+                            // Side by side only: stacked, the heading above separates them.
                             visible: !window.compactLayout
                             Layout.columnSpan: window.compactLayout ? 1 : 2
                             Layout.preferredHeight: Stylesheet.defaultMargin
                         }
 
                         StyledLabel{
-                            // Spacer between groups of fields. "height" is ignored inside a
-                            // layout - the layout owns the size - so the intended gap was never
-                            // applied; Layout.preferredHeight is what actually reserves it.
-                            // The span must follow the column count too: 2 in a one-column grid
-                            // is more columns than the grid has.
+                            // Spacer between groups of fields - see the first one above.
                             Layout.columnSpan: window.compactLayout ? 1 : 2
                             Layout.preferredHeight: Stylesheet.defaultMargin
                             visible: !window.compactLayout && (invoice_custom_field_1.visible |
@@ -1252,15 +1190,10 @@ Item {
                         }
 
                         StyledLabel{
-                            // Spacer between groups of fields. "height" is ignored inside a
-                            // layout - the layout owns the size - so the intended gap was never
-                            // applied; Layout.preferredHeight is what actually reserves it.
-                            // The span must follow the column count too: 2 in a one-column grid
-                            // is more columns than the grid has.
+                            // Spacer between groups of fields - see the first one above.
                             Layout.columnSpan: window.compactLayout ? 1 : 2
                             Layout.preferredHeight: Stylesheet.defaultMargin
-                            // Only a gap for the side by side layout: stacked, the heading
-                            // below already separates the groups.
+                            // Side by side only: stacked, the heading below separates them.
                             visible: !window.compactLayout && (invoice_custom_field_1.visible |
                                      invoice_custom_field_2.visible |
                                      invoice_custom_field_3.visible |
@@ -1378,10 +1311,8 @@ Item {
                         // heading is a sibling and not a child of this block.
                         visible: !window.compactLayout || sectionAddress.expanded
                         Layout.alignment: Qt.AlignTop
-                        // Same reason as the Top part grid above: without this the block
-                        // keeps the width of its widest field (320) even when less space
-                        // is available, and the right edge - the combo box arrow - ends
-                        // up outside the screen.
+                        // As in the Top part grid above: without this the block keeps the
+                        // width of its widest field and the combo box arrow ends up off screen.
                         Layout.fillWidth: true
 
                         StyledLabel{
@@ -1772,15 +1703,9 @@ Item {
                     }
 
                     Rectangle { // Separates the form from the items table
-                        // Declared inside this grid rather than beside it, so that the gap
-                        // above the line is the grid's own row spacing - the same gap that
-                        // separates two section headings. Outside, it was governed by the
-                        // enclosing column's spacing instead, which is twice as wide: the
-                        // line sat visibly lower under "Address" than the rule of a heading
-                        // sits under the section before it.
-                        //
-                        // Below it the spacing adds up as before, since this is now the last
-                        // row of the grid and the column's spacing follows it either way.
+                        // Inside this grid rather than beside it, so the gap above the line
+                        // is the grid's row spacing - the same gap a section heading gets.
+                        // Outside, the enclosing column's spacing applied, twice as wide.
                         visible: window.compactLayout
                         Layout.fillWidth: true
                         Layout.bottomMargin: Stylesheet.defaultMargin
@@ -1818,10 +1743,8 @@ Item {
                         DelegateChoice {
                             Item {
                                 Rectangle {
-                                    // Own background, so the header reads as a header instead of
-                                    // blending into the rows: the data rows now carry bold text
-                                    // for header/total lines, which left the column titles as the
-                                    // weakest text of the table.
+                                    // Own background, so the header still reads as a header
+                                    // now that data rows carry bold text of their own.
                                     anchors.fill: parent
                                     color: Stylesheet.buttonColor
                                 }
@@ -1954,20 +1877,12 @@ Item {
                     rowSpacing: 2
                     columnSpacing: 5 * Stylesheet.pixelScaleRatio
 
-                    /* A bar of its own to drag the table sideways with.
-
-                       The table already scrolls horizontally, but the only way to do it was to
-                       drag from inside the table - and on a touch screen a drag that starts on
-                       a cell puts that cell into edit and raises the keyboard. Scrolling meant
-                       fighting the fields.
-
-                       Always shown when the screen is narrow, which also makes it visible that
-                       the table continues past the right edge rather than ending there. Its
-                       whole height is the touch target, not just the visible handle. */
-                    // The strip is reserved only when a bar will actually occupy it: always on a
-                    // narrow screen, and on a wide one only while the columns are wider than the
-                    // room they have. A permanent gap under the table would otherwise sit there
-                    // empty on the desktop, where the bar is usually not needed at all.
+                    /* A bar to drag the table sideways with: on a touch screen a drag started
+                       on a cell puts it into edit and raises the keyboard. Always shown when
+                       narrow, so it is also visible that the table continues past the edge. */
+                    // Reserved only where a bar will occupy it: always when narrow, and when
+                    // wide only while the columns do not fit. Otherwise the desktop would
+                    // carry an empty gap under the table.
                     readonly property int horizontalBarHeight: (window.compactLayout
                                                                || contentWidth > width)
                                                               ? 14 * Stylesheet.pixelScaleRatio : 0
@@ -1977,11 +1892,9 @@ Item {
                         // whatever the document contains. On a wide screen only when the columns
                         // really do not fit - a dialog left narrow, or every column switched on.
                         policy: window.compactLayout ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
-                        // Thickness through implicitHeight, never height: an attached scroll bar
-                        // is placed by Qt from its implicit size, and assigning height outright
-                        // takes away what it anchors to - it then sits at the top of the table,
-                        // over the first row, instead of below the last. Same value as the strip
-                        // reserved above, so the two cannot drift apart.
+                        // Thickness through implicitHeight, never height: Qt places an attached
+                        // scroll bar from its implicit size, and setting height outright moves
+                        // it over the first row. Same value as the strip reserved above.
                         implicitHeight: invoiceItemsTable.horizontalBarHeight
                     }
 
@@ -1998,9 +1911,7 @@ Item {
                         target: appSettings
                         function onFieldsVisibilityChanged() {
                             // Toggling a column in the Settings tab changes what
-                            // columnWidthProvider() returns, but the view is not notified: without
-                            // this the table kept the previous columns until something else
-                            // happened to relayout it.
+                            // columnWidthProvider() returns, but the view is not notified.
                             invoiceItemsTable.updateColDescrWidth()
                         }
                     }
@@ -2133,19 +2044,9 @@ Item {
                     }
 
                     rowHeightProvider: function(row) {
-                        /* A negative value makes TableView size the row from its cells: the
-                           tallest implicit height in the row. The description cell's implicit
-                           height is its text plus its padding, so the row grows by exactly one
-                           line for each line of text.
-
-                           The original dialog behaved like this by accident: this function read
-                           an undefined variable ("rowNr") and threw on every call, and Qt handles
-                           a result that is not a number the same way. Fixing the variable put its
-                           formula into effect - 34 points per line of text, about twice the
-                           height of a line - and every line break added an empty band to the cell.
-
-                           TableView does not notice when a cell's implicit height changes, so the
-                           description cell asks for the relayout itself: see updateRowHeights(). */
+                        /* A negative value sizes the row from its cells, so it grows by one line per
+                           line of description; the original threw instead, which Qt treats the same
+                           way. A changed implicit height is not noticed: see updateRowHeights(). */
                         return -1
                     }
 
@@ -2177,14 +2078,9 @@ Item {
                                     }
                                 }
 
-                                /* The row's own menu, on a narrow screen where the bar of buttons
-                                   below the table is gone.
-
-                                   It lives in the row number cell because that cell already
-                                   exists and is read only: nothing here competes with editing,
-                                   and no column had to be added - which matters, because the
-                                   eleven column indices below are hard coded and would all have
-                                   shifted. */
+                                /* The row's own menu, replacing the bar of buttons on a narrow
+                                   screen. In the row number cell: it is read only, and adding a
+                                   column would shift the hard coded indices below. */
                                 StyledLabel {
                                     visible: window.compactLayout && !invoice.isReadOnly
                                     anchors.right: parent.right
@@ -2427,11 +2323,7 @@ Item {
                                 text: model.display
                                 readOnly: invoice.isReadOnly
 
-                                // Mirror how these rows come out on the printed document:
-                                // header rows are printed bold (description only), total rows
-                                // bold (description and amount), note rows in normal text.
-                                // Keeping the editor and the print consistent is the point -
-                                // hence no styling of its own for notes. The
+                                // As these rows come out on the printed document. The
                                 // signalInvoiceChanged dependency is what re-evaluates this
                                 // when the row type is changed from the Type combo box.
                                 font.bold: invoice.signalInvoiceChanged &&
@@ -2483,14 +2375,9 @@ Item {
                                     /** Abbiamo aggiunto il nuovo controllo sull'esistenza della riga del modello perchè è apparso un warning nuovo
                                         che prima non cera, inizialmente non viene trovato l'oggetto: invoice.json.items[model.row]. Sembra che il controllo non cambi il comportamento corretto del programma, ma è
                                         da testare*/
-                                    /* React to edits typed by the user only. This handler also runs
-                                       when `text` is re-evaluated from its `model.display` binding,
-                                       which happens for every visible row whenever calculateInvoice()
-                                       replaces invoice.json and updateViewItems() refreshes the model
-                                       (e.g. right after picking a type from the combo box). Writing
-                                       back then pushed text into rows the user never touched.
-                                       StyledTextArea guards its own onTextChanged the same way, but
-                                       declaring this handler here replaces that one. */
+                                    /* Edits typed by the user only: this also runs when `text` is
+                                       re-evaluated from `model.display`, which pushed text into
+                                       rows nobody had touched. Replaces StyledTextArea's guard. */
                                     if (!focus)
                                         return
 
@@ -2502,11 +2389,9 @@ Item {
                                 }
 
                                 onImplicitHeightChanged: {
-                                    // The height the text needs has changed: a line break, the text
-                                    // wrapping on its own, a bold font, a new column width. This used
-                                    // to be triggered from onTextChanged by a line count estimated from
-                                    // the text width, which ignores the padding and the breaks between
-                                    // words: a text wrapping by itself went unnoticed for a few keys.
+                                    // The height the text needs has changed: a line break, the
+                                    // text wrapping on its own, a bold font, a new column width.
+                                    // Counting lines from the text instead missed the wrapping.
                                     invoiceItemsTable.updateRowHeights()
                                 }
                             }
@@ -2881,16 +2766,9 @@ Item {
                         signalUpdateTableHeight++
                     }
 
-                    /* Called by a cell of the items table before it writes into its row.
-
-                       The trailing "*" row has no item behind it: it becomes one here, and a new "*"
-                       row is added below it - but only when the cell was left with a value. Leaving a
-                       cell reads as an edit even when nothing was typed: StyledTextField sets
-                       "modified" on every editingFinished, and the combo boxes report an empty key
-                       when they lose focus. So a click into the "*" row and out again used to add an
-                       empty row every time.
-
-                       Returns false when there is still no item to write into: the caller must stop. */
+                    /* Called by a cell before it writes into its row. The trailing "*" row becomes a
+                       real item here, but only when the cell was left with a value: leaving a cell
+                       counts as an edit, which added an empty row every time. False: caller stops. */
                     function ensureItemForRow(row, hasValue) {
                         if (!isNewRow(row))
                             return true
@@ -2910,13 +2788,9 @@ Item {
                         let numberOfLines = texts.length;
                         let columnWidth = invoiceItemsTable.columnWidth(4);
                         if (columnWidth <= 0) {
-                            // columnWidth() only knows the columns the view has actually laid
-                            // out. It returns -1 while the table is still being built, and also
-                            // whenever the description column is scrolled out of sight - which
-                            // happens routinely once the dialog is narrow. Substituting a small
-                            // fixed width there made every line of text count as several, and
-                            // the rows grew to many times their proper height. The provider
-                            // knows the width the column is meant to have, on screen or not.
+                            // Through the provider, not columnWidth(): that one returns -1 while the
+                            // table is being built and whenever the column is scrolled out of sight,
+                            // and a fixed width in its place made the rows many times too tall.
                             columnWidth = invoiceItemsTable.columnWidthProvider(4)
                         }
                         if (columnWidth > 0 ){
@@ -2953,16 +2827,9 @@ Item {
 
                         }*/
                         else {
-                            // Compute current height
-                            // The trailing "*" row has no item, so it is not part of the loop below.
-                            // It had a fixed 34 here: a description typed into it grew the row but not
-                            // the table, and the lines past those 34 points were cut off by its edge.
-                            // Only the fixed numbers below are scaled, never the heights measured
-                            // from the rows: those already are scaled pixels, since the cells get
-                            // their height from the scaled sizes of the fields. Scaling the sum
-                            // again left every row a third taller than it is on a phone, where the
-                            // factor is about 1.3 - an empty band under the table that grew with
-                            // every row added. On the desktop the factor is 1 and it never showed.
+                            // The trailing "*" row is measured here rather than given a fixed
+                            // height, which cut off text typed into it. Only the fixed numbers are
+                            // scaled: the measured heights are scaled pixels already.
                             let newRowHeight = rowHeight(invoice.json.items.length)
                             let height = Math.max(34 * Stylesheet.pixelScaleRatio, newRowHeight);
                             for (let rowNr = 0; rowNr < invoice.json.items.length; ++rowNr) {
@@ -2991,18 +2858,14 @@ Item {
                         return maxVisibleItems
                     }
 
-                    /* The four commands the items table offers.
-
-                       They live here rather than inside the buttons that used to be the only
-                       way to reach them: on a narrow screen the same commands are offered by a
-                       menu on the row itself, and a command reachable from two places must not
-                       be written twice. Each body is what its button did, moved unchanged. */
+                    /* The four commands the items table offers. Here rather than inside the
+                       buttons, because the row menu offers the same four on a narrow screen.
+                       Each body is what its button did, moved unchanged. */
 
                     function addItemRow(rowIndex) {
-                        // "rowIndex.count" is undefined on a number, so the condition reads as
-                        // "append when no row is current, otherwise insert below it". Left as it
-                        // was found: this is the behaviour the button has always had, and tidying
-                        // it here would change it silently.
+                        // "rowIndex.count" is undefined on a number, so this reads as "append
+                        // when no row is current, otherwise insert below it". Left as found:
+                        // tidying it would change what the button has always done.
                         if (rowIndex < 0 || (rowIndex + 1 < rowIndex.count)) {
                             invoice.json.items.push(emptyInvoiceItem())
                         } else {
@@ -3147,12 +3010,9 @@ Item {
                     }
 
                     Timer {
-                        // updateColDescrWidth() is called from onWidthChanged, i.e. while the
-                        // view is already recomputing its geometry. Calling forceLayout() from
-                        // there is a re-entrant layout (undefined behaviour per Qt docs) and can
-                        // leave delegates positioned with stale coordinates. Going through a
-                        // 0-interval timer runs the update after the current pass has finished,
-                        // and coalesces the many width changes of a resize into a single relayout.
+                        // updateColDescrWidth() runs from onWidthChanged, and forceLayout() from
+                        // inside a layout pass is re-entrant, undefined per Qt docs. A 0-interval
+                        // timer runs it after, and coalesces the width changes of a resize.
                         id: updateColDescrWidthTimer
                         interval: 0
                         repeat: false
@@ -3171,15 +3031,9 @@ Item {
                         if (columnWidthProvider(colDescriptionIndex) <= 0)
                             return // Description hidden in this view: nothing to size
 
-                        // Measure the other columns through columnWidthProvider(), NOT through
-                        // contentWidth. contentWidth describes the layout currently on screen,
-                        // while columnWidthProvider() already reflects the current view: the two
-                        // disagree right after switching view (the visible columns changed but the
-                        // view has not relaid out yet) and before the first layout. Mixing them
-                        // could blow Description up until the following columns no longer fitted,
-                        // and the bad value was then persisted in the settings. Deriving the width
-                        // from the provider alone also makes this computation stateless: the
-                        // previous Description width never feeds back into the new one.
+                        // Through columnWidthProvider(), NOT contentWidth: that one is the layout
+                        // on screen, the provider already the current view, and the two disagree
+                        // after a view switch. Mixing them blew Description up, and it was saved.
                         let otherColumnsWidth = 0
                         let visibleColumns = 0
                         for (let col = 0; col < invoiceItemsModel.headers.length; ++col) {
@@ -3200,10 +3054,8 @@ Item {
                         // previous layout while columnWidthProvider() already reports the new one.
                         invoiceItemsTable.forceLayout()
 
-                        // Keep the whole table inside the dialog: if the fresh layout still
-                        // overflows (hidden columns may consume spacing too, depending on the Qt
-                        // version) take the overflow off Description. Runs at most once - the
-                        // corrected width is strictly smaller, so it cannot loop.
+                        // If the fresh layout still overflows, take the overflow off
+                        // Description. Runs at most once: the new width is strictly smaller.
                         if (contentWidth > width) {
                             let corrected = Math.max(200 * Stylesheet.pixelScaleRatio,
                                                      newColDescriptionWidth - (contentWidth - width))
@@ -3215,13 +3067,9 @@ Item {
                     }
 
                     Timer {
-                        // Relayout for the row heights, deferred like updateColDescrWidthTimer
-                        // above. The request comes from a description cell that is still handling
-                        // a key press, and forceLayout() lays the table out on the spot: the cell
-                        // was resized, and its whole text laid out again, in the middle of its own
-                        // update - the likely reason why the text sometimes went invisible. The
-                        // zero interval runs the relayout right after instead, and merges into one
-                        // the requests of all the cells created together when the table is built.
+                        // Deferred like updateColDescrWidthTimer above: the request comes from a
+                        // cell still handling a key press, which forceLayout() would resize in the
+                        // middle of its own update. Zero interval also merges the requests.
                         id: updateRowHeightsTimer
                         interval: 0
                         repeat: false
@@ -3237,12 +3085,9 @@ Item {
                 }
 
                 Menu {
-                    /* The commands for one row of the items table, offered on a narrow screen
-                       from the row number cell. Each entry calls the same function its button
-                       calls, so there is one implementation of every command.
-
-                       Which entries appear depends on the row: the trailing "*" row does not
-                       exist yet, so there is nothing there to remove or move. */
+                    /* The commands for one row, from the row number cell on a narrow screen.
+                       Each entry calls the function its button calls. The trailing "*" row does
+                       not exist yet, so there is nothing there to remove or move. */
                     id: itemRowMenu
 
                     property int targetRow: -1
@@ -3297,24 +3142,9 @@ Item {
                 }
 
                 GridLayout { // Items button bar
-                    // One row, on any screen - but a row that takes the width it is given
-                    // instead of demanding one.
-                    //
-                    // Four buttons on one line was fine while they were bare symbols. Once two
-                    // of them carried a word again the row asked for more than a small phone is
-                    // wide - and it asks in scaled units, which grow with the system font while
-                    // the screen does not. A row that can neither wrap nor shrink does not give
-                    // way: it simply demands that width, and being the widest thing in the
-                    // column it became the width of the whole form. That is what made the
-                    // dialog scroll sideways and the totals look as though they hung past the
-                    // right edge - they were not wide, everything else was being held wider
-                    // than the screen.
-                    //
-                    // The fix is not a smaller size, which would be another number to be wrong
-                    // about: the two buttons that carry words share out whatever room is left
-                    // once the arrows have theirs, so the row measures the screen rather than
-                    // the other way round. Where the words no longer fit they are elided, which
-                    // is the worst that can now happen here.
+                    // Takes the width it is given instead of demanding one: a row that can
+                    // neither wrap nor shrink held the whole form wider than the screen. The two
+                    // buttons with words share what the arrows leave, and elide.
                     Layout.fillWidth: true
                     columns: 7
                     columnSpacing: Stylesheet.defaultMargin
@@ -3398,22 +3228,14 @@ Item {
                 }
 
                 GridLayout {// Subtotals and Totals
-                    // On the right in both layouts. On a narrow display the total is also
-                    // shown at the top right, and with the block on the left the same figure
-                    // sat in two different places on the screen.
-                    //
-                    // Set here and not on the totals: in a single column this grid is no
-                    // wider than the totals themselves - a layout cannot grow past what its
-                    // children can, and the totals are sized to their content - so it is
-                    // this grid that has to be placed. On a wide dialog it fills the width
-                    // anyway, through the empty column below, and this changes nothing.
+                    // On the right in both layouts, under the total shown at the top. Set here
+                    // and not on the totals: in a single column this grid is no wider than they
+                    // are, since a layout cannot grow past what its children can.
                     Layout.alignment: Qt.AlignRight
 
                     ColumnLayout {
-                        // Empty left column that holds the totals over on the right half of
-                        // a wide dialog. In a single column there is no right half to speak
-                        // of, and the indent it creates only detaches the totals from
-                        // everything else, which is flush left.
+                        // Empty left column that holds the totals on the right half of a wide
+                        // dialog. In a single column there is no right half to speak of.
                         visible: !window.compactLayout
                         Layout.alignment: Qt.AlignTop
                     }
@@ -3423,23 +3245,17 @@ Item {
                         columns: 2
                         columnSpacing: (window.compactLayout ? 1 : 3) * Stylesheet.defaultMargin
 
-                        // In a single column the block is sized to its own two columns. Filling
-                        // the width was what created the gap: a grid stretched wider than its
-                        // content shares the surplus out among its columns, so the labels and
-                        // the figures drifted apart until each was against an opposite edge of
-                        // the screen. Sized to its content there is no surplus to share, and
-                        // the figures sit where they belong, still lined up with one another
-                        // down the column. On the right: see the grid around it.
+                        // Sized to its content in a single column: a grid stretched wider shares
+                        // the surplus among its columns, and the labels and the figures drifted
+                        // apart until each sat against an opposite edge of the screen.
                         Layout.fillWidth: !window.compactLayout
                         Layout.alignment: Qt.AlignRight
                         Layout.rightMargin: 0
 
                         StyledTextField {
                             // No fillWidth here, unlike the rest of the form: the label column
-                            // used to swallow all the spare width, which drove the amounts
-                            // against the right edge of the screen and left a band of nothing
-                            // between a label and the figure it belongs to. Sized to its text
-                            // instead, so the two columns stay next to each other.
+                            // swallowed the spare width and left a band of nothing between a
+                            // label and the figure it belongs to.
                             readOnly: true
                             borderless: true
                             text: isVatModeVatNone ? qsTr("Subtotal") : isVatModeVatInclusive ? qsTr("Subtotal") : qsTr("Total Net")
@@ -3722,16 +3538,9 @@ Item {
                         }
 
                         Rectangle {
-                            // Separates the grand total from the intermediate figures above
-                            // (subtotal, VAT, rounding, discount, deposit), which until now all
-                            // looked exactly alike.
-                            //
-                            // In the accent colour, and thicker than the plain rules that
-                            // divide the sections of the form: this one is not structure, it
-                            // belongs to the total below it - already accent coloured and bold
-                            // in both its label and its amount - and reads as part of that
-                            // block. The extra thickness carries the same distinction for
-                            // anyone who does not separate the two colours easily.
+                            // Separates the grand total from the figures above, which all looked
+                            // alike. Accent coloured and thicker than the rules of the form: this
+                            // one is not structure, it belongs to the total below it.
                             Layout.columnSpan: 2
                             Layout.fillWidth: true
                             Layout.topMargin: 4 * Stylesheet.pixelScaleRatio
@@ -3774,12 +3583,9 @@ Item {
                             Layout.topMargin: Stylesheet.defaultMargin
                             Layout.columnSpan: 2
                             Layout.leftMargin: 4 * Stylesheet.pixelScaleRatio
-                            // A whole sentence across both columns. Now that the block is
-                            // sized to its content, without a ceiling this line alone would
-                            // decide how wide the block is. A maximum is the right tool here:
-                            // it caps the width the item may ask for, which neither wrapMode
-                            // nor fillWidth does - the first only says what to do once the
-                            // width is settled, the second only claims space that is spare.
+                            // A whole sentence across both columns: without a ceiling this line
+                            // alone would decide how wide the block is. A maximum caps the width
+                            // the item may ask for, which neither wrapMode nor fillWidth does.
                             wrapMode: Text.WordWrap
                             Layout.maximumWidth: window.compactLayout ? columnLayout.width
                                                                       : Number.POSITIVE_INFINITY
@@ -4279,18 +4085,9 @@ Item {
         isVatModeVatInclusive = !arePricesVatExclusive()
     }
 
-    /* Writes the value shown by one cell of the items table model.
-
-       TableModel.setData() takes its arguments in a different order depending on the Qt
-       version: (index, role, value) on Qt 6.8, (index, value, role) on Qt 6.10 and later, where
-       TableModel was rewritten on a base shared with TreeModel. No overload is left for the old
-       order there, so the old call failed without a warning and wrote nothing: an edited cell
-       went back to its previous value whenever the table recreated its cells, and the "*" row
-       never received its number when it became an item.
-
-       The new order is tried first, and the old one if the model rejects it. On an older Qt the
-       first call either fails without writing anything or already writes the value to the
-       display role: either way the cell ends up with the value. */
+    /* Writes one cell of the items table model. TableModel.setData() takes (index, role, value)
+       on Qt 6.8 and (index, value, role) from Qt 6.10, and the wrong order fails without a
+       warning: edited cells went back to their previous value. New order first, then the old. */
     function setItemsModelDisplay(index, value) {
         if (!invoiceItemsModel.setData(index, value, "display"))
             invoiceItemsModel.setData(index, "display", value)

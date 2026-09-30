@@ -35,21 +35,12 @@ Item {
     property int styleColumnSpacing: 2.5 * Stylesheet.defaultMargin
     property int styleRowSpacing: 0.5 * Stylesheet.defaultMargin
 
-    /* True when a label and its control no longer fit side by side, the same idea as the
-       Invoice tab's own compact layout. The threshold is not a guessed number: it is what
-       one of these rows actually measures - the label column, the control next to it, the
-       gap between them and the margins - so it stays right if any of those constants is
-       ever retuned.
+    /* True when a label and its control no longer fit side by side. The threshold is what a
+       row measures - label, control, gap, margins - so it follows those constants, and it is
+       measured on the scroll area rather than on Screen, whose unit differs across devices.
 
-       Measured on the scroll area's own width rather than on Screen: the screen is only a
-       guess at the room the rows will get, and devices report it in different units.
-
-       Everything ends up in one column. A row of a label plus one control simply stacks.
-       A per view row keeps its three switches side by side on a line of their own, under
-       a label that now spans the full width: the three columns are the three views, so a
-       switch pushed onto the next line would silently come to stand for a different view
-       than the title above it. Three columns instead of four is what stacks the label
-       while leaving that correspondence intact. */
+       The per view rows keep their three switches on one line: the columns are the views, so
+       a switch pushed onto the next line would stand for a different view than its title. */
     readonly property bool compactLayout: scrollView.availableWidth > 0 &&
                                           scrollView.availableWidth < styleLabelWidth + stylePropertyWidth +
                                                                       styleColumnSpacing + 2 * Stylesheet.defaultMargin
@@ -82,13 +73,9 @@ Item {
         anchors.margins: Stylesheet.defaultMargin
         //anchors.topMargin: styleSectionSeparatorHeight / 2
 
-        // Pin the content to the width of the viewport. Left unset, a ScrollView takes the
-        // content width from the implicit width of its child, and a ColumnLayout's implicit
-        // width is that of its widest child - a label's full text on a single line. It would
-        // then decide the content is far wider than the screen, offer horizontal scrolling,
-        // and hand the content that oversized width: every fillWidth below would faithfully
-        // fill 700 points on a 400 point screen. Height is left alone, so the page still
-        // scrolls vertically as far as its content needs.
+        // Pinned to the viewport: left unset, a ScrollView takes its content width from the
+        // widest child, here a label's full text on one line, and would then hand every
+        // fillWidth below 700 points on a 400 point screen. Height is left alone.
         contentWidth: availableWidth - ScrollBar.vertical.width
 
         ColumnLayout {
@@ -661,10 +648,9 @@ Item {
                 color: Stylesheet.buttonColor
             }
             ColumnLayout {
-                // Without this the section is not stretched by the column above it: it sizes
-                // itself to its own content, so nothing inside is ever told how much room it
-                // actually has and the fields keep their full width off the edge of a phone.
-                // A plain "width" here did not do it - a layout owns the size of its children.
+                // Without this the section sizes itself to its content, and nothing inside is
+                // told how much room it has. A plain "width" does not do it: a layout owns the
+                // size of its children.
                 Layout.fillWidth: true
                 height: scrollView.availableHeight
 
@@ -802,10 +788,9 @@ Item {
             }
 
             ColumnLayout {
-                // Without this the section is not stretched by the column above it: it sizes
-                // itself to its own content, so nothing inside is ever told how much room it
-                // actually has and the fields keep their full width off the edge of a phone.
-                // A plain "width" here did not do it - a layout owns the size of its children.
+                // Without this the section sizes itself to its content, and nothing inside is
+                // told how much room it has. A plain "width" does not do it: a layout owns the
+                // size of its children.
                 Layout.fillWidth: true
                 height: scrollView.availableHeight
 
@@ -2503,10 +2488,9 @@ Item {
             }
 
             ColumnLayout {
-                // Without this the section is not stretched by the column above it: it sizes
-                // itself to its own content, so nothing inside is ever told how much room it
-                // actually has and the fields keep their full width off the edge of a phone.
-                // A plain "width" here did not do it - a layout owns the size of its children.
+                // Without this the section sizes itself to its content, and nothing inside is
+                // told how much room it has. A plain "width" does not do it: a layout owns the
+                // size of its children.
                 Layout.fillWidth: true
                 height: scrollView.availableHeight
 

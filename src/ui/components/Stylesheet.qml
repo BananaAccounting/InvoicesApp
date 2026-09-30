@@ -18,27 +18,14 @@ import QtQuick
 import QtQuick.Controls
 
 Item {
-    /* Scale factor applied to nearly every pixel length in the dialog.
+    /* Scale factor applied to nearly every pixel length in the dialog. On the desktop it is
+       measured from a plain TextField, 24 high on macOS where the sizes were chosen, so the
+       ratio is exactly 1 there. On iOS and Android it comes from the system font instead:
+       Material draws a text field far taller, which inflated every length on Android.
 
-       On the desktop it is measured from the height of a plain TextField, as it always has
-       been. That field is 24 high on macOS, where the nominal sizes were chosen, so the ratio
-       is exactly 1 there.
-
-       On iOS and Android it is derived from the system font instead. The height of a
-       TextField is decided by the active Qt Quick Controls style, and Material, which Android
-       uses, draws a text field far taller than the other styles do: the ratio inflated there,
-       and with it every margin, height and minimum width in the dialog. The font does not
-       change with the control style.
-
-       The font based ratio is not used on the desktop as well, because it cannot come out at
-       exactly 1 there: on macOS the text is 15.296875 high, against the 15.3 reference, and
-       lengths stored in int properties are truncated, not rounded - defaultMargin became 9
-       instead of 10. On Windows and Linux it would differ from the ratio the desktop dialog
-       has always been drawn with.
-
-       referenceTextHeight is the text height on the display the nominal sizes were chosen on
-       (macOS, default system font). Both ratios are shown by the diagnostics dialog, opened
-       with Ctrl+Alt+9. */
+       Not font based on the desktop as well, because it cannot come out at exactly 1 there:
+       int properties truncate, and defaultMargin became 9 instead of 10. Both ratios are
+       shown by the diagnostics dialog, Ctrl+Alt+9. */
     readonly property double referenceTextHeight: 15.3
     readonly property double styleDependentRatio: scaleReference.height / 24
     readonly property double fontBasedRatio: Math.max(referenceMetrics.height, 1) / referenceTextHeight
@@ -47,25 +34,20 @@ Item {
 
     property int defaultMargin: 10 * pixelScaleRatio
 
-    /* Spacing scale. Nearly everything used the same ten points, so a field stood as far from
-       the next field as a section stood from the next section, and nothing read as grouped.
-       Four points inside a group of fields, eight between the parts of one line, sixteen
-       between sections - so the eye sees the groups before it reads the labels. */
+    /* Spacing scale. Everything used the same ten points, so nothing read as grouped: four
+       inside a group of fields, eight between the parts of one line, sixteen between
+       sections. */
     readonly property int spacingTight: 4 * pixelScaleRatio
     readonly property int spacingBase: 8 * pixelScaleRatio
     readonly property int spacingSection: 16 * pixelScaleRatio
 
-    /* The colour of a label that names a field. A label is read once, to find the field; the
-       value is what is read afterwards, every time. Keeping both at full strength made every
-       form a wall of equal text. Taken from the theme's own text colour, so it follows the
-       system in both modes: see mutedTextColor below. */
+    /* The colour of a label that names a field: read once to find the field, while the value
+       beside it is read every time. Both at full strength made a wall of equal text. */
     readonly property color labelColor: mutedTextColor
 
-    /* Headings: the dialog's font, a tenth larger and semi bold. Derived from the font the
-       dialog is drawn with rather than from a fixed size, so it follows the system font like
-       everything else. A font carries its size either in points or in pixels, never both, and
-       which one it is depends on the platform: the unset one reads as -1, so each case is
-       handled. */
+    /* Headings: the dialog's own font, a tenth larger and semi bold, so it follows the system
+       font. A font carries its size in points or in pixels, never both, and which one depends
+       on the platform: the unset one reads as -1, so both cases are handled. */
     readonly property font sectionTitleFont: referenceMetrics.font.pointSize > 0 ?
                                                  Qt.font({ family: referenceMetrics.font.family,
                                                            weight: Font.DemiBold,
@@ -107,10 +89,8 @@ Item {
     property color hoverColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.1)
     property color pressedColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.12)
     property color mutedTextColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.55)
-    // Fainter than borderColor on purpose. It divides sections of a form, which is
-    // structure rather than content, and it must not be mistaken for the rule above a
-    // total - that one means "these figures add up to the number below" and has to stay
-    // the stronger of the two. Here the separating is done by the space around the line.
+    // Fainter than borderColor on purpose: it divides sections, which is structure, and must
+    // not be mistaken for the rule above a total. Here the space around the line separates.
     property color separatorColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.18)
 
     // Tinted surface for status banners. Derived from the accent rather than from the
@@ -118,13 +98,9 @@ Item {
     // of blending into it, and follows the theme on its own.
     property color accentSurfaceColor: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.14)
 
-    // Surface of the menus. The desktop styles draw a menu from the palette role window (base
-    // for Fusion), and handing them the dialog's own colours made a menu in dark mode the same
-    // colour as the dialog under it: it did not stand out, and its border, derived from the
-    // same colour, vanished too. A dark interface lifts a popup by drawing it lighter than
-    // what lies beneath, so a little of the text colour is mixed in. Opaque, unlike the
-    // neutral tokens above, as a menu must not show what is behind it. The light theme keeps
-    // the system colours, exactly as before.
+    // Surface of the menus. In dark mode the dialog's own colours made a menu the same colour
+    // as the dialog under it, border included, so a little text colour is mixed in to lift it.
+    // Opaque, unlike the tokens above. The light theme keeps the system colours.
     property color menuWindowColor: isDarkModus() ?
                                         Qt.tint(systemPalette.window, Qt.rgba(textColor.r, textColor.g, textColor.b, 0.12)) :
                                         systemPalette.window

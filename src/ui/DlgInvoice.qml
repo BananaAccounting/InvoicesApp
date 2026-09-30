@@ -23,28 +23,10 @@ import "./components"
 Item {
     id: window
 
-    // Never request a size bigger than the screen: on small displays (tablet,
-    // laptop with a low-resolution screen) a fixed 1000x600 dialog can end up
-    // taller/wider than the available space, pushing the button bar (Save,
-    // Close...) off-screen and out of reach. If the screen is too small on
-    // EITHER axis (e.g. a phone in portrait: narrow but tall) we treat it as
-    // a small/mobile screen and go fullscreen on both axes together, instead
-    // of shrinking width and height independently - otherwise a phone would
-    // end up full-width but not full-height (or vice versa in landscape).
-    // On desktop the screen is always bigger than 1000x600 on both axes, so
-    // this has no effect there. Screen.width/height fall back to 0 if not yet
-    // resolved (e.g. before the item is placed in a window), in which case we
-    // keep the original fixed size.
-    //
-    // On iOS and Android the dialog is always fullscreen, whatever the size of the screen.
-    // There is no window manager there, so a dialog smaller than the screen is not a window
-    // but a smaller area with a border of nothing around it. The size test alone got this
-    // right only by coincidence: it compares the screen with 1000 x pixelScaleRatio, and a
-    // 13" iPad in landscape (1366 wide) sat just above that line once the ratio came down to
-    // 1.32 - so it opened as a fixed 1320 x 792 window. Asking the platform instead gives
-    // the answer that was actually meant, and does not move whenever the scale factor does.
-    // Desktop systems report "osx", "windows" or "linux" and fall through to the size test
-    // unchanged.
+    // Never larger than the screen: a fixed 1000x600 pushed the button bar out of reach on
+    // a small display, and both axes go full screen together or a phone ends up full width
+    // but not full height. Mobile is asked of the platform, not of the size: there is no
+    // window manager there, and an iPad in landscape passed the size test by coincidence.
     readonly property bool isSmallScreen: Qt.platform.os === "ios" || Qt.platform.os === "android" ||
                                           (Screen.width > 0 && Screen.height > 0 &&
                                            (Screen.width < 1000 * Stylesheet.pixelScaleRatio ||
@@ -55,22 +37,10 @@ Item {
     height: Screen.height > 0 ? (isSmallScreen ? Screen.height : 600 * Stylesheet.pixelScaleRatio)
                               : 600 * Stylesheet.pixelScaleRatio
 
-    // True when the bar keeps only Save and Close, and moves Help, Print, Create invoice
-    // and Copy into the overflow menu.
-    //
-    // Six buttons do not fit one row on a phone, and this bar is anchored to the bottom of
-    // the dialog, outside the scrolling area: a button pushed past the right edge is
-    // unreachable, since no amount of scrolling brings it back. Wrapping them onto further
-    // rows solved that but spent height the form cannot spare, so the commands that are
-    // used occasionally step aside instead. Save and Close never do - on a device with no
-    // keyboard, Close is the only way off this dialog.
-    //
-    // Deliberately the same condition that stacks the form into one column, rather than a
-    // second threshold of its own: a bar cannot measure whether it fits without the answer
-    // depending on the width it is trying to decide, so any private threshold would be a
-    // guess at how wide six translated labels are - and a guess that is too low is
-    // unusable, not just ugly. Wherever the form is too narrow for two columns, six
-    // buttons on one row are not plausible either.
+    // True when the bar keeps only Save and Close and the rest move to the overflow menu:
+    // six buttons do not fit a phone, and this bar is outside the scrolling area, so a
+    // button past the right edge is unreachable. The same condition as the single column
+    // form on purpose - a private threshold would be a guess at six translated labels.
     readonly property bool compactButtonBar: wdgInvoice.compactLayout
 
     focus: true
@@ -230,22 +200,14 @@ Item {
     // Per semplicità applichiamo questo spazio a tutti i sistemi operativi
     property int tabBarTopMargin: 12 * Stylesheet.pixelScaleRatio
 
-    // Room the system keeps for itself on a phone or tablet: the notch or Dynamic Island and
-    // the status bar at the top, the home indicator or gesture bar at the bottom, and the
-    // side the notch moves to in landscape. The dialog is full screen there and the window
-    // extends under those areas, so the tabs sat under the clock and the battery and were
-    // hard to tap. The content of the bars and the pages moves inside these margins, while
-    // the backgrounds still reach the edges of the screen. Zero on the desktop.
+    // Room the system keeps for itself on a phone: notch, status bar, gesture bar. The bars
+    // and the pages move inside these margins, the backgrounds still reach the edges. Zero
+    // on the desktop. Read from the root, which the host positions: an item positioned from
+    // its own SafeArea would be a binding loop.
     //
-    // Read from the root, which is positioned by the host and not by these margins: an item
-    // positioned from its own SafeArea would be a binding loop.
-    //
-    // SafeArea arrived in Qt 6.9, and Banana Plus still carries 6.8.6. There the name is
-    // unknown: each of these four lines raised a ReferenceError when it was evaluated, which
-    // left the margin at zero - the right answer for that build, reached by way of an error
-    // in the log every time the dialog opened. Asked for only where it exists instead, so the
-    // zero is stated rather than fallen into. typeof is the one way to ask about a name that
-    // may not exist: anything else raises the error all over again.
+    // SafeArea needs Qt 6.9 and Banana Plus carries 6.8.6, where the name is unknown and
+    // reading it raised a ReferenceError per margin. typeof is the one way to ask about a
+    // name that may not exist: anything else raises the error again.
     readonly property bool hasSafeArea: typeof SafeArea !== "undefined"
     readonly property real safeAreaTop: hasSafeArea ? SafeArea.margins.top : 0
     readonly property real safeAreaBottom: hasSafeArea ? SafeArea.margins.bottom : 0
@@ -417,10 +379,8 @@ Item {
         anchors.leftMargin: Stylesheet.defaultMargin + safeAreaLeft
         anchors.rightMargin: Stylesheet.defaultMargin + safeAreaRight
 
-        // Seven columns, always: one row in both layouts. Narrow, the four less used
-        // commands leave the bar for the overflow menu, so only three controls remain and
-        // there is nothing left to wrap. This bar is anchored over the form and every row
-        // it takes is a row the form loses on a screen that has none to spare.
+        // Seven columns, always: one row in both layouts. Narrow, only three controls remain,
+        // so there is nothing to wrap. Every row this bar takes is a row the form loses.
         columns: 7
         columnSpacing: Stylesheet.defaultMargin
         rowSpacing: Stylesheet.defaultMargin
@@ -448,10 +408,8 @@ Item {
         //                }
 
         StyledButton {
-            // Allowed to shrink below its label. Without this a cell too narrow for a long
-            // translation (German is half again as long as Italian here) would not give
-            // way, and the grid would push the last column off the edge again - the very
-            // failure this bar was rearranged to prevent. The label elides instead.
+            // Allowed to shrink below its label: a cell too narrow for a long translation
+            // would otherwise push the last column off the edge. The label elides instead.
             Layout.minimumWidth: 0
             text: qsTr("Help")
             visible: !window.compactButtonBar
@@ -465,10 +423,7 @@ Item {
         }
 
         StyledButton {
-            // Allowed to shrink below its label. Without this a cell too narrow for a long
-            // translation (German is half again as long as Italian here) would not give
-            // way, and the grid would push the last column off the edge again - the very
-            // failure this bar was rearranged to prevent. The label elides instead.
+            // Allowed to shrink below its label - see the first button above.
             Layout.minimumWidth: 0
             text: qsTr("Print")
             visible: !window.compactButtonBar
@@ -480,10 +435,7 @@ Item {
         }
 
         StyledButton {
-            // Allowed to shrink below its label. Without this a cell too narrow for a long
-            // translation (German is half again as long as Italian here) would not give
-            // way, and the grid would push the last column off the edge again - the very
-            // failure this bar was rearranged to prevent. The label elides instead.
+            // Allowed to shrink below its label - see the first button above.
             Layout.minimumWidth: 0
             text: qsTr("Create invoice")
             visible: !window.compactButtonBar && invoice.isEstimate() && !invoice.isNewDocument
@@ -496,10 +448,7 @@ Item {
 
         StyledButton {
             id: copyButton
-            // Allowed to shrink below its label. Without this a cell too narrow for a long
-            // translation (German is half again as long as Italian here) would not give
-            // way, and the grid would push the last column off the edge again - the very
-            // failure this bar was rearranged to prevent. The label elides instead.
+            // Allowed to shrink below its label - see the first button above.
             Layout.minimumWidth: 0
             text: qsTr("Copy")
             visible: !window.compactButtonBar && !invoice.isNewDocument
@@ -511,10 +460,7 @@ Item {
         }
 
         StyledButton {
-            // Allowed to shrink below its label. Without this a cell too narrow for a long
-            // translation (German is half again as long as Italian here) would not give
-            // way, and the grid would push the last column off the edge again - the very
-            // failure this bar was rearranged to prevent. The label elides instead.
+            // Allowed to shrink below its label - see the first button above.
             Layout.minimumWidth: 0
             text: qsTr("Save")
             primary: true
@@ -532,10 +478,7 @@ Item {
         }
 
         StyledButton {
-            // Allowed to shrink below its label. Without this a cell too narrow for a long
-            // translation (German is half again as long as Italian here) would not give
-            // way, and the grid would push the last column off the edge again - the very
-            // failure this bar was rearranged to prevent. The label elides instead.
+            // Allowed to shrink below its label - see the first button above.
             Layout.minimumWidth: 0
             text: invoice.isModified && !invoice.isReadOnly ? qsTr("Cancel") : qsTr("Close")
             onClicked: {
@@ -551,18 +494,10 @@ Item {
     }
 
 
-    /* An entry of one of this dialog's menus, drawn in the dialog's colours.
-
-       The styles draw menus their own way, and two of those ways go wrong here. The iOS
-       style paints the background of a menu and of every entry with images chosen from the
-       application's colour scheme rather than from the dialog's: on a phone in light mode
-       the menus came out dark grey with black text. The desktop styles read the palette,
-       which is handed to them below, but each reads different roles.
-
-       Drawn from Stylesheet instead, a menu looks the same everywhere. The implicit size of
-       the background matters: every Qt style gives its own background one, and without it a
-       menu ends up with no size at all and appears not to open - which is what happened the
-       first time this was tried. */
+    /* An entry of this dialog's menus, drawn in the dialog's colours: the iOS style paints
+       menu backgrounds from images chosen by the application's colour scheme, which came out
+       dark grey with black text in light mode, and each desktop style reads its own palette
+       roles. The background needs an implicit size, or the menu appears not to open. */
     component StyledMenuEntry: MenuItem {
         id: entry
 
@@ -590,18 +525,14 @@ Item {
     }
 
     Menu {
-        // The commands that leave the bottom bar on a narrow screen. Each mirrors the
-        // button of the same name; the button stays the definition of what the command
-        // does, this is only a second way to reach it.
-        //
-        // Opening the menu takes the active focus, which commits whatever field was being
-        // edited - the same reason the buttons take the focus before acting.
+        // The commands that leave the bottom bar on a narrow screen, each mirroring the
+        // button of the same name. Opening the menu takes the active focus, which commits
+        // whatever field was being edited.
         id: overflowMenu
 
-        // The surface is a lighter shade in dark mode, so the menu stands out from the
-        // dialog, and the system colours in the light theme: see Stylesheet.menuWindowColor.
-        // The palette is still handed to the style for the parts it draws itself, such as
-        // the scroll indicator of a menu too long for the screen.
+        // A lighter shade in dark mode so the menu stands out from the dialog, the system
+        // colours in the light theme: see Stylesheet.menuWindowColor. The palette is still
+        // handed to the style for the parts it draws itself, such as a scroll indicator.
         palette.window: Stylesheet.menuWindowColor
         palette.windowText: Stylesheet.systemPalette.windowText
         palette.base: Stylesheet.menuBaseColor

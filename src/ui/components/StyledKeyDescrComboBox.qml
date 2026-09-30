@@ -81,10 +81,8 @@ StyledComboBox {
 
     hoverEnabled: true
 
-    // Don't rely on the active Qt Quick Controls style's default padding: it differs
-    // per platform (on mobile it is much larger), which left part of the background
-    // uncovered next to the text field, showing up as an empty clickable strip.
-    // The right side keeps room for the dropdown arrow, so the field never covers it.
+    // Not the style's default padding: it is much larger on mobile, which left an empty
+    // clickable strip beside the text field. The right side keeps room for the arrow.
     leftPadding: 0
     topPadding: 0
     bottomPadding: 0
@@ -193,11 +191,9 @@ StyledComboBox {
         }
     }
 
-    // Width of the key column in the drop-down list. Wide enough for a four digit
-    // account number, so the descriptions of most entries still line up, but no wider:
-    // the key used to be separated from the description by a tab, and a tab in a Text
-    // jumps to the next 80 pixel stop, which threw away most of a phone's screen width
-    // for a one digit key and then elided the description that no longer fitted.
+    // Width of the key column: four digits, so most descriptions line up, and no wider. The
+    // tab that separated them jumps to the next 80 pixel stop, which on a phone threw away
+    // most of the width and elided the description.
     TextMetrics {
         id: keyColumnMetrics
         font: control.font

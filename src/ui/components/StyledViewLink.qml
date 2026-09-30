@@ -18,10 +18,8 @@ import QtQuick.Controls
 import "."
 
 /**
- * A single option of a pill-style view switcher (see the "Views:" selector
- * in WdgInvoice.qml). Gives a clearer clickable affordance than plain
- * underlined text: a rounded background that highlights the selected view
- * and reacts on hover.
+ * One option of the pill-style view switcher, see the "Views:" selector in WdgInvoice.qml.
+ * A rounded background reads as clickable more clearly than underlined text did.
  */
 Rectangle {
     id: root

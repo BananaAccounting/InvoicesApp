@@ -19,14 +19,9 @@ import QtQuick.Layouts
 import "."
 
 /**
- * Clickable heading that opens and closes a group of fields below it.
- *
- * Used to break the invoice form into sections when it is stacked into a single column,
- * where the whole form is far taller than the screen. The section that is open is the
- * one being worked on; the rest collapse to a single line each.
- *
- * Holds its own open/closed state in 'expanded', which the fields of the section read to
- * decide whether to show themselves.
+ * Clickable heading that opens and closes a group of fields below it, used where the form
+ * is stacked into a single column and is far taller than the screen. Holds its own state
+ * in 'expanded', which the fields of the section read to decide whether to show themselves.
  */
 Item {
     id: header
@@ -39,14 +34,9 @@ Item {
     // read as cramped, and would fall short of a comfortable target for a fingertip.
     implicitHeight: 34 * Stylesheet.pixelScaleRatio
 
-    /* The rule above a heading must sit the same distance below the previous section
-       wherever the heading is used. The headings of the form do not all live in the same
-       layout - Info, Additional info and Texts are rows of the invoice data grid, which
-       spaces its lines tightly, while Address is a row of the outer grid, which spaces its
-       sections widely - so the gap came out different above each of them.
-
-       What is missing to reach the spacing of a section is asked for here, so the distance
-       is the same in both places and follows the layout if its spacing ever changes. */
+    /* The headings do not all live in the same layout, and those layouts space their rows
+       differently, so the gap came out different above each of them. What is missing to reach
+       a section's spacing is asked for here, and follows the layout if it ever changes. */
     Layout.topMargin: Math.max(0, Stylesheet.spacingSection - parentSpacing)
     readonly property int parentSpacing: !parent ? 0 :
                                              parent.rowSpacing !== undefined ? parent.rowSpacing :
@@ -69,14 +59,9 @@ Item {
     }
 
     Item {
-        // On the trailing edge, so that the title can start flush with the fields of the
-        // section below it. With the indicator first, the heading began a couple of dozen
-        // points further right than the content it heads, which reads as a hierarchy the
-        // wrong way round. Indenting the fields instead would have been the other way to
-        // line them up, but horizontal room is the one thing a phone has none of.
-        //
-        // The indicator shifts its own y when it rotates open, so it cannot be anchored
-        // directly: it is centred through this box instead.
+        // On the trailing edge, so the title starts flush with the fields it heads: with the
+        // indicator first the heading began further right than its own content. The indicator
+        // shifts its y when it rotates, so it cannot be anchored: this box centres it.
         id: indicatorBox
         width: 12 * Stylesheet.pixelScaleRatio
         height: 12 * Stylesheet.pixelScaleRatio
@@ -96,10 +81,8 @@ Item {
         anchors.rightMargin: Stylesheet.defaultMargin
         anchors.verticalCenter: parent.verticalCenter
         text: header.title
-        // A heading is read at full strength, unlike the labels below it, and in the
-        // heading font: a tenth larger and semi bold. Not accent coloured, though - a
-        // heading organises the form, it is not the thing the document is about. The
-        // accent stays on the total.
+        // Full strength and in the heading font, unlike the labels below it. Not accent
+        // coloured: a heading organises the form, the accent stays on the total.
         color: Stylesheet.textColor
         font: Stylesheet.sectionTitleFont
         elide: Text.ElideRight
