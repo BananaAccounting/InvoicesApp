@@ -7,3 +7,5 @@ src/out/build
 src/build
 src/.qtcreator
 src/.vscode
+*.test.diff.txt
+**/test/testresults

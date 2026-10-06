@@ -1,0 +1,2272 @@
+%%info_test_name{ch.banana.application.invoice.test}
+\documentclass{report}
+\usepackage{longtable}
+\usepackage{color}
+\usepackage{listings}
+\usepackage[margin=1cm]{geometry}
+\begin{document}
+\newenvironment{tablevalue}[2]{\textbf{Table: #1}\begin{longtable}[l]{#2}}{\end{longtable}}
+\newenvironment{reportvalue}[1]{\textbf{Report: #1}\\}{}
+\lstnewenvironment{jsonvalue}[1]{\textbf{Json: #1}\lstset{language=Java}}{}
+\lstnewenvironment{xmlvalue}[1]{\textbf{Xml: #1}\lstset{language=Xml}}{}
+\newcommand{\info}[2]{\textit{#1: #2}\\}
+\newcommand{\fatalerror}[1]{\textbf{\textcolor[rgb]{1,0,0}{Fatal error: #1}}\\}
+\newcommand{\keyvalue}[2]{\textbf{Keyvalue: #1} #2\\}
+\newcommand{\textvalue}[1]{#1\\}
+\newcommand{\excltest}[1]{\\Excluded from compare: #1}
+\newcommand{\lognewpage}{\newpage}
+\newenvironment{testcase}[1]{\section*{Test: #1}}{\newpage}
+\newenvironment{test}[1]{\section*{Test case: #1}}{}
+%Begin test data
+%%SCRIPT{/Users/ivan/GitHub/BananaAccounting/InvoicesApp/test/ch.banana.application.invoice.test.js}
+%
+\begin{testcase}{TestInvoiceDocuments}
+\begin{test}{testInvoiceDocuments}
+%Estimates and invoices of the test document, as they are stored
+\subsection{Invoices 1}
+\keyvalue{total\_amount\_vat\_exclusive}{32.50}
+\keyvalue{total\_vat\_amount}{}
+\keyvalue{total\_amount\_vat\_inclusive}{32.50}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{32.50}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "due_date": "2020-06-17",
+        "total_advance_payment": "",
+        "total_amount_vat_exclusive": "32.50",
+        "total_amount_vat_exclusive_before_discount": "32.50",
+        "total_amount_vat_inclusive": "32.50",
+        "total_amount_vat_inclusive_before_discount": "32.50",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "",
+        "total_to_pay": "32.50",
+        "total_vat_amount": "",
+        "total_vat_amount_before_discount": "",
+        "total_vat_codes": [
+        ],
+        "total_vat_rates": [
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via ai Salici",
+        "address2": "",
+        "address3": "",
+        "building_number": "12",
+        "business_name": "",
+        "business_unit": "",
+        "city": "Lugano",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "Pinco",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Pallino",
+        "mobile": "",
+        "number": "1",
+        "phone": "",
+        "postal_code": "6900",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "date": "2026-06-10",
+        "decimals_amounts": 2,
+        "description": "Fattura 1 - senza IVA",
+        "doc_type": "10",
+        "locale": "it",
+        "number": "1",
+        "order_number": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_none"
+    },
+    "internalNote": "",
+    "items": [
+        {
+            "description": "Te",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "25.00",
+            "total_amount_vat_inclusive": "25.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "2.50",
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "7.50",
+            "total_amount_vat_inclusive": "7.50",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "7.50",
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-07-09",
+        "payment_date": "2026-03-20"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 2}
+\keyvalue{total\_amount\_vat\_exclusive}{110.00}
+\keyvalue{total\_vat\_amount}{8.48}
+\keyvalue{total\_amount\_vat\_inclusive}{118.48}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{0.02}
+\keyvalue{total\_to\_pay}{118.50}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "due_date": "2020-06-17",
+        "total_amount_vat_exclusive": "110.00",
+        "total_amount_vat_exclusive_before_discount": "110.00",
+        "total_amount_vat_inclusive": "118.48",
+        "total_amount_vat_inclusive_before_discount": "118.48",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "0.02",
+        "total_to_pay": "118.50",
+        "total_vat_amount": "8.48",
+        "total_vat_amount_before_discount": "8.48",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "100.00",
+                "total_amount_vat_inclusive": "108.10",
+                "total_vat_amount": "8.10",
+                "vat_code": "V81"
+            },
+            {
+                "total_amount_vat_exclusive": "10.00",
+                "total_amount_vat_inclusive": "10.38",
+                "total_vat_amount": "0.38",
+                "vat_code": "V38"
+            }
+        ],
+        "total_vat_rates": [
+            {
+                "total_amount_vat_exclusive": "100.00",
+                "total_amount_vat_inclusive": "108.10",
+                "total_vat_amount": "8.10",
+                "vat_rate": "8.10"
+            },
+            {
+                "total_amount_vat_exclusive": "10.00",
+                "total_amount_vat_inclusive": "10.38",
+                "total_vat_amount": "0.38",
+                "vat_rate": "3.80"
+            }
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via abc",
+        "address2": "",
+        "address3": "",
+        "building_number": "4",
+        "business_name": "",
+        "business_unit": "",
+        "city": "Bellinzona",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "Mario",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Rossi",
+        "mobile": "",
+        "number": "2",
+        "phone": "",
+        "postal_code": "6500",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "customer_reference": "",
+        "date": "2026-06-20",
+        "decimals_amounts": 2,
+        "description": "Fattura 2 - IVA al netto",
+        "doc_type": "10",
+        "locale": "en",
+        "number": "2",
+        "order_number": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_excl"
+    },
+    "items": [
+        {
+            "description": "Tisane",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1200",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "50.00",
+            "total_amount_vat_inclusive": "54.05",
+            "total_vat_amount": "4.05",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "5.00",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "5.00",
+                "calculated_amount_vat_inclusive": "5.41",
+                "calculated_vat_amount": "0.41",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Te",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "5",
+            "total": "",
+            "total_amount_vat_exclusive": "50.00",
+            "total_amount_vat_inclusive": "54.05",
+            "total_vat_amount": "4.05",
+            "unit_price": {
+                "amount_vat_exclusive": "10.00",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "10.00",
+                "calculated_amount_vat_inclusive": "10.81",
+                "calculated_vat_amount": "0.81",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "10.00",
+            "total_amount_vat_inclusive": "10.38",
+            "total_vat_amount": "0.38",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "10.00",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "10.00",
+                "calculated_amount_vat_inclusive": "10.38",
+                "calculated_vat_amount": "0.38",
+                "vat_code": "V38",
+                "vat_rate": "3.80"
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-07-19"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 3}
+\keyvalue{total\_amount\_vat\_exclusive}{102.13}
+\keyvalue{total\_vat\_amount}{7.87}
+\keyvalue{total\_amount\_vat\_inclusive}{110.00}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{110.00}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "due_date": "2020-06-17",
+        "total_amount_vat_exclusive": "102.13",
+        "total_amount_vat_exclusive_before_discount": "102.13",
+        "total_amount_vat_inclusive": "110.00",
+        "total_amount_vat_inclusive_before_discount": "110.00",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "",
+        "total_to_pay": "110.00",
+        "total_vat_amount": "7.87",
+        "total_vat_amount_before_discount": "7.87",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "92.50",
+                "total_amount_vat_inclusive": "100.00",
+                "total_vat_amount": "7.50",
+                "vat_code": "V81"
+            },
+            {
+                "total_amount_vat_exclusive": "9.63",
+                "total_amount_vat_inclusive": "10.00",
+                "total_vat_amount": "0.37",
+                "vat_code": "V38"
+            }
+        ],
+        "total_vat_rates": [
+            {
+                "total_amount_vat_exclusive": "92.50",
+                "total_amount_vat_inclusive": "100.00",
+                "total_vat_amount": "7.50",
+                "vat_rate": "8.10"
+            },
+            {
+                "total_amount_vat_exclusive": "9.63",
+                "total_amount_vat_inclusive": "10.00",
+                "total_vat_amount": "0.37",
+                "vat_rate": "3.80"
+            }
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via del sole",
+        "address2": "",
+        "address3": "",
+        "building_number": "54",
+        "business_name": "Ditta SA",
+        "business_unit": "",
+        "city": "Cagiallo",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "",
+        "mobile": "",
+        "number": "3",
+        "phone": "",
+        "postal_code": "6955",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "customer_reference": "",
+        "date": "2026-06-30",
+        "decimals_amounts": 2,
+        "description": "Fattura 3 - IVA al lordo",
+        "doc_type": "10",
+        "locale": "fr",
+        "number": "3",
+        "order_date": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_incl"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "46.25",
+            "total_amount_vat_inclusive": "50.00",
+            "total_vat_amount": "3.75",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "5.00",
+                "calculated_amount_vat_exclusive": "4.63",
+                "calculated_amount_vat_inclusive": "5.00",
+                "calculated_vat_amount": "0.37",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Tisane",
+            "mesure_unit": "pz",
+            "number": "1200",
+            "quantity": "5",
+            "total": "",
+            "total_amount_vat_exclusive": "46.25",
+            "total_amount_vat_inclusive": "50.00",
+            "total_vat_amount": "3.75",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "10.00",
+                "calculated_amount_vat_exclusive": "9.25",
+                "calculated_amount_vat_inclusive": "10.00",
+                "calculated_vat_amount": "0.75",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "9.63",
+            "total_amount_vat_inclusive": "10.00",
+            "total_vat_amount": "0.37",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "10.00",
+                "calculated_amount_vat_exclusive": "9.63",
+                "calculated_amount_vat_inclusive": "10.00",
+                "calculated_vat_amount": "0.37",
+                "vat_code": "V38",
+                "vat_rate": "3.80"
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-07-29"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 5}
+\keyvalue{total\_amount\_vat\_exclusive}{65.00}
+\keyvalue{total\_vat\_amount}{}
+\keyvalue{total\_amount\_vat\_inclusive}{65.00}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{65.00}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "due_date": "2020-06-17",
+        "total_advance_payment": "",
+        "total_amount_vat_exclusive": "65.00",
+        "total_amount_vat_exclusive_before_discount": "65.00",
+        "total_amount_vat_inclusive": "65.00",
+        "total_amount_vat_inclusive_before_discount": "65.00",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "",
+        "total_to_pay": "65.00",
+        "total_vat_amount": "",
+        "total_vat_amount_before_discount": "",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "32.50",
+                "total_amount_vat_inclusive": "32.50",
+                "total_vat_amount": "",
+                "vat_code": "V0"
+            }
+        ],
+        "total_vat_rate_zero": {
+            "total_amount_vat_exclusive": "32.50",
+            "total_amount_vat_inclusive": "32.50",
+            "total_vat_amount": "",
+            "vat_rate": ""
+        },
+        "total_vat_rates": [
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Redford SA",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "",
+        "business_unit": "",
+        "city": "",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "Andrew",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Redford",
+        "mobile": "",
+        "number": "4",
+        "phone": "",
+        "postal_code": "",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "date": "2026-06-30",
+        "decimals_amounts": 2,
+        "description": "Fattura 5 - IVA al netto aliquota V0",
+        "doc_type": "10",
+        "locale": "de",
+        "number": "5",
+        "order_number": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_excl"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "25.00",
+            "total_amount_vat_inclusive": "25.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "2.50",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "7.50",
+            "total_amount_vat_inclusive": "7.50",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "7.50",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Te",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "25.00",
+            "total_amount_vat_inclusive": "25.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "2.50",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "",
+                "vat_code": "V0",
+                "vat_rate": ""
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "7.50",
+            "total_amount_vat_inclusive": "7.50",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "7.50",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "",
+                "vat_code": "V0",
+                "vat_rate": ""
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-07-29",
+        "payment_date": "2026-03-20"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 6}
+\keyvalue{total\_amount\_vat\_exclusive}{65.00}
+\keyvalue{total\_vat\_amount}{}
+\keyvalue{total\_amount\_vat\_inclusive}{65.00}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{65.00}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "due_date": "2020-06-17",
+        "total_advance_payment": "",
+        "total_amount_vat_exclusive": "65.00",
+        "total_amount_vat_exclusive_before_discount": "65.00",
+        "total_amount_vat_inclusive": "65.00",
+        "total_amount_vat_inclusive_before_discount": "65.00",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "",
+        "total_to_pay": "65.00",
+        "total_vat_amount": "",
+        "total_vat_amount_before_discount": "",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "32.50",
+                "total_amount_vat_inclusive": "32.50",
+                "total_vat_amount": "",
+                "vat_code": "V0"
+            }
+        ],
+        "total_vat_rate_zero": {
+            "total_amount_vat_exclusive": "32.50",
+            "total_amount_vat_inclusive": "32.50",
+            "total_vat_amount": "",
+            "vat_rate": ""
+        },
+        "total_vat_rates": [
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Viale Stazione",
+        "address2": "",
+        "address3": "",
+        "building_number": "11",
+        "business_name": "",
+        "business_unit": "",
+        "city": "BELLINZONA",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "James",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Johnson",
+        "mobile": "",
+        "number": "5",
+        "phone": "",
+        "postal_code": "6500",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "date": "2026-06-30",
+        "decimals_amounts": 2,
+        "description": "Fattura 6 - IVA al lordo aliquota V0",
+        "doc_type": "10",
+        "locale": "it",
+        "number": "6",
+        "order_number": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_incl"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "25.00",
+            "total_amount_vat_inclusive": "25.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "2.50",
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "7.50",
+            "total_amount_vat_inclusive": "7.50",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "7.50",
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Te",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "25.00",
+            "total_amount_vat_inclusive": "25.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "2.50",
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "",
+                "vat_code": "V0",
+                "vat_rate": ""
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "7.50",
+            "total_amount_vat_inclusive": "7.50",
+            "total_vat_amount": "",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "7.50",
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "",
+                "vat_code": "V0",
+                "vat_rate": ""
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-07-29",
+        "payment_date": "2026-03-20"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 7}
+\keyvalue{total\_amount\_vat\_exclusive}{30.00}
+\keyvalue{total\_vat\_amount}{}
+\keyvalue{total\_amount\_vat\_inclusive}{30.00}
+\keyvalue{total\_discount\_vat\_inclusive}{2.50}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{30.00}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "discount": {
+            "amount_vat_inclusive": "2.50"
+        },
+        "due_date": "2020-06-17",
+        "total_advance_payment": "",
+        "total_advance_payment_description": "Acconto",
+        "total_amount_vat_exclusive": "30.00",
+        "total_amount_vat_exclusive_before_discount": "32.50",
+        "total_amount_vat_inclusive": "30.00",
+        "total_amount_vat_inclusive_before_discount": "32.50",
+        "total_categories": [
+        ],
+        "total_discount_percent": "7.7",
+        "total_discount_vat_exclusive": "2.50",
+        "total_discount_vat_inclusive": "2.50",
+        "total_rounding_difference": "",
+        "total_to_pay": "30.00",
+        "total_vat_amount": "",
+        "total_vat_amount_before_discount": "",
+        "total_vat_codes": [
+        ],
+        "total_vat_rates": [
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via Carlo Cattaneo",
+        "address2": "",
+        "address3": "",
+        "building_number": "20",
+        "business_name": "",
+        "business_unit": "",
+        "city": "LUGANO",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "Robert",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Black",
+        "mobile": "",
+        "number": "6",
+        "phone": "",
+        "postal_code": "6900",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "date": "2026-07-10",
+        "decimals_amounts": 2,
+        "description": "Fattura 7 - senza IVA con sconto",
+        "doc_type": "10",
+        "locale": "en",
+        "number": "7",
+        "order_number": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_none"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "25.00",
+            "total_amount_vat_inclusive": "25.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "2.50",
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "7.50",
+            "total_amount_vat_inclusive": "7.50",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "7.50",
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "",
+                "vat_code": ""
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-08-08",
+        "payment_date": ""
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 8}
+\keyvalue{total\_amount\_vat\_exclusive}{100.00}
+\keyvalue{total\_vat\_amount}{7.71}
+\keyvalue{total\_amount\_vat\_inclusive}{107.71}
+\keyvalue{total\_discount\_vat\_inclusive}{10.77}
+\keyvalue{total\_rounding\_difference}{-0.01}
+\keyvalue{total\_to\_pay}{107.70}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "discount": {
+            "amount_vat_exclusive": "10"
+        },
+        "due_date": "2020-06-17",
+        "total_advance_payment": "",
+        "total_advance_payment_description": "Acconto",
+        "total_amount_vat_exclusive": "100.00",
+        "total_amount_vat_exclusive_before_discount": "110.00",
+        "total_amount_vat_inclusive": "107.71",
+        "total_amount_vat_inclusive_before_discount": "118.48",
+        "total_categories": [
+        ],
+        "total_discount_percent": "9.1",
+        "total_discount_vat_exclusive": "10.00",
+        "total_discount_vat_inclusive": "10.77",
+        "total_rounding_difference": "-0.01",
+        "total_to_pay": "107.70",
+        "total_vat_amount": "7.71",
+        "total_vat_amount_before_discount": "8.48",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "90.91",
+                "total_amount_vat_inclusive": "98.27",
+                "total_vat_amount": "7.36",
+                "vat_code": "V81"
+            },
+            {
+                "total_amount_vat_exclusive": "9.09",
+                "total_amount_vat_inclusive": "9.44",
+                "total_vat_amount": "0.35",
+                "vat_code": "V38"
+            }
+        ],
+        "total_vat_rates": [
+            {
+                "total_amount_vat_exclusive": "90.91",
+                "total_amount_vat_inclusive": "98.27",
+                "total_vat_amount": "7.36",
+                "vat_rate": "8.10"
+            },
+            {
+                "total_amount_vat_exclusive": "9.09",
+                "total_amount_vat_inclusive": "9.44",
+                "total_vat_amount": "0.35",
+                "vat_rate": "3.80"
+            }
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via Regina",
+        "address2": "",
+        "address3": "",
+        "building_number": "84",
+        "business_name": "",
+        "business_unit": "",
+        "city": "AGNO",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "John",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Smith",
+        "mobile": "",
+        "number": "7",
+        "phone": "",
+        "postal_code": "6982",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "customer_reference": "",
+        "date": "2026-07-20",
+        "decimals_amounts": 2,
+        "description": "Fattura 8 - IVA al netto con sconto",
+        "doc_type": "10",
+        "locale": "fr",
+        "number": "8",
+        "order_number": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_excl"
+    },
+    "items": [
+        {
+            "description": "Tisane",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1200",
+            "quantity": "10.00",
+            "total": "",
+            "total_amount_vat_exclusive": "50.00",
+            "total_amount_vat_inclusive": "54.05",
+            "total_vat_amount": "4.05",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "5.00",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "5.00",
+                "calculated_amount_vat_inclusive": "5.41",
+                "calculated_vat_amount": "0.41",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Te",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "5",
+            "total": "",
+            "total_amount_vat_exclusive": "50.00",
+            "total_amount_vat_inclusive": "54.05",
+            "total_vat_amount": "4.05",
+            "unit_price": {
+                "amount_vat_exclusive": "10.00",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "10.00",
+                "calculated_amount_vat_inclusive": "10.81",
+                "calculated_vat_amount": "0.81",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "10.00",
+            "total_amount_vat_inclusive": "10.38",
+            "total_vat_amount": "0.38",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "10.00",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "10.00",
+                "calculated_amount_vat_inclusive": "10.38",
+                "calculated_vat_amount": "0.38",
+                "vat_code": "V38",
+                "vat_rate": "3.80"
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-08-18"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 9}
+\keyvalue{total\_amount\_vat\_exclusive}{92.85}
+\keyvalue{total\_vat\_amount}{7.15}
+\keyvalue{total\_amount\_vat\_inclusive}{100.00}
+\keyvalue{total\_discount\_vat\_inclusive}{10.00}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{100.00}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "discount": {
+            "amount_vat_inclusive": "10"
+        },
+        "due_date": "2020-06-17",
+        "total_advance_payment_description": "Acconto",
+        "total_amount_vat_exclusive": "92.85",
+        "total_amount_vat_exclusive_before_discount": "102.13",
+        "total_amount_vat_inclusive": "100.00",
+        "total_amount_vat_inclusive_before_discount": "110.00",
+        "total_categories": [
+        ],
+        "total_discount_percent": "9.1",
+        "total_discount_vat_exclusive": "9.28",
+        "total_discount_vat_inclusive": "10.00",
+        "total_rounding_difference": "",
+        "total_to_pay": "100.00",
+        "total_vat_amount": "7.15",
+        "total_vat_amount_before_discount": "7.87",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "84.09",
+                "total_amount_vat_inclusive": "90.91",
+                "total_vat_amount": "6.82",
+                "vat_code": "V81"
+            },
+            {
+                "total_amount_vat_exclusive": "8.75",
+                "total_amount_vat_inclusive": "9.09",
+                "total_vat_amount": "0.34",
+                "vat_code": "V38"
+            }
+        ],
+        "total_vat_rates": [
+            {
+                "total_amount_vat_exclusive": "84.09",
+                "total_amount_vat_inclusive": "90.91",
+                "total_vat_amount": "6.82",
+                "vat_rate": "8.10"
+            },
+            {
+                "total_amount_vat_exclusive": "8.75",
+                "total_amount_vat_inclusive": "9.09",
+                "total_vat_amount": "0.34",
+                "vat_rate": "3.80"
+            }
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via Trevano",
+        "address2": "",
+        "address3": "",
+        "building_number": "3",
+        "business_name": "",
+        "business_unit": "",
+        "city": "VIGANELLO",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "William",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Allen",
+        "mobile": "",
+        "number": "8",
+        "phone": "",
+        "postal_code": "6962",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "customer_reference": "",
+        "date": "2026-07-30",
+        "decimals_amounts": 2,
+        "description": "Fattura 9 - IVA al lordo",
+        "doc_type": "10",
+        "locale": "de",
+        "number": "9",
+        "order_date": "",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_incl"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "46.25",
+            "total_amount_vat_inclusive": "50.00",
+            "total_vat_amount": "3.75",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "5.00",
+                "calculated_amount_vat_exclusive": "4.63",
+                "calculated_amount_vat_inclusive": "5.00",
+                "calculated_vat_amount": "0.37",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Tisane",
+            "mesure_unit": "pz",
+            "number": "1200",
+            "quantity": "5",
+            "total": "",
+            "total_amount_vat_exclusive": "46.25",
+            "total_amount_vat_inclusive": "50.00",
+            "total_vat_amount": "3.75",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "10.00",
+                "calculated_amount_vat_exclusive": "9.25",
+                "calculated_amount_vat_inclusive": "10.00",
+                "calculated_vat_amount": "0.75",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "item_type": "",
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "9.63",
+            "total_amount_vat_inclusive": "10.00",
+            "total_vat_amount": "0.37",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "10.00",
+                "calculated_amount_vat_exclusive": "9.63",
+                "calculated_amount_vat_inclusive": "10.00",
+                "calculated_vat_amount": "0.37",
+                "vat_code": "V38",
+                "vat_rate": "3.80"
+            }
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": "Si prega di effettuare il pagamento sul seguente conto bancario\nIBAN: CHXX XXXX XXXX XXXX 0203 X\n\nGrazie mille."
+        }
+    ],
+    "payment_info": {
+        "due_date": "2026-08-28"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 10}
+\keyvalue{total\_amount\_vat\_exclusive}{127.50}
+\keyvalue{total\_vat\_amount}{}
+\keyvalue{total\_amount\_vat\_inclusive}{127.50}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{127.50}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "total_amount_vat_exclusive": "127.50",
+        "total_amount_vat_exclusive_before_discount": "127.50",
+        "total_amount_vat_inclusive": "127.50",
+        "total_amount_vat_inclusive_before_discount": "127.50",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "",
+        "total_to_pay": "127.50",
+        "total_vat_amount": "",
+        "total_vat_amount_before_discount": "",
+        "total_vat_codes": [
+        ],
+        "total_vat_rates": [
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Viale Stazione",
+        "address2": "",
+        "address3": "",
+        "building_number": "11",
+        "business_name": "Rossi SA",
+        "business_unit": "",
+        "city": "BELLINZONA",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "",
+        "mobile": "",
+        "number": "9",
+        "phone": "",
+        "postal_code": "6500",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "date": "2026-07-14",
+        "decimals_amounts": 2,
+        "description": "Fattura 10 - senza IVA",
+        "doc_type": "10",
+        "locale": "it",
+        "number": "10",
+        "rounding_total": "0.05",
+        "vat_mode": "vat_none"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "discount": {
+                "amount": "0.50"
+            },
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "20.00",
+            "total_amount_vat_inclusive": "20.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "2.50",
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "",
+                "discounted_amount_vat_exclusive": "2.00",
+                "discounted_amount_vat_inclusive": "2.00",
+                "discounted_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Tisane",
+            "discount": {
+                "amount": "1.00"
+            },
+            "mesure_unit": "pz",
+            "number": "1200",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "40.00",
+            "total_amount_vat_inclusive": "40.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "5.00",
+                "calculated_amount_vat_exclusive": "5.00",
+                "calculated_amount_vat_inclusive": "5.00",
+                "calculated_vat_amount": "",
+                "discounted_amount_vat_exclusive": "4.00",
+                "discounted_amount_vat_inclusive": "4.00",
+                "discounted_vat_amount": "",
+                "vat_code": ""
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "discount": {
+                "percent": "10"
+            },
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "67.50",
+            "total_amount_vat_inclusive": "67.50",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "7.50",
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "",
+                "discounted_amount_vat_exclusive": "6.75",
+                "discounted_amount_vat_inclusive": "6.75",
+                "discounted_vat_amount": "",
+                "vat_code": ""
+            }
+        }
+    ],
+    "note": [
+    ],
+    "payment_info": {
+        "due_date": "2026-08-12"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 11}
+\keyvalue{total\_amount\_vat\_exclusive}{127.50}
+\keyvalue{total\_vat\_amount}{7.43}
+\keyvalue{total\_amount\_vat\_inclusive}{134.93}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{0.02}
+\keyvalue{total\_to\_pay}{134.95}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "total_amount_vat_exclusive": "127.50",
+        "total_amount_vat_exclusive_before_discount": "127.50",
+        "total_amount_vat_inclusive": "134.93",
+        "total_amount_vat_inclusive_before_discount": "134.93",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "0.02",
+        "total_to_pay": "134.95",
+        "total_vat_amount": "7.43",
+        "total_vat_amount_before_discount": "7.43",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "60.00",
+                "total_amount_vat_inclusive": "64.86",
+                "total_vat_amount": "4.86",
+                "vat_code": "V81"
+            },
+            {
+                "total_amount_vat_exclusive": "67.50",
+                "total_amount_vat_inclusive": "70.07",
+                "total_vat_amount": "2.57",
+                "vat_code": "V38"
+            }
+        ],
+        "total_vat_rates": [
+            {
+                "total_amount_vat_exclusive": "60.00",
+                "total_amount_vat_inclusive": "64.86",
+                "total_vat_amount": "4.86",
+                "vat_rate": "8.10"
+            },
+            {
+                "total_amount_vat_exclusive": "67.50",
+                "total_amount_vat_inclusive": "70.07",
+                "total_vat_amount": "2.57",
+                "vat_rate": "3.80"
+            }
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via Carlo Cattaneo",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "",
+        "business_unit": "",
+        "city": "LUGANO",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "Pierre",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Camus",
+        "mobile": "",
+        "number": "10",
+        "phone": "",
+        "postal_code": "6900",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "date": "2026-07-14",
+        "decimals_amounts": 2,
+        "description": "Fattura 11 - IVA al netto",
+        "doc_type": "10",
+        "locale": "en",
+        "number": "11",
+        "rounding_total": "0.05",
+        "vat_mode": "vat_excl"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "discount": {
+                "amount": "0.50"
+            },
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "20.00",
+            "total_amount_vat_inclusive": "21.62",
+            "total_vat_amount": "1.62",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "2.50",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "2.50",
+                "calculated_amount_vat_inclusive": "2.70",
+                "calculated_vat_amount": "0.20",
+                "discounted_amount_vat_exclusive": "2.00",
+                "discounted_amount_vat_inclusive": "2.16",
+                "discounted_vat_amount": "0.16",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Tisane",
+            "discount": {
+                "amount": "1.00"
+            },
+            "mesure_unit": "pz",
+            "number": "1200",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "40.00",
+            "total_amount_vat_inclusive": "43.24",
+            "total_vat_amount": "3.24",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "5.00",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "5.00",
+                "calculated_amount_vat_inclusive": "5.41",
+                "calculated_vat_amount": "0.41",
+                "discounted_amount_vat_exclusive": "4.00",
+                "discounted_amount_vat_inclusive": "4.32",
+                "discounted_vat_amount": "0.32",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "discount": {
+                "percent": "10"
+            },
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "67.50",
+            "total_amount_vat_inclusive": "70.07",
+            "total_vat_amount": "2.57",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": "7.50",
+                "amount_vat_inclusive": null,
+                "calculated_amount_vat_exclusive": "7.50",
+                "calculated_amount_vat_inclusive": "7.79",
+                "calculated_vat_amount": "0.29",
+                "discounted_amount_vat_exclusive": "6.75",
+                "discounted_amount_vat_inclusive": "7.01",
+                "discounted_vat_amount": "0.26",
+                "vat_code": "V38",
+                "vat_rate": "3.80"
+            }
+        }
+    ],
+    "note": [
+    ],
+    "payment_info": {
+        "due_date": "2026-08-12"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Invoices 12}
+\keyvalue{total\_amount\_vat\_exclusive}{120.53}
+\keyvalue{total\_vat\_amount}{6.97}
+\keyvalue{total\_amount\_vat\_inclusive}{127.50}
+\keyvalue{total\_discount\_vat\_inclusive}{}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{127.50}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "total_amount_vat_exclusive": "120.53",
+        "total_amount_vat_exclusive_before_discount": "120.53",
+        "total_amount_vat_inclusive": "127.50",
+        "total_amount_vat_inclusive_before_discount": "127.50",
+        "total_categories": [
+        ],
+        "total_discount_percent": "",
+        "total_discount_vat_exclusive": "",
+        "total_discount_vat_inclusive": "",
+        "total_rounding_difference": "",
+        "total_to_pay": "127.50",
+        "total_vat_amount": "6.97",
+        "total_vat_amount_before_discount": "6.97",
+        "total_vat_codes": [
+            {
+                "total_amount_vat_exclusive": "55.50",
+                "total_amount_vat_inclusive": "60.00",
+                "total_vat_amount": "4.50",
+                "vat_code": "V81"
+            },
+            {
+                "total_amount_vat_exclusive": "65.03",
+                "total_amount_vat_inclusive": "67.50",
+                "total_vat_amount": "2.47",
+                "vat_code": "V38"
+            }
+        ],
+        "total_vat_rates": [
+            {
+                "total_amount_vat_exclusive": "55.50",
+                "total_amount_vat_inclusive": "60.00",
+                "total_vat_amount": "4.50",
+                "vat_rate": "8.10"
+            },
+            {
+                "total_amount_vat_exclusive": "65.03",
+                "total_amount_vat_inclusive": "67.50",
+                "total_vat_amount": "2.47",
+                "vat_rate": "3.80"
+            }
+        ]
+    },
+    "creator_info": {
+        "name": "ch.banana.application.invoice.default",
+        "pubdate": "2026-07-27",
+        "publisher": "Banana.ch SA",
+        "version": ""
+    },
+    "customer_info": {
+        "address1": "Via Regina",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "",
+        "business_unit": "",
+        "city": "AGNO",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "Robert",
+        "fiscal_number": "",
+        "iban": "",
+        "last_name": "Schwartz",
+        "mobile": "",
+        "number": "11",
+        "phone": "",
+        "postal_code": "6982",
+        "vat_number": "",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "custom_fields": [
+        ],
+        "date": "2026-07-14",
+        "decimals_amounts": 2,
+        "description": "Fattura 12 - IVA al lordo",
+        "doc_type": "10",
+        "locale": "fr",
+        "number": "12",
+        "rounding_total": "0.05",
+        "vat_mode": "vat_incl"
+    },
+    "items": [
+        {
+            "description": "Te",
+            "discount": {
+                "amount": "0.50"
+            },
+            "mesure_unit": "pz",
+            "number": "1000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "18.50",
+            "total_amount_vat_inclusive": "20.00",
+            "total_vat_amount": "1.50",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "2.50",
+                "calculated_amount_vat_exclusive": "2.31",
+                "calculated_amount_vat_inclusive": "2.50",
+                "calculated_vat_amount": "0.19",
+                "discounted_amount_vat_exclusive": "1.85",
+                "discounted_amount_vat_inclusive": "2.00",
+                "discounted_vat_amount": "0.15",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Tisane",
+            "discount": {
+                "amount": "1.00"
+            },
+            "mesure_unit": "pz",
+            "number": "1200",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "37.00",
+            "total_amount_vat_inclusive": "40.00",
+            "total_vat_amount": "3.00",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "5.00",
+                "calculated_amount_vat_exclusive": "4.63",
+                "calculated_amount_vat_inclusive": "5.00",
+                "calculated_vat_amount": "0.37",
+                "discounted_amount_vat_exclusive": "3.70",
+                "discounted_amount_vat_inclusive": "4.00",
+                "discounted_vat_amount": "0.30",
+                "vat_code": "V81",
+                "vat_rate": "8.10"
+            }
+        },
+        {
+            "description": "Spese di spedizione",
+            "discount": {
+                "percent": "10"
+            },
+            "mesure_unit": "pz",
+            "number": "6000",
+            "quantity": "10",
+            "total": "",
+            "total_amount_vat_exclusive": "65.03",
+            "total_amount_vat_inclusive": "67.50",
+            "total_vat_amount": "2.47",
+            "unit_price": {
+                "_vat_code": null,
+                "_vat_rate": null,
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "7.50",
+                "calculated_amount_vat_exclusive": "7.23",
+                "calculated_amount_vat_inclusive": "7.50",
+                "calculated_vat_amount": "0.27",
+                "discounted_amount_vat_exclusive": "6.50",
+                "discounted_amount_vat_inclusive": "6.75",
+                "discounted_vat_amount": "0.25",
+                "vat_code": "V38",
+                "vat_rate": "3.80"
+            }
+        }
+    ],
+    "note": [
+    ],
+    "payment_info": {
+        "due_date": "2026-08-12"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "building_number": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\subsection{Estimates 1}
+\keyvalue{total\_amount\_vat\_exclusive}{360.00}
+\keyvalue{total\_vat\_amount}{}
+\keyvalue{total\_amount\_vat\_inclusive}{360.00}
+\keyvalue{total\_discount\_vat\_inclusive}{8.00}
+\keyvalue{total\_rounding\_difference}{}
+\keyvalue{total\_to\_pay}{360.00}
+\begin{jsonvalue}{Document}
+{
+    "billing_info": {
+        "discount": {
+            "amount": "8.00",
+            "percent": null
+        },
+        "total_amount_vat_exclusive": "360.00",
+        "total_amount_vat_exclusive_before_discount": "368.00",
+        "total_amount_vat_inclusive": "360.00",
+        "total_amount_vat_inclusive_before_discount": "368.00",
+        "total_categories": [
+        ],
+        "total_discount_percent": "2.2",
+        "total_discount_vat_exclusive": "8.00",
+        "total_discount_vat_inclusive": "8.00",
+        "total_rounding_difference": "",
+        "total_to_pay": "360.00",
+        "total_vat_amount": "",
+        "total_vat_amount_before_discount": "",
+        "total_vat_codes": [
+        ],
+        "total_vat_rates": [
+        ]
+    },
+    "customer_info": {
+        "address1": "Via ai Salici 12",
+        "address2": "",
+        "address3": "",
+        "business_name": "La stanza del Te SA",
+        "city": "Lugano",
+        "country": "",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "",
+        "first_name": "",
+        "iban": "",
+        "last_name": "",
+        "mobile": "",
+        "number": "1",
+        "phone": "",
+        "postal_code": "6900",
+        "web": ""
+    },
+    "document_info": {
+        "currency": "CHF",
+        "customer_reference": "",
+        "date": "2024-10-22",
+        "decimals_amounts": 2,
+        "description": "Offerta per fornitura merce",
+        "doc_type": "17",
+        "locale": "it",
+        "number": "1",
+        "rounding_total": "0.05",
+        "rounding_totals": "0.05",
+        "vat_mode": "vat_none"
+    },
+    "items": [
+        {
+            "description": "Te e tisane",
+            "item_type": "",
+            "mesure_unit": "",
+            "number": "1000",
+            "price": "",
+            "quantity": "100.00",
+            "total": "",
+            "total_amount_vat_exclusive": "350.00",
+            "total_amount_vat_inclusive": "350.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "3.50",
+                "calculated_amount_vat_exclusive": "3.50",
+                "calculated_amount_vat_inclusive": "3.50",
+                "calculated_vat_amount": ""
+            },
+            "vat_code": "",
+            "vat_rate": ""
+        },
+        {
+            "description": "Spese di spedizine",
+            "item_type": "",
+            "mesure_unit": "",
+            "number": "4000",
+            "price": "",
+            "quantity": "1.00",
+            "total": "",
+            "total_amount_vat_exclusive": "18.00",
+            "total_amount_vat_inclusive": "18.00",
+            "total_vat_amount": "",
+            "unit_price": {
+                "amount_vat_exclusive": null,
+                "amount_vat_inclusive": "18.00",
+                "calculated_amount_vat_exclusive": "18.00",
+                "calculated_amount_vat_inclusive": "18.00",
+                "calculated_vat_amount": ""
+            },
+            "vat_code": "",
+            "vat_rate": ""
+        }
+    ],
+    "note": [
+        {
+            "date": null,
+            "description": ""
+        }
+    ],
+    "payment_info": {
+        "due_date": "2028-12-23"
+    },
+    "supplier_info": {
+        "address1": "VIa alle colline 12",
+        "address2": "",
+        "address3": "",
+        "business_name": "My Company",
+        "city": "Lugano",
+        "country": "Svizzera",
+        "country_code": "CH",
+        "courtesy": "",
+        "email": "info@mycompany.zz",
+        "first_name": "",
+        "fiscal_number": "",
+        "iban_number": "",
+        "last_name": "",
+        "mobile": "",
+        "phone": "+41 56 777 999",
+        "postal_code": "600",
+        "vat_number": "CHE-111.333.999 IVA",
+        "web": "https://www.mycompany.zz"
+    },
+    "type": "invoice",
+    "version": "1.0"
+}
+\end{jsonvalue}
+\keyvalue{Result}{Passed}
+\end{test}
+\end{testcase}
+\end{document}
