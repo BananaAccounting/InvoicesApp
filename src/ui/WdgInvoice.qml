@@ -2058,7 +2058,10 @@ Item {
                             StyledTextField {
                                 id: rowNumberCell
                                 required property bool current
-                                selected: current
+                                // Only while the keyboard is on the table: the current cell
+                                // stays set afterwards, and would go on looking like it is being
+                                // edited once the focus has moved to a field outside.
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 // Captured from the model, so the mouse area below does not have
                                 // to resolve them through its own context.
@@ -2111,6 +2114,9 @@ Item {
                             column: 1
                             StyledKeyDescrComboBox {
                                 id: invoice_item_types
+                                required property bool current
+                                selected: current && invoiceItemsTable.activeFocus
+
                                 Layout.preferredWidth: 300 * Stylesheet.pixelScaleRatio
                                 enabled: !invoice.isReadOnly
 
@@ -2186,6 +2192,9 @@ Item {
                             // Column article number
                             column: 2
                             StyledKeyDescrComboBox {
+                                required property bool current
+                                selected: current && invoiceItemsTable.activeFocus
+
                                 // Capped to the dialog width, see address_customer_selector.
                                 popupMinWidth: Math.min(300 * Stylesheet.pixelScaleRatio, columnLayout.width)
                                 editable: true
@@ -2257,7 +2266,7 @@ Item {
                             column: 3
                             StyledTextField {
                                 required property bool current
-                                selected: current
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 property int updateText: 1  // Binding for updating the text
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
@@ -2317,7 +2326,7 @@ Item {
                             StyledTextArea {
                                 required property bool current
                                 id: textArea
-                                selected: current
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
@@ -2402,7 +2411,7 @@ Item {
                             column: 5
                             StyledTextField {
                                 required property bool current
-                                selected: current
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 /**
@@ -2446,7 +2455,7 @@ Item {
                             column: 6
                             StyledTextField {
                                 required property bool current
-                                selected: current
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: model.display
@@ -2485,7 +2494,7 @@ Item {
                             column: 7
                             StyledTextField {
                                 required property bool current
-                                selected: current
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: toLocaleItemNumberFormat(model.display)
@@ -2548,7 +2557,7 @@ Item {
                             column: 8
                             StyledTextField {
                                 required property bool current
-                                selected: current
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
                                 text: toLocaleItemDiscountFormat(model.display)
@@ -2596,7 +2605,7 @@ Item {
                             column: 9
                             StyledTextField {
                                 required property bool current
-                                selected: current
+                                selected: current && invoiceItemsTable.activeFocus
 
                                 readOnly: true
                                 horizontalAlignment: invoiceItemsModel.headers[model.column].align
@@ -2619,6 +2628,9 @@ Item {
                             column: 10
                             StyledKeyDescrComboBox {
                                 id: invoice_item_vat
+                                required property bool current
+                                selected: current && invoiceItemsTable.activeFocus
+
                                 // Capped to the dialog width, see address_customer_selector.
                                 popupMinWidth: Math.min(300 * Stylesheet.pixelScaleRatio, columnLayout.width)
                                 popupAlign: Qt.AlignRight
@@ -2971,6 +2983,10 @@ Item {
                         if (nextItem) {
                             let index = invoiceItemsModel.index(nextRow, nextColumn)
                             invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                            // The keyboard belongs to the table, not to the cell: the table is
+                            // what sends a typed character to the current cell, and what the
+                            // cells read to mark themselves - see "selected" in the delegates.
+                            invoiceItemsTable.forceActiveFocus()
                             return nextItem
                         }
                         return null
@@ -3004,6 +3020,7 @@ Item {
                         if (prevItem) {
                             let index = invoiceItemsModel.index(prevRow, prevColumn)
                             invoiceItemsTable.selectionModel.setCurrentIndex(index, ItemSelectionModel.SelectCurrent)
+                            invoiceItemsTable.forceActiveFocus()
                             return prevItem
                         }
                         return null

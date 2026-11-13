@@ -92,9 +92,11 @@ StyledComboBox {
         color: Stylesheet.baseColor
         // This is the only visible box: it wraps the text field AND the dropdown
         // arrow, and carries the hover/focus cue (thin accent outline on hover,
-        // thicker on focus).
-        border.width: control.activeFocus ? 2 : 1
-        border.color: control.activeFocus || control.hovered ? Stylesheet.accentColor : Stylesheet.borderColor
+        // thicker on focus). Replaces the one in StyledComboBox, so the current cell
+        // of the items table has to be marked here as well - see "selected" there.
+        border.width: control.activeFocus || control.selected ? 2 : 1
+        border.color: control.activeFocus || control.selected || control.hovered ?
+                          Stylesheet.accentColor : Stylesheet.borderColor
         radius: Stylesheet.cornerRadiusSmall
 
         Behavior on border.color {

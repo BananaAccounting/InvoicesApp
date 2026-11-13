@@ -32,11 +32,13 @@ TextField {
 
    background: Rectangle {
       color: Stylesheet.baseColor
-      // Highlight real focus only. "selected" is bound to the items table's current
-      // cell, which by design stays set after the focus moved elsewhere - keeping it
-      // highlighted made a cell look like it was still being edited.
-      border.color: textField.activeFocus ? Stylesheet.accentColor : borderless ? Stylesheet.baseColor : Stylesheet.borderColor
-      border.width: textField.activeFocus ? 2 : 1
+      // "selected" is the current cell of the items table, which keeps the keyboard on
+      // itself and sends what is typed to that cell: marked like a focused field, because
+      // that is what it behaves like. Whoever sets it has to clear it when the keyboard
+      // goes elsewhere, or a cell is left looking as though it were still being edited.
+      border.color: textField.activeFocus || textField.selected ? Stylesheet.accentColor :
+                        borderless ? Stylesheet.baseColor : Stylesheet.borderColor
+      border.width: textField.activeFocus || textField.selected ? 2 : 1
       radius: Stylesheet.cornerRadiusSmall
 
       Behavior on border.color {

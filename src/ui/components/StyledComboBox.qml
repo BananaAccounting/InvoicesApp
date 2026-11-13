@@ -30,12 +30,17 @@ ComboBox {
     // Popup alignment, to the left or right to the control
     property int popupAlign: Qt.AlignLeft
 
+    // The current cell of the items table, marked like a focused control - see
+    // StyledTextField, which carries the same property for the same reason.
+    property bool selected: false
+
     background: Rectangle {
         color: Stylesheet.baseColor
         // The border (never covered by inner content) carries both the hover and the
         // focus cue: thin accent outline on hover, thicker on focus.
-        border.width: control.activeFocus ? 2 : 1
-        border.color: control.activeFocus || control.hovered ? Stylesheet.accentColor : Stylesheet.borderColor
+        border.width: control.activeFocus || control.selected ? 2 : 1
+        border.color: control.activeFocus || control.selected || control.hovered ?
+                          Stylesheet.accentColor : Stylesheet.borderColor
         radius: Stylesheet.cornerRadiusSmall
 
         Behavior on border.color {

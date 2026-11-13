@@ -42,10 +42,9 @@ TextArea {
       implicitHeight: Qt.platform.os === "android" ? 34 * Stylesheet.pixelScaleRatio : 0
 
       color: Stylesheet.baseColor
-      // Highlight real focus only - see StyledTextField: "selected" is bound to the
-      // items table's current cell, which stays set after the focus moved away.
-      border.color: textArea.activeFocus ? Stylesheet.accentColor : Stylesheet.borderColor
-      border.width: textArea.activeFocus ? 2 : 1
+      // "selected" is the current cell of the items table - see StyledTextField.
+      border.color: textArea.activeFocus || textArea.selected ? Stylesheet.accentColor : Stylesheet.borderColor
+      border.width: textArea.activeFocus || textArea.selected ? 2 : 1
       radius: Stylesheet.cornerRadiusSmall
 
       Behavior on border.color {
