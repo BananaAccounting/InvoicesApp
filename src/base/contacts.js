@@ -247,6 +247,21 @@ function contactCurrencyGet(customer_id) {
     return defaultCurrency
 }
 
+/**
+ * The discount agreed with the customer, as a percentage. Empty when the contact has none:
+ * there is no default to fall back on, unlike the currency and the payment term.
+ */
+function contactDiscountPercentageGet(customer_id) {
+    var tableContacts = contactsTableGet()
+    if (tableContacts) {
+        var contactRow = tableContacts.findRowByValue("RowId", customer_id)
+        if (contactRow) {
+            return contactRow.value("DiscountPercentage")
+        }
+    }
+    return ""
+}
+
 function contactPaymentTermInDaysGet(customer_id) {
     let defaultPaymentTerm = getSettings().new_documents.payment_term_days
     var tableContacts = contactsTableGet()

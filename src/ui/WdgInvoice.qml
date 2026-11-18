@@ -1356,6 +1356,7 @@ Item {
                                     setDocumentLocale(Contacts.contactLocaleGet(contactId))
                                     setDocumentCurrency(Contacts.contactCurrencyGet(contactId))
                                     setDocumentDueDate(Contacts.contactPaymentTermInDaysGet(contactId))
+                                    setDocumentDiscountPercentage(Contacts.contactDiscountPercentageGet(contactId))
                                     invoice_due_date.update()
                                     updateViewAddress()
                                 } else {
@@ -3799,6 +3800,43 @@ Item {
             invoice.json.document_info.currency = defaultCurrency
             setDocumentModified()
         }
+    }
+
+    /* The discount agreed with the customer, taken from the contact when the customer is
+       chosen, like the currency and the payment term above. An empty or zero discount leaves
+       the document as it is: changing customer must not throw away a discount typed by hand.
+
+       Written where the Discount field of the totals writes, so that typing there afterwards
+       simply replaces it. */
+    function setDocumentDiscountPercentage(percentage) {
+
+        // Used as it comes: a column of Contacts is read in the internal format, whatever was
+        // typed into it and however the locale shows it, which is the format the discount is
+        // stored in - see InvoiceDiscountPercentage in main.js, read the same way.
+        if (!percentage || Banana.SDecimal.isZero(percentage))
+            return
+
+        if (!invoice.json.billing_info)
+            invoice.json.billing_info = {}
+        if (!invoice.json.billing_info.discount)
+            invoice.json.billing_info.discount = {}
+
+        // One of these keys at a time, as the Discount field does: which one is decided by
+        // the VAT mode, and a leftover from another mode would be counted as well.
+        delete invoice.json.billing_info.discount.percent
+        delete invoice.json.billing_info.discount.percent_vat_inclusive
+        delete invoice.json.billing_info.discount.percent_vat_exclusive
+        delete invoice.json.billing_info.discount.amount
+        delete invoice.json.billing_info.discount.amount_vat_inclusive
+        delete invoice.json.billing_info.discount.amount_vat_exclusive
+
+        if (!isVatModeVatInclusive)
+            invoice.json.billing_info.discount.percent_vat_exclusive = percentage
+        else
+            invoice.json.billing_info.discount.percent_vat_inclusive = percentage
+
+        setDocumentModified()
+        calculateInvoice()
     }
 
     function setDocumentDueDate(paymentTermInDays) {
