@@ -21,13 +21,18 @@ Shape {
 
     property bool expanded: false
 
+    /* The colour of the triangle. Whatever opens and closes carries the accent, because the
+       triangle is the whole of what says a line can be clicked - the rest of the line is
+       text like any other. */
+    property color color: Stylesheet.textColor
+
     width: 12 * Stylesheet.pixelScaleRatio
     height: 12 * Stylesheet.pixelScaleRatio
 
     ShapePath {
         strokeWidth: 1
-        strokeColor: Stylesheet.textColor
-        fillColor: Stylesheet.textColor
+        strokeColor: shape.color
+        fillColor: shape.color
         fillRule: Qt.WindingFill
         startX: 0; startY: 0
         PathLine { x: shape.width / 2; y: shape.height / 2 }

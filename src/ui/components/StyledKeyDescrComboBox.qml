@@ -50,6 +50,15 @@ StyledComboBox {
     /** If true the control output some debug info */
     property bool debugOut: false
 
+    /* A cell of a table, or a field inside a card - see StyledTextField, where the same
+       three properties do the same thing. */
+    property bool cellMode: false
+    property color cellBackground: "transparent"
+    property bool filled: false
+
+    readonly property bool edited: activeFocus || selected
+    readonly property bool pointedAt: edited || hovered
+
     /** This signal is emitted when the user selected or set a new key */
     signal currentKeySet(key: string, isExistingKey: bool)    
 
@@ -89,14 +98,17 @@ StyledComboBox {
     rightPadding: indicator.width
 
     background: Rectangle {
-        color: Stylesheet.baseColor
+        color: control.cellMode ? (control.pointedAt ? Stylesheet.baseColor
+                                                     : control.cellBackground)
+                                : Stylesheet.baseColor
         // This is the only visible box: it wraps the text field AND the dropdown
         // arrow, and carries the hover/focus cue (thin accent outline on hover,
         // thicker on focus). Replaces the one in StyledComboBox, so the current cell
         // of the items table has to be marked here as well - see "selected" there.
         border.width: control.activeFocus || control.selected ? 2 : 1
-        border.color: control.activeFocus || control.selected || control.hovered ?
-                          Stylesheet.accentColor : Stylesheet.borderColor
+        border.color: control.pointedAt ? Stylesheet.accentColor :
+                          (control.cellMode || control.filled) ? "transparent" :
+                              Stylesheet.borderColor
         radius: Stylesheet.cornerRadiusSmall
 
         Behavior on border.color {

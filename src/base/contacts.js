@@ -150,6 +150,139 @@ function contactsTableGet() {
     return Banana.document.table("Contacts");
 }
 
+/**
+ * Returns the id a new contact can take: the next free number of the RowId column.
+ * Read the same way as the number of a new invoice - see invoiceGetNextNumber.
+ * Contacts whose id is not a number are ignored, so a file that names its contacts
+ * returns "1" and the id is then for the user to replace.
+ */
+function contactsGetNextId() {
+    let table = contactsTableGet();
+    if (!table) {
+        return "";
+    }
+    if (Banana.application.apiVersion &&
+        (Banana.compareVersion(Banana.application.apiVersion, "1.2.2") >= 0)) {
+        return table.progressiveNumber('RowId', true);
+    }
+    let nextNumber = 0;
+    for (let i = 0; i < table.rowCount; ++i) {
+        let rowId = Number(table.value(i, 'RowId'));
+        if (rowId > nextNumber) {
+            nextNumber = rowId;
+        }
+    }
+    return (nextNumber + 1).toString();
+}
+
+/**
+ * Returns the fields of a row of the Contacts table, filled from the customer_info of a
+ * document, ready to be handed to DocumentChange.addOperationRowAdd("Contacts", fields).
+ *
+ * The mapping is the one contactAddressGet() reads in the other direction, so a contact
+ * created from a document and then chosen again fills the very same fields.
+ *
+ * Only the columns the table really has are listed. Most of the columns of Contacts are
+ * optional - OrganisationUnit2 to 4, Language and others are not in a table left as Banana
+ * creates it - and naming one that is missing makes the DocumentChange report
+ * "Column <name> not found" when it is applied. Which columns exist is asked of the table
+ * rather than assumed, so the same contact can be created in any file.
+ *
+ * Empty values are kept for the columns that do exist: this builds a new row, where there
+ * is nothing yet that an empty value could overwrite.
+ */
+function contactRowFieldsGet(id, customerInfo, locale, currency) {
+    if (!customerInfo) {
+        customerInfo = {};
+    }
+
+    // The columns of this file's Contacts table. Null when the list cannot be read, and
+    // then every mapped column is written, as it was before this check existed.
+    var columnNames = null;
+    var table = contactsTableGet();
+    if (table) {
+        var names = table.columnNames;
+        // Only used when it really is the list of names: on a Banana that does not offer
+        // the property, everything is written as it was before this check existed.
+        if (names && typeof names.indexOf === "function") {
+            columnNames = names;
+        }
+    }
+
+    var fields = {};
+    var setField = function (columnName, text) {
+        if (columnNames && columnNames.indexOf(columnName) < 0) {
+            return;
+        }
+        fields[columnName] = text ? text : "";
+    }
+
+    setField("RowId", id);
+    setField("NamePrefix", customerInfo.courtesy);
+    setField("OrganisationName", customerInfo.business_name);
+    setField("OrganisationUnit", customerInfo.business_unit);
+    setField("OrganisationUnit2", customerInfo.business_unit2);
+    setField("OrganisationUnit3", customerInfo.business_unit3);
+    setField("OrganisationUnit4", customerInfo.business_unit4);
+    setField("FirstName", customerInfo.first_name);
+    setField("FamilyName", customerInfo.last_name);
+    setField("Street", customerInfo.address1);
+    setField("BuildingNumber", customerInfo.building_number);
+    setField("AddressExtra", customerInfo.address2);
+    setField("POBox", customerInfo.address3);
+    setField("PostalCode", customerInfo.postal_code);
+    setField("Locality", customerInfo.city);
+    setField("Country", customerInfo.country);
+    setField("CountryCode", customerInfo.country_code);
+    setField("Website", customerInfo.web);
+    setField("EmailWork", customerInfo.email);
+    setField("PhoneWork", customerInfo.phone);
+    setField("PhoneMobile", customerInfo.mobile);
+    setField("VatNumber", customerInfo.vat_number);
+    setField("FiscalNumber", customerInfo.fiscal_number);
+
+    // The language and the currency of the document, which is what the contact would have
+    // been read for - see contactLocaleGet and contactCurrencyGet.
+    setField("Language", locale);
+    setField("Currency", currency);
+
+    return fields;
+}
+
+/**
+ * The description of a contact that is not in the Contacts table yet, built from the
+ * customer_info of a document. Same shape as contactsBriefDescription above, so a contact
+ * just created reads in the selector exactly like the ones already in the table.
+ */
+function contactBriefDescriptionFromCustomerInfo(id, customerInfo) {
+    if (!customerInfo) {
+        return id ? id : "";
+    }
+
+    var addressFields = [];
+    if (customerInfo.business_name)
+        addressFields.push(customerInfo.business_name);
+
+    var customerName = [];
+    if (customerInfo.first_name)
+        customerName.push(customerInfo.first_name);
+    if (customerInfo.last_name)
+        customerName.push(customerInfo.last_name);
+    if (customerName.length > 0)
+        addressFields.push(customerName.join(' '));
+
+    if (addressFields.length === 0) {
+        addressFields.push(id ? id : "");
+    }
+
+    if (customerInfo.city)
+        addressFields.push(customerInfo.city);
+    if (customerInfo.country_code)
+        addressFields.push(customerInfo.country_code);
+
+    return addressFields.join(', ').replace('\n', ", ");
+}
+
 function contactsBriefDescriptionGetById(id) {
     var tableContacts = contactsTableGet()
     if (tableContacts) {

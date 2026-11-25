@@ -93,6 +93,34 @@ var DocumentChange = class DocumentChange {
         currentDoc.dataUnits.push(dataUnitTransactions);
     }
 
+    /**
+     * Marks a row of the table for deletion. The sequence is the row number the row has
+     * before any of these changes is applied, counted from 0 - the same numbering
+     * addOperationRowModify uses. Deleting does not renumber the rows that follow, so
+     * several deletions in one document each keep the number of their own row.
+     */
+    addOperationRowDelete(tableName, rowNr) {
+        var row = {};
+        row.operation = {};
+        row.operation.name = "delete";
+        row.operation.sequence = rowNr.toString();
+
+        //rows
+        var rows = [];
+        rows.push(row);
+
+        //table
+        var dataUnitTransactions = {};
+        dataUnitTransactions.nameXml = tableName;
+        dataUnitTransactions.data = {};
+        dataUnitTransactions.data.rowLists = [];
+        dataUnitTransactions.data.rowLists.push({"rows":rows});
+
+        //document
+        var currentDoc = this.jsonDoc.data[this.jsonDoc.data.length-1].document;
+        currentDoc.dataUnits.push(dataUnitTransactions);
+    }
+
     removeLastOperation() {
         var currentDoc = this.jsonDoc.data[this.jsonDoc.data.length-1].document;
         currentDoc.dataUnits.pop();

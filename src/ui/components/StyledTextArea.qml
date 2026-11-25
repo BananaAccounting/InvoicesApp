@@ -32,6 +32,15 @@ TextArea {
       other platforms too, which is what their styles use anyway. */
    topInset: 0
 
+   /* A cell of a table, or a field inside a card - see StyledTextField, where the same
+      three properties do the same thing. */
+   property bool cellMode: false
+   property color cellBackground: "transparent"
+   property bool filled: false
+
+   readonly property bool edited: activeFocus || selected
+   readonly property bool pointedAt: edited || hovered
+
    background: Rectangle {
       /* Material works out the space above the text from the height the background asks for:
          (implicitBackgroundHeight - height of the placeholder) / 2. A plain Rectangle asks for
@@ -39,11 +48,16 @@ TextArea {
          of a control is asked for instead; Material's own 56 would make every description in
          the items table that tall. Nothing on the other platforms: they pad by fixed amounts
          and a height here would only make an empty field taller than it is today. */
-      implicitHeight: Qt.platform.os === "android" ? 34 * Stylesheet.pixelScaleRatio : 0
+      implicitHeight: Qt.platform.os === "android" ? Stylesheet.controlHeight : 0
 
-      color: Stylesheet.baseColor
+      color: textArea.cellMode ? (textArea.pointedAt ? Stylesheet.baseColor
+                                                     : textArea.cellBackground)
+                               : Stylesheet.baseColor
       // "selected" is the current cell of the items table - see StyledTextField.
-      border.color: textArea.activeFocus || textArea.selected ? Stylesheet.accentColor : Stylesheet.borderColor
+      border.color: textArea.edited ? Stylesheet.accentColor :
+                        (textArea.cellMode || textArea.filled) ?
+                            (textArea.hovered ? Stylesheet.borderColor : "transparent") :
+                            Stylesheet.borderColor
       border.width: textArea.activeFocus || textArea.selected ? 2 : 1
       radius: Stylesheet.cornerRadiusSmall
 

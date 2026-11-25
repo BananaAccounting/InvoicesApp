@@ -1,5 +1,68 @@
 # Changelog
 
+## 2026-11-24
+
+* [Enhancement] Redesigned the Estimate/Invoice dialog.
+  * One single form: every field of the document is always available, the secondary ones
+    folded into the group they belong to, and a group that already holds something opens by
+    itself. The four views (Base, Custom 1, Custom 2, Complete) are gone from the dialog.
+  * The customer and the document's own data sit side by side in two panels, stacked on a
+    narrow screen.
+  * A bar at the top says which document is open, how far along the table it is and what it
+    totals; a bar at the bottom holds Save and Close. Print, Copy, Create invoice, Settings
+    and Help moved into the menu of the top bar, which replaces the tab bar.
+  * The commands of the items table (Add, Remove, Move up, Move Down) moved onto its heading.
+* [Enhancement] Added navigation between the documents of the table: the arrows at the top
+  left, or Alt+Left / Alt+Right, open the previous or the next estimate or invoice without
+  leaving the dialog. Unsaved changes are never written without being asked about first.
+* [Enhancement] Added to the menu of the top bar the commands to create a new estimate or
+  invoice and to delete the open one, so the table does not have to be gone back to.
+* [Enhancement] Added a way to go straight to one document of the table: the magnifier
+  beside the arrows, or Ctrl+F, opens a list of the documents - number, date, customer,
+  amount - that narrows as you type. The list is read from the columns of the table, so a
+  table of several hundred rows is listed without opening a single document.
+* [Enhancement] The customer panel and the document panel end at the same line, and the
+  object and the begin text share one panel, as they follow one another on the printed page.
+* [Enhancement] The texts of the document are each where they are printed: the begin text
+  above the items table it introduces, the end text after the totals. They used to sit
+  together at the bottom, which matched neither. The internal notes, the one field that is
+  never printed, are on their own and say so in their title.
+* [Enhancement] Save no longer closes the dialog: now that the arrows walk through the
+  documents of the table, saving one and going on to the next is the ordinary thing to do.
+  A short message confirms the save, and Close is what closes.
+* [Enhancement] Added a button beside the customer selector that keeps the address of the
+  document as a new contact in the Contacts table.
+* [Enhancement] The commands of the items table (Add, Remove, Move up, Move Down) are now
+  reached from the ⋮ menu of each row at every window width; the bar of buttons is gone.
+* [Enhancement] Removed from the Settings the sections that configured the four views - the
+  titles, which views were visible, and the per view field switches - since the dialog now
+  has one single form that shows every field.
+* [Enhancement] Reworked the look of the dialog:
+  * Introduced a type scale, so the name of a field, its value, a heading and the total are
+    no longer all the same size.
+  * The cards of the form sit on a surface of their own, and the bars above and below the
+    page frame it; the frames around the fields are quieter.
+  * Fields are slightly taller and the rows of the form better spaced.
+  * Two shades of grey instead of four: one means "a group of fields" and is used by the
+    cards and by the heading row of the items table, and the bars above and below the page
+    are the page itself with a rule. What opens and closes - the disclosure lines, the
+    triangles - carries the accent colour, since it can be clicked. Field labels are a
+    little less faded.
+  * The items table draws its grid as alternating rows instead of a frame around every
+    cell: the frame is now shown on the cell under the pointer and on the one being edited.
+  * The state of the document - not saved, read only - is a coloured badge beside the
+    title instead of another line of grey text.
+  * The fields inside a card carry no frame either: they take the colour of the page and
+    are read as cut into the card, which is a shade away from it. The frame says which
+    field is being edited and nothing else. Fields outside a card keep theirs, since there
+    the page and the field are the same colour.
+* [Enhancement] Added a toolbar to the top of the dialog, where the window is wide enough to
+  hold one: New, Copy, Delete, Print, Create invoice, Settings and Help, each with an icon
+  and its name. The names give way to the icons alone on a narrower window, and on a narrow
+  screen the commands stay in the ⋮ menu as before.
+* [Fix] Saving two different documents without closing the dialog no longer discards the
+  operation of the first one.
+
 ## 2026-07-27
 * [RELEASE BETA] Fixed an error when using the console.log() function
 

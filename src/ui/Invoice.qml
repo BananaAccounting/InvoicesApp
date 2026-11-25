@@ -35,12 +35,26 @@ QtObject {
 
     // Private properties
     property var docChange: null
-    property bool docChangeRowModifyAdded : false
-    property bool docChangeRowAddAdded : false
+
+    /* Which operation was added to the DocumentChange last: its kind and the row it was for.
+       Saving the same document twice - printing it, then saving it - must replace that
+       operation rather than add a second one, which for a new document would add its row to
+       the table twice. It is compared by row and not by a flag, because the dialog can now
+       walk from one document to another and save more than one of them: a flag said only
+       "something was added", and the second document's save then dropped the first
+       document's operation. */
+    property string docChangeLastOperationKey: ""
+
+    /* Tells one new document from the next. A document that is not a row of the table yet has
+       no row number to be known by - every one of them sits at the end of the table - so
+       without this the save of a second new document would be taken for the save of the
+       first one and would replace its operation. Bumped by beginNewDocument(). */
+    property int newDocumentSerial: 0
 
     // Signals
     signal invoiceChanged()
     signal invoiceSaved()
+    signal documentDeleted()
 
     property int signalInvoiceChanged: 1
 
@@ -86,19 +100,27 @@ QtObject {
         var invoiceDataField = invoiceUpdatedInvoiceDataFieldGet(invoice.tabPos, invoice.json)
         changedRowFields["InvoiceData"] = invoiceDataField
 
+        // What this save is about to add. Only an operation of the very same kind, for the
+        // very same document, may be replaced - see docChangeLastOperationKey. A new
+        // document is told apart by its serial and not by its row, which it does not have
+        // yet - see newDocumentSerial.
+        var operationKey = (invoiceRow ? "modify" : "add|" + newDocumentSerial) + "|" +
+                invoice.tabPos.tableName + "|" +
+                (invoice.tabPos.listName ? invoice.tabPos.listName : "") + "|" +
+                invoice.tabPos.rowNr
+
         if (invoiceRow) {
             // existing invoice / estimate
-            if (docChangeRowModifyAdded)
+            if (docChangeLastOperationKey === operationKey)
                 invoice.docChange.removeLastOperation()
 
             docChange.addOperationRowModify(
                         invoice.tabPos.tableName,
                         invoice.tabPos.rowNr,
                         changedRowFields);
-            docChangeRowAddAdded = true;
         } else {
             // new invoice / estimate
-            if (docChangeRowAddAdded)
+            if (docChangeLastOperationKey === operationKey)
                 docChange.removeLastOperation();
 
             docChange.addOperationRowAdd(tabPos.tableName, changedRowFields);
@@ -106,11 +128,66 @@ QtObject {
                         tabPos.tableName,
                         invoice.tabPos.rowNr,
                         "RowId");
-            docChangeRowAddAdded = true
         }
+
+        docChangeLastOperationKey = operationKey
 
         setIsModified(false)
         invoiceSaved()
+    }
+
+    /* Called before a document that is not in the table yet is put on screen - a new one, a
+       copy, an invoice created from an estimate - so that its save cannot be mistaken for
+       the save of the previous one. See newDocumentSerial. */
+    function beginNewDocument() {
+        newDocumentSerial++
+    }
+
+    /* Marks the open document for deletion. Like a save, this only writes an operation into
+       the DocumentChange: the row leaves the table when Banana applies it, once the dialog
+       is closed. Returns false when there is no row to delete, which is the case for a
+       document that has not been saved yet.
+
+       Any change still being held for this document is dropped: it would be written to a
+       row that is about to go, and the operations of a document are applied before the
+       deletions are. */
+    function deleteDocument() {
+        if (!docChange || !tabPos)
+            return false
+
+        var invoiceRow = invoiceRowGet(tabPos)
+        if (!invoiceRow)
+            return false
+
+        var operationKey = "delete|" + tabPos.tableName + "|" +
+                (tabPos.listName ? tabPos.listName : "") + "|" + tabPos.rowNr
+
+        // Deleting twice would mark the same row twice, and the second sequence would be
+        // refused as a row that no longer exists.
+        if (docChangeLastOperationKey === operationKey)
+            return true
+
+        docChange.addOperationRowDelete(tabPos.tableName, tabPos.rowNr)
+        docChangeLastOperationKey = operationKey
+
+        setIsModified(false)
+        documentDeleted()
+        return true
+    }
+
+    /* Adds a row to the Contacts table, so that the address typed into a document can be
+       kept as a contact without leaving the dialog. The fields are built by
+       contactRowFieldsGet in contacts.js.
+
+       The key of the last operation is cleared afterwards: this row belongs to another
+       table and must never be the one a following save replaces. */
+    function addContact(fields) {
+        if (!docChange || !fields)
+            return false
+
+        docChange.addOperationRowAdd("Contacts", fields)
+        docChangeLastOperationKey = ""
+        return true
     }
 
     function setIsNew(newDocument) {

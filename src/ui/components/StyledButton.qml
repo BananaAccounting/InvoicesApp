@@ -86,7 +86,7 @@ Button {
 
    background: Rectangle {
       color: button.showAsPrimary ? Stylesheet.accentColor : Stylesheet.buttonColor
-      implicitHeight: 34 * Stylesheet.pixelScaleRatio
+      implicitHeight: Stylesheet.controlHeight
       // implicitWidth: contentItem.Width
       radius: Stylesheet.cornerRadius
       border.width: button.showAsPrimary ? 0 : 1

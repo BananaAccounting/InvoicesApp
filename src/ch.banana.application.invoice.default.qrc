@@ -15,26 +15,26 @@
         <file>ui/components/SimpleMessageDialog.qml</file>
         <file>ui/components/StyledBranchIndicator.qml</file>
         <file>ui/components/StyledButton.qml</file>
+        <file>ui/components/StyledCard.qml</file>
         <file>ui/components/StyledCheckBox.qml</file>
         <file>ui/components/StyledComboBox.qml</file>
+        <file>ui/components/StyledIcon.qml</file>
         <file>ui/components/StyledKeyDescrComboBox.qml</file>
         <file>ui/components/StyledLabel.qml</file>
         <file>ui/components/StyledRadioButton.qml</file>
         <file>ui/components/StyledScrollableTextArea.qml</file>
-        <file>ui/components/StyledSectionHeader.qml</file>
-        <file>ui/components/StyledSettingsSwitch.qml</file>
         <file>ui/components/StyledSwitch.qml</file>
-        <file>ui/components/StyledTabBar.qml</file>
-        <file>ui/components/StyledTabButton.qml</file>
         <file>ui/components/StyledTextArea.qml</file>
+        <file>ui/components/StyledToolButton.qml</file>
         <file>ui/components/StyledTextField.qml</file>
-        <file>ui/components/StyledViewLink.qml</file>
         <file>ui/components/Stylesheet.qml</file>
         <file>ui/AppSettings.qml</file>
         <file>ui/DevSettings.qml</file>
         <file>ui/DlgEditSource.qml</file>
         <file>ui/DlgInvoice.qml</file>
+        <file>ui/DlgGoToDocument.qml</file>
         <file>ui/DlgLincense.qml</file>
+        <file>ui/DlgNewContact.qml</file>
         <file>ui/DlgPixelMetrics.qml</file>
         <file>ui/DlgTranslations.qml</file>
         <file>ui/Invoice.qml</file>

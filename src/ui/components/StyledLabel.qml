@@ -23,4 +23,9 @@ Label {
     // Stylesheet.labelColor. Where a label carries a heading or a figure instead, the
     // colour is set on the spot - the read only banner, the totals, the table headings.
     color: Stylesheet.labelColor
+
+    /* And the size of one: a step below the value it names, so that a form reads as values
+       with names attached rather than as one even block of text. A label that is really a
+       heading or a figure sets a font of its own - see Stylesheet's type scale. */
+    font: Stylesheet.labelFont
 }

@@ -43,22 +43,57 @@ Item {
 
     /* The colour of a label that names a field: read once to find the field, while the value
        beside it is read every time. Both at full strength made a wall of equal text. */
-    readonly property color labelColor: mutedTextColor
+    /* One step behind the value it names, not two: at a little over half opacity a form
+       full of labels came out washed on anything but a perfect screen. The grey of what is
+       genuinely secondary stays where it was, further down. */
+    readonly property color labelColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.68)
 
-    /* Headings: the dialog's own font, a tenth larger and semi bold, so it follows the system
-       font. A font carries its size in points or in pixels, never both, and which one depends
-       on the platform: the unset one reads as -1, so both cases are handled. */
-    readonly property font sectionTitleFont: referenceMetrics.font.pointSize > 0 ?
-                                                 Qt.font({ family: referenceMetrics.font.family,
-                                                           weight: Font.DemiBold,
-                                                           pointSize: referenceMetrics.font.pointSize * 1.1 }) :
-                                                 Qt.font({ family: referenceMetrics.font.family,
-                                                           weight: Font.DemiBold,
-                                                           pixelSize: Math.round(referenceMetrics.font.pixelSize * 1.1) })
+    /* The type scale. Everything used to be the system font at one single size, told apart
+       only by colour and weight, so a form read as one even block: the name of a field, its
+       value and the heading above them all looked alike. Four steps are enough here - a
+       caption, the body, a heading, and the one figure the document is about.
+
+       All of them follow the system font. A font carries its size in points or in pixels,
+       never both, and which one depends on the platform: the unset one reads as -1, so both
+       cases are handled in one place.  */
+    function scaledFont(factor, weight) {
+        if (referenceMetrics.font.pointSize > 0) {
+            return Qt.font({ family: referenceMetrics.font.family,
+                             weight: weight,
+                             pointSize: referenceMetrics.font.pointSize * factor })
+        }
+        return Qt.font({ family: referenceMetrics.font.family,
+                         weight: weight,
+                         pixelSize: Math.round(referenceMetrics.font.pixelSize * factor) })
+    }
+
+    // The name of a field, a caption, a unit: read once to find the value beside it.
+    readonly property font labelFont: scaledFont(0.92, Font.Normal)
+
+    // A sentence meant to be read: a notice, a message. The size of the values of the form.
+    readonly property font bodyFont: scaledFont(1.0, Font.Normal)
+
+    // Headings of the sections of a page.
+    readonly property font sectionTitleFont: scaledFont(1.1, Font.DemiBold)
+
+    // The title of a card: a step below a section heading, a step above the body.
+    readonly property font cardTitleFont: scaledFont(1.02, Font.DemiBold)
+
+    // The name of the open document, in the bar at the top of the window.
+    readonly property font documentTitleFont: scaledFont(1.2, Font.DemiBold)
+
+    // The total: the one figure the whole document is about.
+    readonly property font totalFont: scaledFont(1.3, Font.DemiBold)
 
     // Corner radius, shared so controls read as one consistent, modern style
     property double cornerRadius: 6 * pixelScaleRatio
     property double cornerRadiusSmall: 3 * pixelScaleRatio
+
+    /* The height of a field and of a button. Fields used to be 28 points, which left the
+       text pressed against the frame and made a form of them look cramped next to buttons
+       six points taller. */
+    property int fieldHeight: 30 * pixelScaleRatio
+    property int controlHeight: 34 * pixelScaleRatio
 
     // Colors
     property double minimumContrast: 4.5
@@ -94,9 +129,45 @@ Item {
     property color separatorColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.18)
 
     // Tinted surface for status banners. Derived from the accent rather than from the
-    // text colour, so it stays clearly distinct from buttonColor (the tab bar) instead
-    // of blending into it, and follows the theme on its own.
-    property color accentSurfaceColor: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.14)
+    // text colour, so it stays clearly distinct from the page instead of blending into
+    // it, and follows the theme on its own.
+    property color accentSurfaceColor: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.12)
+
+    /* The surfaces of the window. Mixed from the text colour rather than taken from the
+       system palette: a translucent tint lands the same way in a light and in a dark theme,
+       while systemPalette.button came out almost the colour of the page on one platform and
+       far from it on another.
+
+       Two levels, and only two. There used to be four greys a shade apart - the bars, the
+       cards, the heading row of the items table - none of which said anything the others
+       did not, and one of them from another family altogether. Now one grey means "a group
+       of fields", and the bars are the page with a rule under them, which is all a bar
+       needs to be a bar.
+
+       The card has to be far enough from the page to be seen, because the fields inside it
+       take the colour of the page and are told apart from it by that difference alone. */
+    property color surfaceColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.06)
+    property color barColor: baseColor
+
+    /* The same grey, mixed down onto the page so that it covers instead of letting through.
+       The heading row of the items table needs this: its cells are laid out again whenever
+       the width of the Description column is worked out, and the cells the view leaves
+       behind stay where they were. An opaque cell paints over them, a translucent one shows
+       every one of them - the titles of the columns that move came out written twice. */
+    property color surfaceColorOpaque: Qt.tint(baseColor, surfaceColor)
+
+    /* Every other row of the items table. The rows are told apart by this and not by a
+       frame around each cell: a table of figures is read down its columns, and a frame
+       around every one of them cut those columns into boxes. Faint on purpose - it has to
+       be felt rather than seen, or it competes with the figures it carries. */
+    property color rowAlternateColor: Qt.rgba(textColor.r, textColor.g, textColor.b, 0.06)
+
+    /* Something that wants attention without being wrong: a document with changes that are
+       not saved yet. Brightened in dark mode like the accent above, for the same reason. */
+    property color amberColor: "#B5730C"
+    property color warningColor: getContrastRatio(amberColor, systemPalette.base) > minimumContrast ?
+                                     amberColor : Qt.lighter(amberColor, 1.7)
+    property color warningSurfaceColor: Qt.rgba(warningColor.r, warningColor.g, warningColor.b, 0.16)
 
     // Surface of the menus. In dark mode the dialog's own colours made a menu the same colour
     // as the dialog under it, border included, so a little text colour is mixed in to lift it.

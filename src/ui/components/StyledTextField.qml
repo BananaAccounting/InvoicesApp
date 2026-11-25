@@ -19,25 +19,52 @@ import "."
 
 TextField {
    id: textField
-   implicitHeight: 28 * Stylesheet.pixelScaleRatio
+   implicitHeight: Stylesheet.fieldHeight
 
    selectByMouse: true
    property bool selected: false
    property bool borderless: false
    property bool modified: false
 
+   /* A cell of a table rather than a field of a form. The rows of a table are told apart by
+      their colour, so a cell carries the colour of its row and no frame of its own; the
+      frame appears on the cell under the pointer and on the one being edited, which is the
+      only place it says anything. */
+   property bool cellMode: false
+   property color cellBackground: "transparent"
+
+   /* A field inside a card, where the card has a tint of its own: the field takes the
+      colour of the page and reads as cut into the card, so it needs no frame to say that
+      it can be typed into. The frame is then free to say what it alone can say - which
+      field is being edited.
+
+      Only inside a card. A field on the page is the same colour as the page, so there it
+      is the frame that makes it a field at all. */
+   property bool filled: false
+
+   // True while the field is the one the keyboard or the pointer is on. "selected" is the
+   // current cell of the items table, which keeps the keyboard on itself and sends what is
+   // typed to that cell: marked like a focused field, because that is what it behaves like.
+   // Whoever sets it has to clear it when the keyboard goes elsewhere, or a cell is left
+   // looking as though it were still being edited.
+   readonly property bool edited: activeFocus || selected
+   readonly property bool pointedAt: edited || hovered
+
    color: Stylesheet.textColor
    selectionColor : Stylesheet.selectionColor
    selectedTextColor: Stylesheet.selectedTextColor
 
    background: Rectangle {
-      color: Stylesheet.baseColor
-      // "selected" is the current cell of the items table, which keeps the keyboard on
-      // itself and sends what is typed to that cell: marked like a focused field, because
-      // that is what it behaves like. Whoever sets it has to clear it when the keyboard
-      // goes elsewhere, or a cell is left looking as though it were still being edited.
-      border.color: textField.activeFocus || textField.selected ? Stylesheet.accentColor :
-                        borderless ? Stylesheet.baseColor : Stylesheet.borderColor
+      color: borderless ? "transparent" :
+                 textField.cellMode ? (textField.pointedAt ? Stylesheet.baseColor
+                                                           : textField.cellBackground)
+                                    : Stylesheet.baseColor
+
+      border.color: textField.edited ? Stylesheet.accentColor :
+                        borderless ? "transparent" :
+                            (textField.cellMode || textField.filled) ?
+                                (textField.hovered ? Stylesheet.borderColor : "transparent") :
+                                Stylesheet.borderColor
       border.width: textField.activeFocus || textField.selected ? 2 : 1
       radius: Stylesheet.cornerRadiusSmall
 

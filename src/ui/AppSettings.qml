@@ -20,17 +20,10 @@ QtObject {
     // Constants
     readonly property string settings_id: "invoices"
 
-    readonly property string view_id_base: "base"
-    readonly property string view_id_short: "short"
-    readonly property string view_id_long: "long"
+    /* The dialog has one single form showing every field, so there is one view left. The
+       name is still the one the settings use, because the widths of the columns of the
+       items table are stored under it - see WdgInvoice.saveInvoiceItemColumnWidth. */
     readonly property string view_id_full: "full"
-
-    readonly property var default_views_titles: {
-        "base": qsTr("Base"),
-        "short": qsTr("Custom 1"),
-        "long": qsTr("Custom 2"),
-        "full": qsTr("Complete")
-    }
 
     // Current settings data
 
@@ -43,10 +36,10 @@ QtObject {
     // Use one of them and not both, if not you well get a double notifications
     // N.B.: Counters are used as signals in qml binding
 
+    /* Emitted when the settings are loaded or replaced wholesale. The form listens to it to
+       lay the items table out again, since the widths of its columns are read from here. */
     signal fieldsVisibilityChanged
 
-    property int signalViewsSettingsChanged: 1
-    property int signalFieldsVisibilityChanged: 1
     property int signalItemsVisibilityChanged: 1
     property int signalTranslationsChanged: 1
     property int signalNotificationsChanged: 1
@@ -64,8 +57,6 @@ QtObject {
     function clearSettings() {
         data = Settings.getDefaultSettings()
         modified = true
-        signalViewsSettingsChanged++
-        signalFieldsVisibilityChanged++
         fieldsVisibilityChanged()
     }
 
@@ -73,16 +64,12 @@ QtObject {
         data = Settings.getSettings()
         modified = true
         loaded = true
-        signalViewsSettingsChanged++
-        signalFieldsVisibilityChanged++
         fieldsVisibilityChanged()
     }
 
     function resetSettings() {
         data = Settings.getDefaultSettings()
         modified = true
-        signalViewsSettingsChanged++
-        signalFieldsVisibilityChanged++
         fieldsVisibilityChanged()
     }
 
@@ -91,38 +78,8 @@ QtObject {
             data = newSettings
             data = Settings.upgradeSettings(data)
             modified = true
-            signalViewsSettingsChanged++
-            signalFieldsVisibilityChanged++
             fieldsVisibilityChanged()
         }
-    }
-
-    // Fields visibility
-
-    function getInvoiceFieldVisible(fieldId, viewId) {
-        if (viewId === view_id_full) {
-            return true;
-        }
-        let viewAppearance = data.interface.invoice.views[viewId].appearance
-        if (fieldId in viewAppearance) {
-            return viewAppearance[fieldId];
-        } else {
-            let defaultAppearance = Settings.getDefaultSettings().interface.invoice.views[viewId].appearance
-            if (fieldId in defaultAppearance) {
-                return defaultAppearance[fieldId];
-            } else {
-                console.log("appearance flag '" + fieldId + "' in view '" + viewId + "' not found")
-            }
-        }
-
-        return true; // if missing default is visible
-    }
-
-    function setInvoiceFieldVisible(fieldId, viewId, value) {
-        data.interface.invoice.views[viewId].appearance[fieldId] = value
-        signalFieldsVisibilityChanged++
-        fieldsVisibilityChanged()
-        modified = true
     }
 
     function meetInvoiceFieldLicenceRequirement(fieldId) {
@@ -142,49 +99,6 @@ QtObject {
             }
         }
         return true
-    }
-
-    // Views titles
-
-    function getDefaultViewTitle(viewid) {
-        let viewTitle = default_views_titles[viewid]
-        if (viewTitle)
-            return viewTitle
-        return viewid
-    }
-
-    function getSettingsViewTitle(viewid) {
-        return data.interface.invoice.views[viewid].title
-    }
-
-    function getViewTitle(viewid) {
-        if (signalViewsSettingsChanged) {
-            let viewTitle = getSettingsViewTitle(viewid)
-            if (viewTitle)
-                return viewTitle
-            return getDefaultViewTitle(viewid)
-        }
-        return viewid;
-    }
-
-    function setViewTitle(viewId, title) {
-        data.interface.invoice.views[viewId].title = title.trim()
-        modified = true
-        signalViewsSettingsChanged++
-    }
-
-    // Views visibility
-
-    function isViewVisible(viewId) {
-        if (signalViewsSettingsChanged)
-            return data.interface.invoice.views[viewId].visible
-        return true
-    }
-
-    function setViewVisible(viewId, value) {
-        data.interface.invoice.views[viewId].visible = value
-        modified = true
-        signalViewsSettingsChanged++
     }
 
     // Notifications

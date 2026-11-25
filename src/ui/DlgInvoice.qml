@@ -20,6 +20,22 @@ import QtQuick.Layouts
 import "."
 import "./components"
 
+import "../base/invoice.js" as InvoiceJs
+
+/*
+   The window of one estimate or invoice.
+
+   It is built as a single page with a bar above it and a bar below it:
+
+   - the bar above says which document is open, how far along the table it is, and what it
+     totals, and holds the arrows that walk through the documents of the table plus the menu
+     of the commands that are not Save and Close;
+   - the page itself is the form, WdgInvoice, which is the only page the user normally sees.
+     Settings, and the pages that exist only in the internal build, are reached from that
+     menu and replace the form until they are left again;
+   - the bar below holds Save and Close, and nothing else: the two things one always wants
+     to find in the same place.
+*/
 Item {
     id: window
 
@@ -37,18 +53,60 @@ Item {
     height: Screen.height > 0 ? (isSmallScreen ? Screen.height : 600 * Stylesheet.pixelScaleRatio)
                               : 600 * Stylesheet.pixelScaleRatio
 
-    // True when the bar keeps only Save and Close and the rest move to the overflow menu:
-    // six buttons do not fit a phone, and this bar is outside the scrolling area, so a
-    // button past the right edge is unreachable. The same condition as the single column
-    // form on purpose - a private threshold would be a guess at six translated labels.
-    readonly property bool compactButtonBar: wdgInvoice.compactLayout
-
     focus: true
 
     // Placehoder for setTitle function, it is set by c++
     property var setTitle: null
 
     property int result: 0;
+
+    // Pages
+
+    readonly property int page_invoice: 0
+    readonly property int page_settings: 1
+    readonly property int page_source: 2
+    readonly property int page_development: 3
+    readonly property int page_changelog: 4
+
+    property int currentPage: page_invoice
+
+    readonly property string currentPageTitle: {
+        switch (currentPage) {
+        case page_settings: return qsTr("Settings")
+        case page_source: return qsTr("Source")
+        case page_development: return qsTr("Development")
+        case page_changelog: return qsTr("Changelog")
+        }
+        return documentTitle
+    }
+
+    /* The document being edited, "Invoice 123" or "Estimate 123". signalInvoiceChanged is
+       read so the binding follows a change of number: the json itself notifies nothing. */
+    readonly property string documentTitle: invoice.signalInvoiceChanged && invoice.json &&
+                                            invoice.json.document_info ?
+                                                getDocumentName().trim() : qsTr("Document")
+
+    /* The line under the title: what state the document is in, and where it sits in the
+       table. Both are easy to miss in a window title, and there is no window title at all
+       on a phone.
+
+       The state is a word on a coloured ground rather than more grey text: a document with
+       changes that are not saved is the one thing in this window worth catching the eye,
+       and it read as just another line of the same grey as everything around it. */
+    readonly property string documentState: {
+        if (invoice.isReadOnly)
+            return qsTr("Read only")
+        if (invoice.signalInvoiceChanged && invoice.isModified)
+            return qsTr("Not saved")
+        return ""
+    }
+
+    // Amber while there is something to save, plain grey for a document that is only shown.
+    readonly property bool documentStateIsWarning: !invoice.isReadOnly
+
+    // The total belongs beside the title on a wide window and on its own line on a narrow
+    // one, where the row cannot hold both.
+    readonly property bool compactHeader: wdgInvoice.compactLayout
 
     Keys.onEscapePressed: function(event) {
         focus = true
@@ -67,6 +125,24 @@ Item {
                             (event.modifiers & Qt.ControlModifier)) {
                             // Ctrl + Alt + 9
                             pixelMetricsDialog.visible = true
+                            event.accepted = true
+                        } else if (currentPage === page_invoice &&
+                                   (event.key === Qt.Key_F) &&
+                                   (event.modifiers & (Qt.ControlModifier | Qt.MetaModifier))) {
+                            // Ctrl + F, or Cmd + F
+                            openGoToDocument()
+                            event.accepted = true
+                        } else if (currentPage === page_invoice &&
+                                   (event.modifiers & Qt.AltModifier) &&
+                                   (event.key === Qt.Key_Left || event.key === Qt.Key_PageUp)) {
+                            // Alt + Left: the previous document of the table
+                            goToPreviousDocument()
+                            event.accepted = true
+                        } else if (currentPage === page_invoice &&
+                                   (event.modifiers & Qt.AltModifier) &&
+                                   (event.key === Qt.Key_Right || event.key === Qt.Key_PageDown)) {
+                            // Alt + Right: the next document of the table
+                            goToNextDocument()
                             event.accepted = true
                         }
                     }
@@ -104,8 +180,7 @@ Item {
     }
 
     // The document being edited, "Invoice 123" or "Estimate 123": the title without the
-    // read only or modified markers. Also shown at the top of the form on a narrow
-    // display, where the window title is not shown - see WdgInvoice.documentName.
+    // read only or modified markers. Also shown at the top of the window - see documentTitle.
     function getDocumentName() {
         let title = qsTr("Document")
         if (invoice.json.document_info.number) {
@@ -149,6 +224,7 @@ Item {
 
     function setPosition(tabPos) {
         invoice.setPosition(tabPos)
+        signalPositionChanged++
     }
 
     function setDocumentChange(docChange) {
@@ -156,7 +232,7 @@ Item {
     }
 
     function showHelp() {
-        if (tabBar.currentIndex === 1) {
+        if (currentPage === page_settings) {
             Banana.Ui.showHelp("dlginvoiceedit::settings");
         } else {
             Banana.Ui.showHelp("dlginvoiceedit");
@@ -175,6 +251,351 @@ Item {
         Qt.quit()
     }
 
+    // Navigation through the documents of the table
+    //
+    // The arrows move the window from one row of the Invoices or Estimates table to the next,
+    // so that going from one document to another does not mean closing the window and opening
+    // it again. Nothing else changes: the row is read exactly as the extension reads it when
+    // the window is opened on it, and a document that is saved on the way out adds its own
+    // operation to the same DocumentChange, which Banana applies once the window is closed.
+
+    /* The documents saved while this window was open, by the row they belong to. The table
+       itself is only written once the window closes, so a row that has already been saved
+       still holds its previous content: coming back to it would show the old figures and
+       quietly undo the editing. What was saved is kept here and shown instead. */
+    property var savedDocuments: ({})
+
+    /* The rows marked for deletion while this window was open, by row. They are still rows
+       of the table until Banana applies the DocumentChange, so the arrows have to be told
+       to walk past them, and nothing may open one of them again. */
+    property var deletedRows: ({})
+
+    /* Bumped when a row is marked for deletion, so that what the arrows can reach is worked
+       out again: deletedRows is a plain object and notifies nothing on its own. */
+    property int signalDeletedRowsChanged: 1
+
+    /* Bumped whenever the row the window stands on changes. The position is handed over
+       after the document is, and a tabPos notifies nothing when one of its own fields is
+       written, so without this counter the arrows would be reading the position the window
+       was opened with - or none at all. */
+    property int signalPositionChanged: 1
+
+    readonly property int navRowCount: signalPositionChanged && invoice.signalInvoiceChanged ?
+                                           getNavTableRowCount() : 0
+    readonly property int navRowNr: signalPositionChanged && invoice.signalInvoiceChanged &&
+                                    invoice.tabPos ? invoice.tabPos.rowNr : -1
+
+    /* A document that is not a row of the table yet - a new one, a copy, an invoice just
+       created from an estimate - has nowhere to walk from, so the arrows stay off until it
+       has been saved and the window reopened on it. */
+    readonly property bool canNavigate: navRowCount > 0 && navRowNr >= 0 && navRowNr < navRowCount
+    readonly property bool canGoPrevious: signalDeletedRowsChanged ? findLiveRow(navRowNr, -1) >= 0 : false
+    readonly property bool canGoNext: signalDeletedRowsChanged ? findLiveRow(navRowNr, 1) >= 0 : false
+
+    /* A document is a row of the table and can be deleted, as opposed to one that has not
+       been saved yet - a new one, a copy, an invoice created from an estimate - which has
+       nothing in the table to remove. */
+    readonly property bool canDelete: !invoice.isReadOnly && canNavigate
+
+    readonly property string navPositionText: canNavigate ?
+                                                  qsTr("%1 of %2").arg(navRowNr + 1).arg(navRowCount) : ""
+
+    // What to do once the question about unsaved changes has been answered.
+    property string pendingAction: ""
+    property int pendingNavRowNr: -1
+
+    /** The table, or the row list of the table, the open document belongs to. */
+    function getNavTable() {
+        if (!invoice.tabPos || !invoice.tabPos.tableName)
+            return null
+        let table = Banana.document.table(invoice.tabPos.tableName)
+        // As invoiceRowGet() reads it: outside the base list the rows come from the list.
+        if (table && invoice.tabPos.listName && invoice.tabPos.listName !== "Base")
+            table = table.list(invoice.tabPos.listName)
+        return table
+    }
+
+    function getNavTableRowCount() {
+        let table = getNavTable()
+        return table ? table.rowCount : 0
+    }
+
+    /** The first row from navRowNr in the given direction that is not marked for deletion,
+        or -1 when there is none left that way. */
+    function findLiveRow(fromRowNr, step) {
+        if (fromRowNr < 0 || navRowCount <= 0)
+            return -1
+        for (let rowNr = fromRowNr + step; rowNr >= 0 && rowNr < navRowCount; rowNr += step) {
+            if (!isRowDeleted(rowNr))
+                return rowNr
+        }
+        return -1
+    }
+
+    function goToPreviousDocument() {
+        let rowNr = findLiveRow(navRowNr, -1)
+        if (rowNr >= 0)
+            goToDocument(rowNr)
+    }
+
+    function goToNextDocument() {
+        let rowNr = findLiveRow(navRowNr, 1)
+        if (rowNr >= 0)
+            goToDocument(rowNr)
+    }
+
+    function goToDocument(rowNr) {
+        if (rowNr < 0 || rowNr >= navRowCount || isRowDeleted(rowNr))
+            return
+
+        // Acquire focus, if a text field is in edit mode it will commit changes
+        focus = true
+
+        if (invoice.isModified && !invoice.isReadOnly) {
+            pendingAction = "goto"
+            pendingNavRowNr = rowNr
+            navConfirmDialog.open()
+            return
+        }
+
+        loadDocument(rowNr)
+    }
+
+    /** Opens a brand new document at the end of the same table, as the Invoices table does
+        when a document is created on an empty row. It is a row of the table only once it
+        has been saved, so the arrows and Delete stay off until then. */
+    function newDocument() {
+        // Acquire focus, if a text field is in edit mode it will commit changes
+        focus = true
+
+        if (invoice.isReadOnly)
+            return
+
+        if (invoice.isModified) {
+            pendingAction = "new"
+            navConfirmDialog.open()
+            return
+        }
+
+        loadNewDocument()
+    }
+
+    function loadNewDocument() {
+        let tabPos = invoice.tabPos
+        if (!tabPos)
+            return
+
+        // At the end of the table, which is where a saved new document is added.
+        tabPos.rowNr = getNavTableRowCount()
+
+        invoice.beginNewDocument()
+
+        let invoiceObj = InvoiceJs.invoiceCreateNew(tabPos)
+
+        invoice.setPosition(tabPos)
+        invoice.setIsNew(true)
+        invoice.setInvoice(invoiceObj)
+        invoice.setIsModified(true)
+        signalPositionChanged++
+
+        wdgInvoice.updateView()
+        updateTitle()
+
+        wdgInvoice.notify(invoice.isEstimate() ? qsTr("New estimate") : qsTr("New invoice"))
+    }
+
+    /** Marks the open document for deletion and moves on to the one beside it. The row
+        leaves the table when Banana applies the DocumentChange, once this window is
+        closed - see Invoice.deleteDocument. */
+    function deleteDocument() {
+        // Acquire focus, if a text field is in edit mode it will commit changes
+        focus = true
+
+        if (!canDelete)
+            return
+
+        // Where to go afterwards, worked out while this row still counts as alive.
+        let nextRowNr = findLiveRow(navRowNr, 1)
+        if (nextRowNr < 0)
+            nextRowNr = findLiveRow(navRowNr, -1)
+
+        let deletedRowNr = navRowNr
+
+        if (!invoice.deleteDocument())
+            return
+
+        deletedRows[rowKey(deletedRowNr)] = true
+        // Whatever was saved for it is no longer worth showing: the row is going.
+        delete savedDocuments[rowKey(deletedRowNr)]
+        signalDeletedRowsChanged++
+
+        if (nextRowNr < 0) {
+            // Nothing left in the table to show. The deletion is in the DocumentChange and
+            // is applied as the window closes.
+            closeDialog()
+            return
+        }
+
+        loadDocument(nextRowNr)
+        wdgInvoice.notify(invoice.isEstimate() ? qsTr("Estimate deleted") : qsTr("Invoice deleted"))
+    }
+
+    /* The documents of the table, for the list that goes straight to one of them.
+       Built from the columns of the row - RowId, InvoiceDate, InvoiceAddress,
+       InvoiceTotalAmount - and not from the document each row carries: those columns are
+       written on every save (see invoiceChangedFieldsGet) and hold exactly what the list
+       shows, so a table of several hundred rows is read without opening a single one of
+       them. Read once, when the list is opened: the table does not change while this
+       window is open, since the operations are applied as it closes.
+
+       Two corrections, the same two the arrows need: a row marked for deletion is left out,
+       and a row saved in this session is read from what was saved rather than from the
+       column, which still holds what was there before. */
+    function collectDocuments() {
+        let table = getNavTable()
+        if (!table)
+            return []
+
+        let documents = []
+        for (let rowNr = 0; rowNr < table.rowCount; ++rowNr) {
+            if (isRowDeleted(rowNr))
+                continue
+
+            let saved = savedDocuments[rowKey(rowNr)]
+            let entry
+
+            if (saved) {
+                entry = {
+                    'rowNr': rowNr,
+                    'number': saved.document_info.number ? saved.document_info.number : "",
+                    'date': saved.document_info.date ? saved.document_info.date : "",
+                    'customer': InvoiceJs.invoiceCustomerAddressBriefDescriptionGet(saved),
+                    'description': saved.document_info.description ? saved.document_info.description : "",
+                    'amount': saved.billing_info.total_to_pay ? saved.billing_info.total_to_pay : "",
+                    'currency': saved.document_info.currency ? saved.document_info.currency : ""
+                }
+            } else {
+                entry = {
+                    'rowNr': rowNr,
+                    'number': table.value(rowNr, "RowId"),
+                    'date': table.value(rowNr, "InvoiceDate"),
+                    'customer': table.value(rowNr, "InvoiceAddress"),
+                    'description': table.value(rowNr, "Description"),
+                    'amount': table.value(rowNr, "InvoiceTotalAmount"),
+                    'currency': table.value(rowNr, "Currency")
+                }
+            }
+
+            // A row with nothing on it is a row of the table all the same, but there is
+            // nothing to show for it and nothing to search it by.
+            if (!entry.number && !entry.customer && !entry.description)
+                continue
+
+            documents.push(prepareDocumentEntry(entry))
+        }
+
+        return documents
+    }
+
+    /** Puts the dates and the amounts of one entry the way they are read, and builds the
+        one string the search is matched against. */
+    function prepareDocumentEntry(entry) {
+        let date = entry.date ? entry.date.split("T")[0] : ""
+        let localeDate = date ? Banana.Converter.toLocaleDateFormat(date) : ""
+        let localeAmount = entry.amount ? Banana.Converter.toLocaleNumberFormat(entry.amount) : ""
+
+        return {
+            'rowNr': entry.rowNr,
+            'number': entry.number ? entry.number : "",
+            'date': localeDate,
+            'customer': entry.customer ? entry.customer : "",
+            'amount': entry.currency ? (entry.currency.toUpperCase() + " " + localeAmount)
+                                     : localeAmount,
+            'isCurrent': entry.rowNr === navRowNr,
+            // What the typing is matched against: everything the entry shows, plus the
+            // object of the document, which is worth finding by even though the list has
+            // no room to show it.
+            'search': [entry.number, localeDate, entry.customer, entry.description,
+                       localeAmount].join(" ")
+        }
+    }
+
+    function openGoToDocument() {
+        // Acquire focus, if a text field is in edit mode it will commit changes
+        focus = true
+        goToDocumentDialog.openWith(collectDocuments(), navRowNr)
+    }
+
+    /** The key under which a row is remembered - see savedDocuments and deletedRows. */
+    function rowKey(rowNr) {
+        let tabPos = invoice.tabPos
+        if (!tabPos || !tabPos.tableName)
+            return ""
+        return tabPos.tableName + "|" + (tabPos.listName ? tabPos.listName : "") + "|" + rowNr
+    }
+
+    /** Carries out what the question about unsaved changes was asked for. */
+    function runPendingAction() {
+        let action = pendingAction
+        let rowNr = pendingNavRowNr
+        pendingAction = ""
+        pendingNavRowNr = -1
+
+        if (action === "new") {
+            loadNewDocument()
+        } else if (action === "goto" && rowNr >= 0) {
+            loadDocument(rowNr)
+        }
+    }
+
+    function isRowDeleted(rowNr) {
+        let key = rowKey(rowNr)
+        return key.length > 0 && deletedRows[key] === true
+    }
+
+    function rememberSavedDocument() {
+        let tabPos = invoice.tabPos
+        let key = tabPos ? rowKey(tabPos.rowNr) : ""
+        if (key.length > 0 && invoice.json) {
+            // A copy, not the object itself: the form goes on editing the one it holds.
+            savedDocuments[key] = JSON.parse(JSON.stringify(invoice.json))
+        }
+    }
+
+    /** Opens the document of the given row of the same table, as if the window had been
+        opened on it. Any unsaved change has already been dealt with by goToDocument(). */
+    function loadDocument(rowNr) {
+        let tabPos = invoice.tabPos
+        tabPos.rowNr = rowNr
+
+        let invoiceObj = null
+        let isNewDocument = false
+
+        let saved = savedDocuments[rowKey(rowNr)]
+        if (saved) {
+            invoiceObj = JSON.parse(JSON.stringify(saved))
+        } else {
+            // Read as the extension reads it when the window is opened: a row that carries no
+            // document yet gets a new one, which is then waiting to be saved.
+            invoiceObj = InvoiceJs.invoiceObjGet(tabPos)
+            if (!invoiceObj) {
+                invoiceObj = InvoiceJs.invoiceCreateNew(tabPos)
+                isNewDocument = true
+            }
+        }
+
+        invoice.setPosition(tabPos)
+        invoice.setIsNew(isNewDocument)
+        invoice.setInvoice(invoiceObj)
+        // A row that carried no document yet now holds a new one, waiting to be saved -
+        // unless the window is only showing documents, where nothing is ever saved.
+        invoice.setIsModified(isNewDocument && !invoice.isReadOnly)
+        signalPositionChanged++
+
+        wdgInvoice.updateView()
+        updateTitle()
+    }
+
     // Data objects
 
     DevSettings {
@@ -191,14 +612,11 @@ Item {
         onInvoiceChanged: {
             updateTitle()
         }
+        onInvoiceSaved: {
+            // The row of the table is now out of date - see savedDocuments.
+            rememberSavedDocument()
+        }
     }
-
-    // Visual content
-
-    // Questo margine permette sotto windows di separare la tab bar dal windows frame,
-    // che essendo bianco si fondono e non creano alcuna separazione
-    // Per semplicità applichiamo questo spazio a tutti i sistemi operativi
-    property int tabBarTopMargin: 12 * Stylesheet.pixelScaleRatio
 
     // Room the system keeps for itself on a phone: notch, status bar, gesture bar. The bars
     // and the pages move inside these margins, the backgrounds still reach the edges. Zero
@@ -214,80 +632,286 @@ Item {
     readonly property real safeAreaLeft: hasSafeArea ? SafeArea.margins.left : 0
     readonly property real safeAreaRight: hasSafeArea ? SafeArea.margins.right : 0
 
+    // Visual content
+
     Rectangle {
         // Window background
         anchors.fill: parent
         color: Stylesheet.baseColor
     }
 
-    Rectangle {
-        // Tab bar background
+    Rectangle { // The bar above the page
+        id: headerBar
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.bottom: tabBar.bottom
-        color: Stylesheet.buttonColor
-    }
+        implicitHeight: headerLayout.implicitHeight + 2 * Stylesheet.defaultMargin + safeAreaTop
+        height: implicitHeight
+        color: Stylesheet.barColor
 
-    StyledTabBar {
-        id: tabBar
-
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.leftMargin: safeAreaLeft - 1 // Don't draw left button border
-        anchors.topMargin: tabBarTopMargin + safeAreaTop
-
-        StyledTabButton {
-            text: invoice.isEstimate() ? qsTr("Estimate") : qsTr("Invoice")
+        Rectangle { // Divides the bar from the page below it
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: 1
+            color: Stylesheet.borderColor
         }
 
-        StyledTabButton {
-            text: qsTr("Settings")
-        }
+        ColumnLayout {
+            id: headerLayout
 
-        StyledTabButton {
-            id: tabButtonSource
-            text: qsTr("Source")
-            visible: appSettings.isInternalVersion()
-            onVisibleChanged: tabBar.removeItem(tabButtonSource)
-        }
+            anchors.fill: parent
+            anchors.margins: Stylesheet.defaultMargin
+            anchors.topMargin: Stylesheet.defaultMargin + safeAreaTop
+            anchors.leftMargin: Stylesheet.defaultMargin + safeAreaLeft
+            anchors.rightMargin: Stylesheet.defaultMargin + safeAreaRight
+            spacing: Stylesheet.spacingTight
 
-        StyledTabButton {
-            id: tabDevelopment
-            text: qsTr("Development")
-            visible: appSettings.isInternalVersion()
-            onVisibleChanged: tabBar.removeItem(tabDevelopment)
-        }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Stylesheet.spacingBase
 
-        StyledTabButton {
-            id: tabChangeLog
-            text: qsTr("Changelog")
-            visible: appSettings.isInternalVersion()
-            onVisibleChanged: tabBar.removeItem(tabChangeLog)
+                StyledButton {
+                    // Back off a secondary page. It takes the place of the arrows, which
+                    // have nothing to walk through while Settings is open.
+                    visible: window.currentPage !== window.page_invoice
+                    text: "‹  " + qsTr("Back")
+                    onClicked: window.currentPage = window.page_invoice
+                }
+
+                StyledButton {
+                    id: previousButton
+                    visible: window.currentPage === window.page_invoice
+                    enabled: window.canGoPrevious
+                    text: "‹"
+                    Layout.minimumWidth: 40 * Stylesheet.pixelScaleRatio
+                    Accessible.name: qsTr("Previous document")
+                    onClicked: window.goToPreviousDocument()
+                }
+
+                StyledButton {
+                    id: nextButton
+                    visible: window.currentPage === window.page_invoice
+                    enabled: window.canGoNext
+                    text: "›"
+                    Layout.minimumWidth: 40 * Stylesheet.pixelScaleRatio
+                    Accessible.name: qsTr("Next document")
+                    onClicked: window.goToNextDocument()
+                }
+
+                StyledButton {
+                    // Straight to one document instead of walking to it: the arrows step,
+                    // this jumps. Beside them, because it is the same business.
+                    id: goToButton
+                    visible: window.currentPage === window.page_invoice
+                    enabled: window.navRowCount > 0
+                    Layout.minimumWidth: 40 * Stylesheet.pixelScaleRatio
+                    Accessible.name: qsTr("Go to document")
+                    contentItem: StyledIcon {
+                        name: "search"
+                        color: goToButton.enabled ? Stylesheet.textColor
+                                                  : Stylesheet.mutedTextColor
+                    }
+                    onClicked: window.openGoToDocument()
+                }
+
+                ColumnLayout { // Which document, and what state it is in
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    StyledLabel {
+                        Layout.fillWidth: true
+                        // The name of the open document: the title of the window, so full
+                        // strength and the largest thing in the bar after the total.
+                        color: Stylesheet.textColor
+                        font: Stylesheet.documentTitleFont
+                        elide: Text.ElideRight
+                        text: window.currentPageTitle
+                    }
+
+                    RowLayout { // How the document stands, and where it sits in the table
+                        Layout.fillWidth: true
+                        visible: window.currentPage === window.page_invoice
+                        spacing: Stylesheet.spacingBase
+
+                        Rectangle { // The state, on a ground of its own
+                            visible: window.documentState.length > 0
+                            implicitWidth: stateLabel.implicitWidth + 2 * Stylesheet.spacingBase
+                            implicitHeight: stateLabel.implicitHeight + Stylesheet.spacingTight
+                            radius: height / 2
+                            color: window.documentStateIsWarning ? Stylesheet.warningSurfaceColor
+                                                                 : Stylesheet.hoverColor
+
+                            StyledLabel {
+                                id: stateLabel
+                                anchors.centerIn: parent
+                                text: window.documentState
+                                color: window.documentStateIsWarning ? Stylesheet.warningColor
+                                                                     : Stylesheet.mutedTextColor
+                            }
+                        }
+
+                        StyledLabel {
+                            Layout.fillWidth: true
+                            visible: text.length > 0
+                            elide: Text.ElideRight
+                            text: window.navPositionText
+                        }
+                    }
+                }
+
+                StyledLabel {
+                    // What the document comes to. Never shortened: when the row is too
+                    // narrow the total moves to the line below instead.
+                    visible: window.currentPage === window.page_invoice && !window.compactHeader
+                    Layout.minimumWidth: implicitWidth
+                    font: Stylesheet.totalFont
+                    color: Stylesheet.accentColor
+                    text: wdgInvoice.invoiceTotalText
+                }
+
+                StyledButton {
+                    /* What the bars do not hold. On a narrow screen that is every command,
+                       since there is no toolbar there; on the desktop only the pages of the
+                       internal build, so for everyone else the button is not there at all. */
+                    id: menuButton
+                    visible: window.compactHeader || appSettings.isInternalVersion()
+                    text: "⋮"
+                    Layout.minimumWidth: 40 * Stylesheet.pixelScaleRatio
+                    Accessible.name: qsTr("More commands")
+                    onClicked: commandsMenu.popup(menuButton, 0, menuButton.height)
+                }
+            }
+
+            StyledLabel {
+                // The total on its own line, where the row above cannot hold it as well.
+                visible: window.currentPage === window.page_invoice && window.compactHeader
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignRight
+                font: Stylesheet.totalFont
+                color: Stylesheet.accentColor
+                text: wdgInvoice.invoiceTotalText
+            }
+
+            RowLayout { // The toolbar
+                /* The commands of the document, out in the open where they can be seen,
+                   instead of behind the ⋮ menu that held all of them. Only where there is
+                   room for them: on a narrow screen the menu is still the whole of it, and
+                   a row of buttons would have pushed the form off the bottom of the screen.
+
+                   What is left in the menu is what does not earn a place here: the help,
+                   and the pages that only the internal build shows. */
+                id: toolBar
+
+                visible: window.currentPage === window.page_invoice && !window.compactHeader
+                Layout.fillWidth: true
+                Layout.topMargin: Stylesheet.spacingTight
+                spacing: 0
+
+                /* True when the names of the commands no longer fit beside their icons and
+                   the icons have to stand on their own. Measured on the room the bar has,
+                   not guessed from the width of the window.
+
+                   The threshold is what the seven names come to in a long language, which
+                   is what has to fit: it cannot be measured, because the width the bar asks
+                   for is itself decided by this - the labels would then turn each other on
+                   and off for ever. */
+                readonly property bool iconsOnly: width > 0 && width < 860 * Stylesheet.pixelScaleRatio
+
+                StyledToolButton {
+                    iconName: "new"
+                    text: invoice.isEstimate() ? qsTr("New estimate") : qsTr("New invoice")
+                    showLabel: !toolBar.iconsOnly
+                    enabled: !invoice.isReadOnly
+                    Accessible.name: text
+                    onClicked: window.newDocument()
+                }
+
+                StyledToolButton {
+                    iconName: "copy"
+                    text: qsTr("Copy")
+                    showLabel: !toolBar.iconsOnly
+                    enabled: !invoice.isNewDocument
+                    Accessible.name: text
+                    onClicked: wdgInvoice.duplicateInvoice()
+                }
+
+                StyledToolButton {
+                    iconName: "delete"
+                    text: invoice.isEstimate() ? qsTr("Delete estimate") : qsTr("Delete invoice")
+                    showLabel: !toolBar.iconsOnly
+                    enabled: window.canDelete
+                    Accessible.name: text
+                    onClicked: deleteConfirmDialog.visible = true
+                }
+
+                ToolBarSeparator {}
+
+                StyledToolButton {
+                    iconName: "print"
+                    text: qsTr("Print")
+                    showLabel: !toolBar.iconsOnly
+                    Accessible.name: text
+                    onClicked: wdgInvoice.printInvoice()
+                }
+
+                StyledToolButton {
+                    // Only an estimate becomes an invoice, so on an invoice this command
+                    // gives up its room rather than sitting there greyed out.
+                    iconName: "convert"
+                    text: qsTr("Create invoice")
+                    showLabel: !toolBar.iconsOnly
+                    visible: invoice.isEstimate() && !invoice.isNewDocument
+                    Accessible.name: text
+                    onClicked: wdgInvoice.createInvoiceFromEstimate()
+                }
+
+                ToolBarSeparator {}
+
+                StyledToolButton {
+                    iconName: "settings"
+                    text: qsTr("Settings")
+                    showLabel: !toolBar.iconsOnly
+                    Accessible.name: text
+                    onClicked: window.currentPage = window.page_settings
+                }
+
+                Item {
+                    // Holds the commands to the leading edge, whatever width the window
+                    // has, and pushes the help to the far end.
+                    Layout.fillWidth: true
+                }
+
+                StyledToolButton {
+                    // On its own at the trailing end: it is about the dialog, not about the
+                    // document the other commands act on.
+                    iconName: "help"
+                    text: qsTr("Help")
+                    showLabel: !toolBar.iconsOnly
+                    Accessible.name: text
+                    onClicked: showHelp()
+                }
+            }
         }
     }
 
     StackLayout {
-        id: tabStackLayout
+        id: pageStackLayout
 
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.top: tabBar.bottom
+        anchors.top: headerBar.bottom
         anchors.bottom: buttonBar.top
         anchors.leftMargin: safeAreaLeft
         anchors.rightMargin: safeAreaRight
 
-        currentIndex: tabBar.currentIndex
+        currentIndex: window.currentPage
 
         WdgInvoice {
             id: wdgInvoice
             invoice: invoice
             appSettings: appSettings
-            // Built here, and not in the form, so it uses the very texts of the window
-            // title, which are already translated. signalInvoiceChanged is read so the
-            // binding follows a change of number: the json itself notifies nothing.
-            documentName: invoice.signalInvoiceChanged && invoice.json && invoice.json.document_info ?
-                              getDocumentName().trim() : ""
         }
 
         WdgSettings {
@@ -341,7 +965,7 @@ Item {
             devSettings: devSettings
             invoice: invoice
             onGoToHome: {
-                tabBar.currentIndex = 0
+                window.currentPage = window.page_invoice
             }
         }
 
@@ -357,18 +981,24 @@ Item {
     }
 
     Rectangle {
-        // Button bar background, mirrors the tab bar background above.
-        // Extends a bit above the buttons themselves, so they don't sit flush
-        // against the top edge of the colored area.
+        // The bar below the page, mirroring the one above it.
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: buttonBar.top
         anchors.topMargin: -Stylesheet.defaultMargin
         anchors.bottom: parent.bottom
-        color: Stylesheet.buttonColor
+        color: Stylesheet.barColor
+
+        Rectangle { // Divides the bar from the page above it
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: 1
+            color: Stylesheet.borderColor
+        }
     }
 
-    GridLayout {  // Invoice's button's bar
+    RowLayout { // Save and Close, and nothing else
         id: buttonBar
 
         anchors.bottom: parent.bottom
@@ -379,106 +1009,44 @@ Item {
         anchors.leftMargin: Stylesheet.defaultMargin + safeAreaLeft
         anchors.rightMargin: Stylesheet.defaultMargin + safeAreaRight
 
-        // Seven columns, always: one row in both layouts. Narrow, only three controls remain,
-        // so there is nothing to wrap. Every row this bar takes is a row the form loses.
-        columns: 7
-        columnSpacing: Stylesheet.defaultMargin
-        rowSpacing: Stylesheet.defaultMargin
-
-        StyledButton {
-            // Opens the commands that do not fit a phone's bar. Only Save and Close stay
-            // out here: Close in particular is the only way off this dialog on a device
-            // with no keyboard, so it never goes behind a second tap.
-            id: overflowButton
-            visible: window.compactButtonBar
-            text: "⋮"
-            Layout.minimumWidth: 44 * Stylesheet.pixelScaleRatio
-            Accessible.name: qsTr("More commands")
-            onClicked: overflowMenu.popup(overflowButton, 0, -overflowMenu.height)
-        }
-
-        //                StyledButton {
-        //                    text: qsTr("Export...")
-        //                    onClicked: {
-        //                        if (activeFocusItem)
-        //                            activeFocusItem.focus = false
-
-        //                        exportInvoice()
-        //                    }
-        //                }
-
-        StyledButton {
-            // Allowed to shrink below its label: a cell too narrow for a long translation
-            // would otherwise push the last column off the edge. The label elides instead.
-            Layout.minimumWidth: 0
-            text: qsTr("Help")
-            visible: !window.compactButtonBar
-            onClicked: showHelp()
-        }
+        spacing: Stylesheet.defaultMargin
 
         Item {
-            // Pushes Save and Close to the right, away from Help - or, on a narrow screen,
-            // away from the overflow button.
+            // Pushes the two buttons to the trailing edge, where they stay whatever the
+            // width of the window.
             Layout.fillWidth: true
         }
 
         StyledButton {
-            // Allowed to shrink below its label - see the first button above.
-            Layout.minimumWidth: 0
-            text: qsTr("Print")
-            visible: !window.compactButtonBar
-            onClicked: {
-                // Acquire focus, if a text field is in edit mode it will commit changes
-                focus = true
-                wdgInvoice.printInvoice()
-            }
-        }
-
-        StyledButton {
-            // Allowed to shrink below its label - see the first button above.
-            Layout.minimumWidth: 0
-            text: qsTr("Create invoice")
-            visible: !window.compactButtonBar && invoice.isEstimate() && !invoice.isNewDocument
-            onClicked: {
-                // Acquire focus, if a text field is in edit mode it will commit changes
-                focus = true
-                wdgInvoice.createInvoiceFromEstimate()
-            }
-        }
-
-        StyledButton {
-            id: copyButton
-            // Allowed to shrink below its label - see the first button above.
-            Layout.minimumWidth: 0
-            text: qsTr("Copy")
-            visible: !window.compactButtonBar && !invoice.isNewDocument
-            onClicked: {
-                // Acquire focus, if a text field is in edit mode it will commit changes
-                focus = true
-                wdgInvoice.duplicateInvoice()
-            }
-        }
-
-        StyledButton {
-            // Allowed to shrink below its label - see the first button above.
+            // Allowed to shrink below its label: a cell too narrow for a long translation
+            // would otherwise push the last column off the edge. The label elides instead.
             Layout.minimumWidth: 0
             text: qsTr("Save")
             primary: true
             visible: !invoice.isReadOnly
             enabled: invoice.isModified
             onClicked: {
+                /* Saves and stays open. It used to close the window as well, which made
+                   sense while the window served one document: now that the arrows walk
+                   through the table, saving one document and going on to the next is the
+                   ordinary thing to do, and closing got in the way of it.
+
+                   Nothing reaches the file yet either way - the operations are applied by
+                   Banana when the window is finally closed. */
                 // Acquire focus, if a text field is in edit mode it will commit changes
                 focus = true
-                if (!invoice.isReadOnly) {
+                if (!invoice.isReadOnly && invoice.isModified) {
                     invoice.save()
                     result = 1
-                    closeDialog()
+                    // Saving leaves nothing on screen that says it happened: the button
+                    // simply goes quiet, which is easy to miss.
+                    wdgInvoice.notifySaved()
                 }
             }
         }
 
         StyledButton {
-            // Allowed to shrink below its label - see the first button above.
+            // Allowed to shrink below its label - see the button above.
             Layout.minimumWidth: 0
             text: invoice.isModified && !invoice.isReadOnly ? qsTr("Cancel") : qsTr("Close")
             onClicked: {
@@ -494,6 +1062,17 @@ Item {
     }
 
 
+    /* Divides the toolbar into the groups a command belongs to: what makes or unmakes a
+       document, what sends it out, and the settings. */
+    component ToolBarSeparator: Rectangle {
+        Layout.preferredWidth: 1
+        Layout.preferredHeight: 18 * Stylesheet.pixelScaleRatio
+        Layout.leftMargin: Stylesheet.spacingBase
+        Layout.rightMargin: Stylesheet.spacingBase
+        Layout.alignment: Qt.AlignVCenter
+        color: Stylesheet.separatorColor
+    }
+
     /* An entry of this dialog's menus, drawn in the dialog's colours: the iOS style paints
        menu backgrounds from images chosen by the application's colour scheme, which came out
        dark grey with black text in light mode, and each desktop style reads its own palette
@@ -503,6 +1082,10 @@ Item {
 
         palette.text: entry.down || entry.highlighted ? Stylesheet.accentTextColor : Stylesheet.textColor
         palette.windowText: entry.palette.text
+
+        // An invisible menu item still reserves its row, so it has to give up its height
+        // as well to disappear.
+        height: visible ? implicitHeight : 0
 
         // The text is drawn here too, for the same reason as the background: the Material
         // style, which Android uses, takes the colour of an entry from its own theme rather
@@ -525,10 +1108,9 @@ Item {
     }
 
     Menu {
-        // The commands that leave the bottom bar on a narrow screen, each mirroring the
-        // button of the same name. Opening the menu takes the active focus, which commits
-        // whatever field was being edited.
-        id: overflowMenu
+        // Everything the bars do not hold. Opening the menu takes the active focus, which
+        // commits whatever field was being edited.
+        id: commandsMenu
 
         // A lighter shade in dark mode so the menu stands out from the dialog, the system
         // colours in the light theme: see Stylesheet.menuWindowColor. The palette is still
@@ -541,57 +1123,94 @@ Item {
         palette.highlightedText: Stylesheet.accentTextColor
 
         background: Rectangle {
-            implicitWidth: 200 * Stylesheet.pixelScaleRatio
+            implicitWidth: 220 * Stylesheet.pixelScaleRatio
             implicitHeight: 40 * Stylesheet.pixelScaleRatio
             color: Stylesheet.menuWindowColor
             border.color: Stylesheet.borderColor
             radius: Stylesheet.cornerRadius
         }
 
+        /* The commands of the toolbar, for the narrow screen that has no toolbar. On the
+           desktop they are out in the open and would be in the menu twice. */
+
         StyledMenuEntry {
-            text: qsTr("Help")
-            onTriggered: showHelp()
+            text: invoice.isEstimate() ? qsTr("New estimate") : qsTr("New invoice")
+            visible: window.compactHeader && !invoice.isReadOnly
+            onTriggered: window.newDocument()
+        }
+
+        StyledMenuEntry {
+            text: invoice.isEstimate() ? qsTr("Delete estimate") : qsTr("Delete invoice")
+            visible: window.compactHeader && window.canDelete
+            onTriggered: deleteConfirmDialog.visible = true
         }
 
         StyledMenuEntry {
             text: qsTr("Print")
+            visible: window.compactHeader
             onTriggered: wdgInvoice.printInvoice()
         }
 
         StyledMenuEntry {
-            // An invisible menu item still reserves its row, so it has to give up its
-            // height as well to disappear.
             text: qsTr("Create invoice")
-            visible: invoice.isEstimate() && !invoice.isNewDocument
-            height: visible ? implicitHeight : 0
+            visible: window.compactHeader && invoice.isEstimate() && !invoice.isNewDocument
             onTriggered: wdgInvoice.createInvoiceFromEstimate()
         }
 
         StyledMenuEntry {
             text: qsTr("Copy")
-            visible: !invoice.isNewDocument
-            height: visible ? implicitHeight : 0
+            visible: window.compactHeader && !invoice.isNewDocument
             onTriggered: wdgInvoice.duplicateInvoice()
+        }
+
+        StyledMenuEntry {
+            text: qsTr("Settings")
+            visible: window.compactHeader
+            onTriggered: window.currentPage = window.page_settings
+        }
+
+        StyledMenuEntry {
+            text: qsTr("Help")
+            visible: window.compactHeader
+            onTriggered: showHelp()
+        }
+
+        StyledMenuEntry {
+            text: qsTr("Source")
+            visible: appSettings.isInternalVersion()
+            onTriggered: window.currentPage = window.page_source
+        }
+
+        StyledMenuEntry {
+            text: qsTr("Development")
+            visible: appSettings.isInternalVersion()
+            onTriggered: window.currentPage = window.page_development
+        }
+
+        StyledMenuEntry {
+            text: qsTr("Changelog")
+            visible: appSettings.isInternalVersion()
+            onTriggered: window.currentPage = window.page_changelog
         }
     }
 
     SimpleMessageDialog { // Error message dialog
         id: errorMessageDialog
         visible: false
-        // Under the tab bar on a wide window, centred on a narrow one where the top of the
+        // Under the bar above on a wide window, centred on a narrow one where the top of the
         // screen belongs to the notch.
-        topY: tabStackLayout.y
+        topY: pageStackLayout.y
         centered: wdgInvoice.compactLayout
     }
 
     SimpleMessageDialog { // Error message dialog
         id: jsonErrorMessageDialog
         visible: false
-        topY: tabStackLayout.y
+        topY: pageStackLayout.y
         centered: wdgInvoice.compactLayout
         standardButtons: Dialog.Ok
         onAccepted: {
-            tabBar.currentIndex = tabButtonSource.TabBar.index
+            window.currentPage = window.page_source
         }
     }
 
@@ -612,6 +1231,69 @@ Item {
         }
         onDiscarded: {
             closeDialog()
+        }
+    }
+
+    SimpleMessageDialog { // Unsaved changes, on the way to another document
+        /* Walking to another document would leave the editing of this one behind, so it is
+           never decided here: saving writes an operation into the DocumentChange, and that
+           is the user's to ask for. */
+        id: navConfirmDialog
+        centered: wdgInvoice.compactLayout
+        width: Math.min(340 * Stylesheet.pixelScaleRatio,
+                        parent.width - 2 * Stylesheet.defaultMargin)
+        height: Math.min(140 * Stylesheet.pixelScaleRatio,
+                         parent.height - 2 * Stylesheet.defaultMargin)
+        text: qsTr("Save the changes before opening another document?")
+        standardButtons: Dialog.Save | Dialog.Discard | Dialog.Cancel
+        visible: false
+        onAccepted: {
+            invoice.save()
+            window.runPendingAction()
+        }
+        onDiscarded: {
+            // Nothing is written: the document is read again from its row, which is what
+            // it looked like before it was edited.
+            invoice.setIsModified(false)
+            window.runPendingAction()
+        }
+        onRejected: {
+            window.pendingAction = ""
+            window.pendingNavRowNr = -1
+            navConfirmDialog.close()
+        }
+    }
+
+    SimpleMessageDialog { // Confirm the deletion of the open document
+        id: deleteConfirmDialog
+        centered: wdgInvoice.compactLayout
+        width: Math.min(340 * Stylesheet.pixelScaleRatio,
+                        parent.width - 2 * Stylesheet.defaultMargin)
+        height: Math.min(150 * Stylesheet.pixelScaleRatio,
+                         parent.height - 2 * Stylesheet.defaultMargin)
+        text: invoice.isEstimate() ?
+                  qsTr("Delete this estimate? It is removed from the table when the dialog is closed.") :
+                  qsTr("Delete this invoice? It is removed from the table when the dialog is closed.")
+        standardButtons: Dialog.Yes | Dialog.No
+        visible: false
+        onAccepted: {
+            window.deleteDocument()
+        }
+        onRejected: {
+            deleteConfirmDialog.close()
+        }
+    }
+
+    DlgGoToDocument {
+        id: goToDocumentDialog
+        visible: false
+        centered: wdgInvoice.compactLayout
+        topY: pageStackLayout.y
+
+        onDocumentChosen: function(rowNr) {
+            // Through the same door the arrows use, so that unsaved changes are asked
+            // about here exactly as they are there.
+            window.goToDocument(rowNr)
         }
     }
 
