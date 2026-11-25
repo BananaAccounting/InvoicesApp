@@ -17,6 +17,10 @@
   leaving the dialog. Unsaved changes are never written without being asked about first.
 * [Enhancement] Added to the menu of the top bar the commands to create a new estimate or
   invoice and to delete the open one, so the table does not have to be gone back to.
+* [Enhancement] The list that goes to a document shows how each invoice stands - overdue by
+  so many days, or due in so many - and can be narrowed to the unpaid ones. An invoice
+  counts as paid when the InvoiceDatePayment column of its row holds a date; where the table
+  has no such column, neither the state nor the filter is offered.
 * [Enhancement] Added a way to go straight to one document of the table: the magnifier
   beside the arrows, or Ctrl+F, opens a list of the documents - number, date, customer,
   amount - that narrows as you type. The list is read from the columns of the table, so a

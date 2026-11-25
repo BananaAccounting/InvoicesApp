@@ -37,6 +37,13 @@ Dialog {
     /** Which row of the table the open document is on, so it can be marked in the list. */
     property int currentRowNr: -1
 
+    /** True when this table can say what has been paid - see DlgInvoice.canTellPaidState.
+        When it cannot, the filter is not offered rather than offered and useless. */
+    property bool canFilterUnpaid: false
+
+    /** Narrows the list to the invoices with no payment date. */
+    property bool unpaidOnly: false
+
     /** Centre it on a narrow screen, where the top of the screen belongs to the notch. */
     property bool centered: false
     property real topY: 0
@@ -66,9 +73,12 @@ Dialog {
     }
 
     /** Opens the list, with nothing typed and the open document picked out. */
-    function openWith(documentList, rowNr) {
+    function openWith(documentList, rowNr, canFilter) {
         documents = documentList ? documentList : []
         currentRowNr = rowNr
+        canFilterUnpaid = canFilter === true
+        if (!canFilterUnpaid)
+            unpaidOnly = false
         searchField.text = ""
         applyFilter("")
         visible = true
@@ -86,6 +96,8 @@ Dialog {
 
         for (let i = 0; i < documents.length; ++i) {
             let doc = documents[i]
+            if (unpaidOnly && doc.paid)
+                continue
             if (query.length > 0 && !Utils.textMatchSearch(doc.search, query))
                 continue
             if (doc.rowNr === currentRowNr)
@@ -138,10 +150,28 @@ Dialog {
             }
         }
 
-        StyledLabel {
+        RowLayout {
             Layout.fillWidth: true
-            visible: results.count === 0
-            text: qsTr("No document found")
+            spacing: Stylesheet.spacingBase
+
+            StyledCheckBox {
+                visible: dialog.canFilterUnpaid
+                text: qsTr("Unpaid only")
+                checked: dialog.unpaidOnly
+                onToggled: {
+                    dialog.unpaidOnly = checked
+                    dialog.applyFilter(searchField.text)
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            StyledLabel {
+                visible: results.count === 0
+                text: qsTr("No document found")
+            }
         }
 
         ListView {
@@ -164,6 +194,9 @@ Dialog {
                 required property string date
                 required property string customer
                 required property string amount
+                // Not "state": an Item already has one - see DlgInvoice.prepareDocumentEntry
+                required property string paymentState
+                required property bool isLate
                 required property bool isCurrent
 
                 width: ListView.view.width
@@ -203,6 +236,17 @@ Dialog {
                         color: Stylesheet.textColor
                         elide: Text.ElideRight
                         text: customer
+                    }
+
+                    StyledLabel {
+                        // How it stands, when the table can say: amber once the due date
+                        // has gone by, quiet while it has not.
+                        visible: paymentState.length > 0
+                        Layout.minimumWidth: 90 * Stylesheet.pixelScaleRatio
+                        horizontalAlignment: Text.AlignRight
+                        elide: Text.ElideRight
+                        color: isLate ? Stylesheet.warningColor : Stylesheet.labelColor
+                        text: paymentState
                     }
 
                     StyledLabel {

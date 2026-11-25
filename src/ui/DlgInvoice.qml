@@ -21,6 +21,7 @@ import "."
 import "./components"
 
 import "../base/invoice.js" as InvoiceJs
+import "../base/invoicesopen.js" as InvoicesOpenJs
 
 /*
    The window of one estimate or invoice.
@@ -467,6 +468,11 @@ Item {
             if (saved) {
                 entry = {
                     'rowNr': rowNr,
+                    'dueDate': saved.payment_info && saved.payment_info.due_date ?
+                                   saved.payment_info.due_date : "",
+                    // Only the row knows: the payment date is a column of the table, it is
+                    // not part of the document.
+                    'paymentDate': table.value(rowNr, "InvoiceDatePayment"),
                     'number': saved.document_info.number ? saved.document_info.number : "",
                     'date': saved.document_info.date ? saved.document_info.date : "",
                     'customer': InvoiceJs.invoiceCustomerAddressBriefDescriptionGet(saved),
@@ -477,6 +483,8 @@ Item {
             } else {
                 entry = {
                     'rowNr': rowNr,
+                    'dueDate': table.value(rowNr, "InvoiceDateExpiration"),
+                    'paymentDate': table.value(rowNr, "InvoiceDatePayment"),
                     'number': table.value(rowNr, "RowId"),
                     'date': table.value(rowNr, "InvoiceDate"),
                     'customer': table.value(rowNr, "InvoiceAddress"),
@@ -504,6 +512,25 @@ Item {
         let localeDate = date ? Banana.Converter.toLocaleDateFormat(date) : ""
         let localeAmount = entry.amount ? Banana.Converter.toLocaleNumberFormat(entry.amount) : ""
 
+        // How the invoice stands, for the list and for the filter. Only invoices: an
+        // estimate is never paid, and a file whose table has no payment date column cannot
+        // say - in both cases the state is left empty and the filter is not offered.
+        let paid = Boolean(entry.paymentDate)
+        /* Never called "state": a delegate of the list is an Item, and every Item already
+           has a property of that name - the one its state machine uses. A model role called
+           "state" is quietly ignored, the delegate reads Item.state instead, and the cell
+           stays empty for ever without a word of warning. */
+        let paymentState = ""
+        if (canTellPaidState && !paid) {
+            let dueDate = entry.dueDate ? entry.dueDate.split("T")[0] : ""
+            paymentState = dueDate ? InvoicesOpenJs.invoicesOpenStateText({
+                                  'dueDate': dueDate,
+                                  'daysLate': Math.max(0, InvoicesOpenJs.invoicesOpenDaysBetween(
+                                                  dueDate, InvoicesOpenJs.invoicesOpenToday()))
+                                     })
+                                   : ""
+        }
+
         return {
             'rowNr': entry.rowNr,
             'number': entry.number ? entry.number : "",
@@ -511,6 +538,11 @@ Item {
             'customer': entry.customer ? entry.customer : "",
             'amount': entry.currency ? (entry.currency.toUpperCase() + " " + localeAmount)
                                      : localeAmount,
+            'paid': paid,
+            'paymentState': paymentState,
+            'isLate': paymentState.length > 0 && entry.dueDate &&
+                      InvoicesOpenJs.invoicesOpenDaysBetween(
+                          entry.dueDate.split("T")[0], InvoicesOpenJs.invoicesOpenToday()) > 0,
             'isCurrent': entry.rowNr === navRowNr,
             // What the typing is matched against: everything the entry shows, plus the
             // object of the document, which is worth finding by even though the list has
@@ -520,10 +552,18 @@ Item {
         }
     }
 
+    /* True when this table can say what has been paid: the Invoices table, in a file whose
+       Invoices table has the payment date column. Estimates are never paid. */
+    readonly property bool canTellPaidState: {
+        if (!invoice.tabPos || invoice.tabPos.tableName !== "Invoices")
+            return false
+        return InvoicesOpenJs.invoicesPaymentDateColumnExists()
+    }
+
     function openGoToDocument() {
         // Acquire focus, if a text field is in edit mode it will commit changes
         focus = true
-        goToDocumentDialog.openWith(collectDocuments(), navRowNr)
+        goToDocumentDialog.openWith(collectDocuments(), navRowNr, canTellPaidState)
     }
 
     /** The key under which a row is remembered - see savedDocuments and deletedRows. */

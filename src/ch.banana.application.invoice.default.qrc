@@ -54,6 +54,7 @@
         <file>changelog.md</file>
         <file>base/languages.js</file>
         <file>base/invoices.js</file>
+        <file>base/invoicesopen.js</file>
         <file>ui/qt6-4/components/check-mark.png</file>
         <file>ui/qt6-4/components/NotificationPopUp.qml</file>
         <file>ui/qt6-4/components/qmldir</file>
